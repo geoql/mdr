@@ -16,7 +16,8 @@
  *       "model": "baai/bge-m3",
  *       "input_type": "passage",        // optional, for models that need it
  *       "query_input_type": "query",    // optional
- *       "batch_size": 64                // optional, default 64
+ *       "batch_size": 64,               // optional, default 64
+ *       "extra_body": {}                // optional, merged into the request
  *     }
  *   }
  */
@@ -35,6 +36,7 @@ export interface RemoteEmbeddingConfig {
   input_type?: string;
   query_input_type?: string;
   batch_size?: number;
+  extra_body?: Record<string, unknown>;
 }
 
 // Local model produces 384-dimensional embeddings
@@ -91,6 +93,7 @@ async function embedRemote(
   const inputType = kind === "query" ? config.query_input_type : config.input_type;
 
   const body: Record<string, unknown> = {
+    ...(config.extra_body ?? {}),
     model: config.model,
     input: texts,
   };

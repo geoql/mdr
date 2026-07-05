@@ -216,4 +216,20 @@ describe("remote embedding requests", () => {
     expect(vectors).toEqual([]);
     expect(recordedRequests).toHaveLength(0);
   });
+
+  test("merges extra_body fields into the request payload", async () => {
+    writeConfig({
+      provider: "openai-compatible",
+      endpoint: ENDPOINT,
+      api_key: "sk-test",
+      model: "test-model",
+      extra_body: { truncate: "END" },
+    });
+
+    await embed("hello");
+
+    expect(recordedRequests).toHaveLength(1);
+    expect((recordedRequests[0].body as Record<string, unknown>).truncate).toBe("END");
+    expect(recordedRequests[0].body.model).toBe("test-model");
+  });
 });
