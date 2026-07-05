@@ -247,25 +247,35 @@ async function doRebuildConversationIndex(): Promise<{ exchangeCount: number }> 
     }
     await idx.createIndex();
 
-    for (let i = 0; i < exchanges.length; i++) {
-      const ex = exchanges[i];
-      await idx.upsertItem({
-        id: ex.id,
-        vector: vectors[i],
-        metadata: {
-          userPrompt: ex.userPrompt,
-          assistantSummary: ex.assistantSummary,
-          project: ex.project,
-          projectPath: ex.projectPath,
-          timestamp: ex.timestamp,
-          sessionId: ex.sessionId,
-          messageId: ex.messageId,
-        },
-      });
+    // Batch inside a single update transaction: without it, vectra rewrites
+    // the entire index.json on every upsert, which is O(n^2) and takes hours
+    // for tens of thousands of items.
+    await idx.beginUpdate();
+    try {
+      for (let i = 0; i < exchanges.length; i++) {
+        const ex = exchanges[i];
+        await idx.upsertItem({
+          id: ex.id,
+          vector: vectors[i],
+          metadata: {
+            userPrompt: ex.userPrompt,
+            assistantSummary: ex.assistantSummary,
+            project: ex.project,
+            projectPath: ex.projectPath,
+            timestamp: ex.timestamp,
+            sessionId: ex.sessionId,
+            messageId: ex.messageId,
+          },
+        });
 
-      if (i > 0 && i % 500 === 0) {
-        logger.log(`  ...inserted ${i}/${exchanges.length}`);
+        if (i > 0 && i % 500 === 0) {
+          logger.log(`  ...inserted ${i}/${exchanges.length}`);
+        }
       }
+      await idx.endUpdate();
+    } catch (err) {
+      idx.cancelUpdate();
+      throw err;
     }
 
     const duration = Date.now() - startTime;
@@ -407,21 +417,29 @@ export async function updateConversationIndex(): Promise<{ newCount: number; tot
     logger.log(`Generating embeddings for ${texts.length} new exchanges...`);
     const vectors = await embedBatch(texts);
 
-    for (let i = 0; i < newExchanges.length; i++) {
-      const ex = newExchanges[i];
-      await idx.upsertItem({
-        id: ex.id,
-        vector: vectors[i],
-        metadata: {
-          userPrompt: ex.userPrompt,
-          assistantSummary: ex.assistantSummary,
-          project: ex.project,
-          projectPath: ex.projectPath,
-          timestamp: ex.timestamp,
-          sessionId: ex.sessionId,
-          messageId: ex.messageId,
-        },
-      });
+    // Single update transaction: one index.json write for the whole batch
+    await idx.beginUpdate();
+    try {
+      for (let i = 0; i < newExchanges.length; i++) {
+        const ex = newExchanges[i];
+        await idx.upsertItem({
+          id: ex.id,
+          vector: vectors[i],
+          metadata: {
+            userPrompt: ex.userPrompt,
+            assistantSummary: ex.assistantSummary,
+            project: ex.project,
+            projectPath: ex.projectPath,
+            timestamp: ex.timestamp,
+            sessionId: ex.sessionId,
+            messageId: ex.messageId,
+          },
+        });
+      }
+      await idx.endUpdate();
+    } catch (err) {
+      idx.cancelUpdate();
+      throw err;
     }
 
     const duration = Date.now() - startTime;

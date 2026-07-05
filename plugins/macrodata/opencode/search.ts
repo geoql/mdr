@@ -218,23 +218,30 @@ export async function rebuildMemoryIndex(): Promise<{ itemCount: number }> {
   logger.log(`Generating embeddings for ${allItems.length} items...`);
   const vectors = await embedBatch(allItems.map((i) => i.content));
 
-  // Index all items
+  // Index all items in a single update transaction (one index.json write)
   const idx = await getMemoryIndex();
-  for (let i = 0; i < allItems.length; i++) {
-    const item = allItems[i];
-    const metadata: Record<string, string | number | boolean> = {
-      type: item.type,
-      content: item.content,
-      source: item.source,
-    };
-    if (item.section) metadata.section = item.section;
-    if (item.timestamp) metadata.timestamp = item.timestamp;
+  await idx.beginUpdate();
+  try {
+    for (let i = 0; i < allItems.length; i++) {
+      const item = allItems[i];
+      const metadata: Record<string, string | number | boolean> = {
+        type: item.type,
+        content: item.content,
+        source: item.source,
+      };
+      if (item.section) metadata.section = item.section;
+      if (item.timestamp) metadata.timestamp = item.timestamp;
 
-    await idx.upsertItem({
-      id: item.id,
-      vector: vectors[i],
-      metadata,
-    });
+      await idx.upsertItem({
+        id: item.id,
+        vector: vectors[i],
+        metadata,
+      });
+    }
+    await idx.endUpdate();
+  } catch (err) {
+    idx.cancelUpdate();
+    throw err;
   }
 
   const duration = Date.now() - startTime;

@@ -375,24 +375,31 @@ export async function rebuildConversationIndex(): Promise<{ exchangeCount: numbe
 
   const idx = await getConversationIndex();
 
-  // Index all exchanges
-  for (let i = 0; i < allExchanges.length; i++) {
-    const exchange = allExchanges[i];
-    await idx.upsertItem({
-      id: exchange.id,
-      vector: vectors[i],
-      metadata: {
-        userPrompt: exchange.userPrompt,
-        assistantSummary: exchange.assistantSummary,
-        project: exchange.project,
-        projectPath: exchange.projectPath,
-        branch: exchange.branch || "",
-        timestamp: exchange.timestamp,
-        sessionId: exchange.sessionId,
-        sessionPath: exchange.sessionPath,
-        messageUuid: exchange.messageUuid,
-      },
-    });
+  // Index all exchanges in a single update transaction (one index.json write)
+  await idx.beginUpdate();
+  try {
+    for (let i = 0; i < allExchanges.length; i++) {
+      const exchange = allExchanges[i];
+      await idx.upsertItem({
+        id: exchange.id,
+        vector: vectors[i],
+        metadata: {
+          userPrompt: exchange.userPrompt,
+          assistantSummary: exchange.assistantSummary,
+          project: exchange.project,
+          projectPath: exchange.projectPath,
+          branch: exchange.branch || "",
+          timestamp: exchange.timestamp,
+          sessionId: exchange.sessionId,
+          sessionPath: exchange.sessionPath,
+          messageUuid: exchange.messageUuid,
+        },
+      });
+    }
+    await idx.endUpdate();
+  } catch (err) {
+    idx.cancelUpdate();
+    throw err;
   }
 
   saveIndexState(newState);
@@ -445,23 +452,30 @@ export async function updateConversationIndex(): Promise<{ exchangeCount: number
       );
       const vectors = await embedBatch(texts);
 
-      for (let i = 0; i < exchanges.length; i++) {
-        const exchange = exchanges[i];
-        await idx.upsertItem({
-          id: exchange.id,
-          vector: vectors[i],
-          metadata: {
-            userPrompt: exchange.userPrompt,
-            assistantSummary: exchange.assistantSummary,
-            project: exchange.project,
-            projectPath: exchange.projectPath,
-            branch: exchange.branch || "",
-            timestamp: exchange.timestamp,
-            sessionId: exchange.sessionId,
-            sessionPath: exchange.sessionPath,
-            messageUuid: exchange.messageUuid,
-          },
-        });
+      await idx.beginUpdate();
+      try {
+        for (let i = 0; i < exchanges.length; i++) {
+          const exchange = exchanges[i];
+          await idx.upsertItem({
+            id: exchange.id,
+            vector: vectors[i],
+            metadata: {
+              userPrompt: exchange.userPrompt,
+              assistantSummary: exchange.assistantSummary,
+              project: exchange.project,
+              projectPath: exchange.projectPath,
+              branch: exchange.branch || "",
+              timestamp: exchange.timestamp,
+              sessionId: exchange.sessionId,
+              sessionPath: exchange.sessionPath,
+              messageUuid: exchange.messageUuid,
+            },
+          });
+        }
+        await idx.endUpdate();
+      } catch (err) {
+        idx.cancelUpdate();
+        throw err;
       }
     }
 
