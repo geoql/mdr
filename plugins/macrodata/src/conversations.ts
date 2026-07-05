@@ -13,7 +13,7 @@
 import { readdirSync, readFileSync, existsSync, statSync, writeFileSync, mkdirSync } from "fs";
 import { join, basename } from "path";
 import { homedir } from "os";
-import { embed, embedBatch } from "./embeddings.js";
+import { embedBatch, embedQuery } from "./embeddings.js";
 import { LocalIndex } from "vectra";
 import { getIndexDir } from "./config.js";
 
@@ -525,7 +525,7 @@ export async function searchConversations(
     return [];
   }
   
-  const queryVector = await embed(query);
+  const queryVector = await embedQuery(query);
   
   // Get more results than needed for filtering/reranking
   const results = await idx.queryItems(queryVector, limit * 3);
