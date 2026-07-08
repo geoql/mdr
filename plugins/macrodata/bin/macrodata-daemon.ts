@@ -16,4 +16,13 @@
 
 import { runDaemon } from "../src/daemon.js";
 
-runDaemon();
+export function isRunAsMain(argv1: string | undefined, moduleUrl: string): boolean {
+  return Boolean(argv1) && moduleUrl === `file://${argv1}`;
+}
+
+/* v8 ignore next 3 -- entry-point glue: only runs when this file is the process
+   entry (node dist/bin/macrodata-daemon.js), a subprocess vitest cannot
+   instrument. runDaemon() is covered directly in the daemon tests. */
+if (isRunAsMain(process.argv[1], import.meta.url)) {
+  runDaemon();
+}
