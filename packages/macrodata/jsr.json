@@ -1,11 +1,18 @@
 {
   "name": "@geoql/mdr",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "license": "MIT",
   "exports": {
     ".": "./opencode/index.ts"
   },
   "publish": {
-    "include": ["opencode", "src", "bin", "README.md", "USAGE.md", "LICENSE"]
+    "include": [
+      "opencode",
+      "src",
+      "bin",
+      "README.md",
+      "USAGE.md",
+      "LICENSE"
+    ]
   }
 }
