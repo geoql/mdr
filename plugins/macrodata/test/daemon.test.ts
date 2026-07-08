@@ -131,6 +131,9 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
           await Bun.sleep(100);
           attempts++;
         }
+        if (isDaemonRunning(pid)) {
+          process.kill(pid, "SIGKILL");
+        }
       } catch {
         // Ignore
       }
