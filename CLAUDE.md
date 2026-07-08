@@ -24,7 +24,7 @@ macrodata/
 # From the repo root
 pnpm install
 pnpm build          # Compile the plugin to dist/
-pnpm --filter @geoql/macrodata run start   # Run MCP server
+pnpm --filter @geoql/mdr run start   # Run MCP server
 ```
 
 ## Architecture

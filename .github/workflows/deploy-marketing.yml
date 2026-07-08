@@ -1,0 +1,61 @@
+name: Deploy Marketing Site
+
+on:
+  workflow_call:
+    inputs:
+      skip-build:
+        description: 'Download build artifact from CI instead of rebuilding'
+        default: false
+        required: false
+        type: boolean
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-marketing-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Cloudflare Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Download build artifact
+        if: inputs.skip-build == true
+        uses: actions/download-artifact@v8
+        with:
+          name: marketing-dist
+          path: apps/marketing/dist/
+
+      - name: Install dependencies
+        if: inputs.skip-build != true
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        if: inputs.skip-build != true
+        run: pnpm --filter @geoql/mdr-marketing build
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
+          NITRO_PRESET: cloudflare-pages
+          NUXT_TELEMETRY_DISABLED: 1
+          NUXT_PUBLIC_BASE_URL: https://mdr.geoql.in
+
+      - name: Deploy to Cloudflare Pages
+        working-directory: apps/marketing
+        run: pnpm exec wrangler pages deploy dist --project-name=mdr-marketing
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

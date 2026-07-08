@@ -1,5 +1,5 @@
 {
-  "name": "@geoql/macrodata",
+  "name": "@geoql/mdr",
   "version": "0.3.0",
   "description": "Persistent layered memory for coding agents (OpenCode, Claude Code) — journal, entities, state files, semantic search, daemon, scheduled reminders. A hard fork of ascorbic/macrodata by Matt Kane.",
   "type": "module",
@@ -45,12 +45,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/geoql/macrodata.git",
+    "url": "git+https://github.com/geoql/mdr.git",
     "directory": "plugins/macrodata"
   },
-  "homepage": "https://macrodata.geoql.in",
+  "homepage": "https://mdr.geoql.in",
   "bugs": {
-    "url": "https://github.com/geoql/macrodata/issues"
+    "url": "https://github.com/geoql/mdr/issues"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",

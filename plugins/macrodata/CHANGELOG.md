@@ -1,6 +1,6 @@
-# @geoql/macrodata
+# @geoql/mdr
 
-> `@geoql/macrodata` is a hard fork of [`@macrodata/opencode`](https://www.npmjs.com/package/@macrodata/opencode)
+> `@geoql/mdr` is a hard fork of [`@macrodata/opencode`](https://www.npmjs.com/package/@macrodata/opencode)
 > from [ascorbic/macrodata](https://github.com/ascorbic/macrodata) by
 > [Matt Kane](https://github.com/ascorbic). Entries below the fork marker are
 > the upstream changelog, preserved verbatim. From here forward this changelog

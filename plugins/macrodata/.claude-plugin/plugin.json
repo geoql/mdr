@@ -1,12 +1,12 @@
 {
-	"name": "macrodata",
+	"name": "refiner",
 	"version": "0.3.0",
 	"description": "Stateful agent tools for Claude Code. Learns who you are, remembers what you're working on, schedules tasks, maintains itself.",
 	"author": {
 		"name": "Vinayak Kulkarni",
 		"url": "https://vinayakkulkarni.dev"
 	},
-	"repository": "https://github.com/geoql/macrodata",
+	"repository": "https://github.com/geoql/mdr",
 	"license": "MIT",
 	"keywords": [
 		"memory",

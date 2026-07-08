@@ -1,0 +1,57 @@
+{
+  "name": "@geoql/mdr-marketing",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "oxlint && eslint .",
+    "lint:fix": "oxlint --fix && eslint . --fix",
+    "typecheck": "nuxt typecheck",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check ."
+  },
+  "dependencies": {
+    "@nuxt/icon": "catalog:",
+    "@nuxtjs/color-mode": "catalog:",
+    "@nuxtjs/robots": "catalog:app:marketing",
+    "@nuxtjs/sitemap": "catalog:app:marketing",
+    "@vue/compiler-core": "catalog:",
+    "@vue/compiler-sfc": "catalog:",
+    "@vueuse/core": "catalog:",
+    "@vueuse/nuxt": "catalog:",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "motion-v": "catalog:",
+    "nuxt": "catalog:",
+    "reka-ui": "catalog:",
+    "tailwind-merge": "catalog:",
+    "tw-animate-css": "catalog:",
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "catalog:app:marketing",
+    "@nuxt/eslint": "catalog:",
+    "@nuxt/eslint-config": "catalog:",
+    "@nuxtjs/plausible": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "eslint-plugin-better-tailwindcss": "catalog:",
+    "eslint-plugin-oxlint": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "shadcn-nuxt": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vue-tsc": "catalog:",
+    "wrangler": "catalog:"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -1,0 +1,25 @@
+# Build output
+.nuxt/
+.output/
+.data/
+dist/
+
+# Node
+node_modules/
+*.log
+.pnpm-store/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Wrangler
+.wrangler/
+.dev.vars
+
+# Editor
+.DS_Store
+.vscode/
+.idea/
+*.swp

@@ -1,18 +1,18 @@
-# @geoql/macrodata
+# @geoql/mdr
 
 > Persistent, self-maintaining memory and autonomous scheduling for coding agents (OpenCode, Claude Code).
 
-[![npm](https://img.shields.io/npm/v/@geoql/macrodata)](https://www.npmjs.com/package/@geoql/macrodata)
-[![JSR](https://jsr.io/badges/@geoql/macrodata)](https://jsr.io/@geoql/macrodata)
-[![Pipeline](https://github.com/geoql/macrodata/actions/workflows/pipeline.yml/badge.svg)](https://github.com/geoql/macrodata/actions/workflows/pipeline.yml)
-[![codecov](https://codecov.io/gh/geoql/macrodata/branch/main/graph/badge.svg)](https://codecov.io/gh/geoql/macrodata)
+[![npm](https://img.shields.io/npm/v/@geoql/mdr)](https://www.npmjs.com/package/@geoql/mdr)
+[![JSR](https://jsr.io/badges/@geoql/mdr)](https://jsr.io/@geoql/mdr)
+[![Pipeline](https://github.com/geoql/mdr/actions/workflows/pipeline.yml/badge.svg)](https://github.com/geoql/mdr/actions/workflows/pipeline.yml)
+[![codecov](https://codecov.io/gh/geoql/mdr/branch/main/graph/badge.svg)](https://codecov.io/gh/geoql/mdr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 Macrodata gives an AI coding agent layered, local-first memory: a searchable journal, entity files for people and projects, always-injected state files, semantic search across every past session, a background daemon for scheduled reminders, and overnight self-maintenance. All memory is plain markdown and JSON on disk — nothing phones home, and the whole system runs inside the agent's existing permission model with no new APIs or attack surface.
 
 ## Hard fork of ascorbic/macrodata
 
-`@geoql/macrodata` is a **hard fork of [ascorbic/macrodata](https://github.com/ascorbic/macrodata) by [Matt Kane](https://github.com/ascorbic)** (published upstream as [`@macrodata/opencode`](https://www.npmjs.com/package/@macrodata/opencode)). The layered-memory architecture, the tools, the skills, and the design are Matt's work — this fork stands entirely on that foundation.
+`@geoql/mdr` is a **hard fork of [ascorbic/macrodata](https://github.com/ascorbic/macrodata) by [Matt Kane](https://github.com/ascorbic)** (published upstream as [`@macrodata/opencode`](https://www.npmjs.com/package/@macrodata/opencode)). The layered-memory architecture, the tools, the skills, and the design are Matt's work — this fork stands entirely on that foundation.
 
 ### Why this fork
 
@@ -38,7 +38,7 @@ Add the plugin to **`~/.config/opencode/opencode.json`**:
 
 ```json
 {
-  "plugin": ["@geoql/macrodata@latest"]
+  "plugin": ["@geoql/mdr@latest"]
 }
 ```
 
@@ -47,8 +47,8 @@ Launch OpenCode and ask it to set up Macrodata.
 ### Claude Code
 
 ```bash
-/plugin marketplace add geoql/macrodata
-/plugin install macrodata@macrodata
+/plugin marketplace add geoql/mdr
+/plugin install refiner@mdr
 ```
 
 ## What it does
