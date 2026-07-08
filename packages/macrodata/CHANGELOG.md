@@ -58,6 +58,19 @@ Forked from upstream at commit
 
 <!-- fork marker — everything below is the upstream ascorbic/macrodata changelog -->
 
+## 1.0.0 (2026-07-08)
+
+
+### Documentation
+
+* point codecov badge at tokened URL; gitignore .cortexkit ([926f279](https://github.com/geoql/mdr/commit/926f279b27fa38c04de18c2d143308fb845be1bc))
+
+
+### Code Refactoring
+
+* move plugin to packages/ to match geoql workspace convention ([63e8e01](https://github.com/geoql/mdr/commit/63e8e014bcbe4693cf3bb452a20edd8af06e9680))
+* **test:** use ~/~~ path aliases for imports ([7feb237](https://github.com/geoql/mdr/commit/7feb2373ee9ce7810cc590d9eac672e3de6c9bbc))
+
 ## 0.3.0
 
 ### Minor Changes
