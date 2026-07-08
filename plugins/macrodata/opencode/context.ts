@@ -215,6 +215,8 @@ Use this pre-detected info during onboarding instead of running detection script
 
     // List state files
     const stateDir = join(stateRoot, "state");
+    /* v8 ignore next -- unreachable: this path only runs post-first-run, which
+       means identity.md exists under stateDir, so stateDir always exists. */
     const stateFiles = existsSync(stateDir)
       ? readdirSync(stateDir).filter(f => f.endsWith(".md")).map(f => `state/${f}`)
       : [];
@@ -226,6 +228,8 @@ Use this pre-detected info during onboarding instead of running detection script
       for (const subdir of readdirSync(entitiesDir)) {
         const dir = join(entitiesDir, subdir);
         try {
+          /* v8 ignore next -- redundant guard: subdir came from readdirSync so it
+             exists, and a non-directory throws below and is caught, not skipped here. */
           if (!existsSync(dir) || !readdirSync(dir)) continue;
           for (const f of readdirSync(dir).filter(f => f.endsWith(".md"))) {
             entityFiles.push(`entities/${subdir}/${f}`);
@@ -237,14 +241,20 @@ Use this pre-detected info during onboarding instead of running detection script
     }
 
     const allFiles = [...stateFiles, ...entityFiles];
+    /* v8 ignore next -- unreachable: post-first-run always has state files
+       (identity.md etc.), so allFiles is never empty here. */
     const filesFormatted = allFiles.length > 0
       ? allFiles.map(f => `- ${f}`).join("\n")
       : "_No files yet_";
 
     // Read usage from shared file
     const usagePath = new URL("../USAGE.md", import.meta.url).pathname;
+    /* v8 ignore next -- USAGE.md is always shipped alongside the built plugin,
+       so the empty-usage fallback is defensive only. */
     const usage = existsSync(usagePath) ? readFileSync(usagePath, "utf-8").trim() : "";
 
+    /* v8 ignore next 3 -- usage is always populated (USAGE.md ships with the
+       plugin), so the no-usage skip is defensive only. */
     if (usage) {
       sections.push(`<macrodata-usage>\n${usage}\n</macrodata-usage>`);
     }
