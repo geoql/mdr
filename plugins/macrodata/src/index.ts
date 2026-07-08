@@ -170,14 +170,15 @@ function getRecentJournalEntries(count: number): JournalEntry[] {
   return entries;
 }
 
-// Create MCP server
-const server = new McpServer({
-  name: "macrodata-local",
-  version: "0.1.0",
-});
+// Create MCP server with every tool registered.
+export function createServer(): McpServer {
+  const server = new McpServer({
+    name: "macrodata-local",
+    version: "0.1.0",
+  });
 
-// Tool: log_journal
-server.tool(
+  // Tool: log_journal
+  server.tool(
   "log_journal",
   "Append a timestamped entry to the journal",
   {
@@ -636,10 +637,25 @@ server.tool(
 );
 
 
+  return server;
+}
+
 // Start server
-async function main() {
+export async function main(): Promise<void> {
+  const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
 
-main().catch(console.error);
+// Auto-start only when run directly, so importing this module for tests does
+// not open a stdio transport.
+export function isRunAsMain(argv1: string | undefined, moduleUrl: string): boolean {
+  return Boolean(argv1) && moduleUrl === `file://${argv1}`;
+}
+
+/* v8 ignore next 3 -- entry-point glue: only runs when this file is the process
+   entry (node dist/src/index.js); that path is a subprocess vitest cannot
+   instrument. main() and isRunAsMain() are each covered directly above. */
+if (isRunAsMain(process.argv[1], import.meta.url)) {
+  main().catch(console.error);
+}
