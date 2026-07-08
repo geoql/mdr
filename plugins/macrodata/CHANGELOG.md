@@ -1,4 +1,62 @@
-# @macrodata/opencode
+# @geoql/macrodata
+
+> `@geoql/macrodata` is a hard fork of [`@macrodata/opencode`](https://www.npmjs.com/package/@macrodata/opencode)
+> from [ascorbic/macrodata](https://github.com/ascorbic/macrodata) by
+> [Matt Kane](https://github.com/ascorbic). Entries below the fork marker are
+> the upstream changelog, preserved verbatim. From here forward this changelog
+> is maintained by [release-please](https://github.com/googleapis/release-please).
+
+## Unreleased (fork divergence from ascorbic/macrodata@0.3.0)
+
+Forked from upstream at commit
+[`ee80b99`](https://github.com/ascorbic/macrodata/commit/ee80b99413099f94c5f9b0b14c4f6dcc3a14aadd)
+(`chore: genericize personal references (#32)`), the last upstream commit at the
+`0.3.0` release. This fork layers the following on top:
+
+### Merged upstream contribution PRs
+
+- **Repair incremental indexing SQL + harden the daemon against hung children
+  ([#34](https://github.com/ascorbic/macrodata/pull/34), fixes #25).** Two bugs
+  that silently disabled the plugin for weeks. Scheduled `opencode run` /
+  `claude --print` children are now supervised with a hard timeout (default 10
+  minutes, `MACRODATA_CHILD_TIMEOUT_MS`); on timeout the child's process group is
+  killed and the daemon keeps running. The daemon installs
+  `unhandledRejection` / `uncaughtException` handlers and writes a
+  `.daemon.heartbeat` every minute; the plugin restarts a PID-alive-but-stale
+  daemon on the next session, so a wedged daemon self-heals instead of staying
+  dead for days.
+- **Migrate `@xenova/transformers` → `@huggingface/transformers`
+  ([#35](https://github.com/ascorbic/macrodata/pull/35), addresses #24).**
+  Eliminates the `sharp` postinstall failure that broke the native binary
+  install under blocked-lifecycle-script package managers — including when the
+  plugin is installed through OpenCode's generated wrapper package. Same model,
+  same 384-dim embeddings; existing indexes stay valid. The daemon lazy-loads
+  the indexing modules so its PID file appears in ~300ms instead of ~4.6s.
+- **Optional remote OpenAI-compatible embedding provider
+  ([#36](https://github.com/ascorbic/macrodata/pull/36)).** Configure an
+  embeddings endpoint in `~/.config/macrodata/config.json` to offload embedding
+  generation to an API instead of running the local Transformers.js model. When
+  configured, the local model is never loaded (no download, no inference CPU).
+  Without the `embedding` block, behavior is unchanged: local
+  `all-MiniLM-L6-v2`, fully offline. Supports `api_key` / `api_key_env`,
+  per-request `input_type` / `query_input_type`, `batch_size`, and `extra_body`
+  passthrough.
+
+### Runtime and toolchain migration (geoql)
+
+- **Bun → pnpm / Node.** Replaced Bun-specific APIs (`bun:sqlite`,
+  `bun:test`, bundled-Bun daemon startup) with Node equivalents (`node:sqlite`),
+  moved to a pnpm workspace, and target Node `>=24.11.0`. OpenCode no longer
+  ships Bun, so the plugin now runs on the same Node runtime as its host.
+- **Vitest suite at 100% coverage.** Migrated the test suite from `bun:test`
+  to Vitest with a hard 100% statements/branches/functions/lines gate, extracted
+  daemon and MCP-server logic into testable modules, and made the suite hermetic
+  against a developer's real `~/.config/macrodata/config.json`.
+- **geoql release automation.** release-please → npm (OIDC provenance) + JSR,
+  a coverage gate, and husky/commitlint/lint-staged, mirroring the
+  [geoql/doctor](https://github.com/geoql/doctor) conventions.
+
+<!-- fork marker — everything below is the upstream ascorbic/macrodata changelog -->
 
 ## 0.3.0
 
