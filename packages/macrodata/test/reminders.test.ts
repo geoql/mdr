@@ -8,7 +8,7 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { createTestContext, addReminder, type TestContext } from './helpers';
-import { getRemindersDir } from '../src/config';
+import { getRemindersDir } from '~/config';
 
 describe('reminders', () => {
   let ctx: TestContext;

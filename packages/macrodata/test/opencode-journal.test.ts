@@ -13,8 +13,8 @@ import {
   getRecentJournal,
   getRecentSummaries,
   saveConversationSummary,
-} from '../opencode/journal';
-import { resetMemoryIndexForTests } from '../opencode/search';
+} from '~~/opencode/journal';
+import { resetMemoryIndexForTests } from '~~/opencode/search';
 
 let root: string;
 let prevRoot: string | undefined;

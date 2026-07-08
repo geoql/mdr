@@ -36,7 +36,7 @@ vi.mock('../src/conversations.js', () => ({
   getConversationIndexStats: vi.fn().mockRejectedValue(new Error('conv stats down')),
 }));
 
-import { createServer, main, isRunAsMain } from '../src/index';
+import { createServer, main, isRunAsMain } from '~/index';
 
 let ctx: TestContext;
 let client: Client;

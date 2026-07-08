@@ -42,7 +42,7 @@ vi.mock('child_process', () => ({
 }));
 
 // Import after the mock is registered.
-import * as daemon from '../src/daemon';
+import * as daemon from '~/daemon';
 
 const {
   getDaemonDir,

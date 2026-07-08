@@ -9,7 +9,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { queryExchanges } from '../opencode/conversations';
+import { queryExchanges } from '~~/opencode/conversations';
 
 function createOpenCodeDb(): DatabaseSync {
   const db = new DatabaseSync(':memory:');

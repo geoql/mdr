@@ -16,7 +16,7 @@ import {
   getMemoryIndexStats,
   indexJournalEntry,
   resetMemoryIndexForTests,
-} from '../opencode/search';
+} from '~~/opencode/search';
 
 let root: string;
 let prevRoot: string | undefined;

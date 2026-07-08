@@ -6,8 +6,8 @@
  */
 
 import { describe, test, expect, vi } from 'vitest';
-import * as indexConversations from '../bin/index-conversations';
-import * as daemonEntry from '../bin/macrodata-daemon';
+import * as indexConversations from '~~/bin/index-conversations';
+import * as daemonEntry from '~~/bin/macrodata-daemon';
 
 describe('index-conversations entry', () => {
   test('main reports the update result and returns 0', async () => {

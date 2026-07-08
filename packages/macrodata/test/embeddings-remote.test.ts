@@ -20,7 +20,7 @@ import {
   preloadModel,
   getRemoteEmbeddingConfig,
   resetEmbeddingConfigCache,
-} from '../src/embeddings';
+} from '~/embeddings';
 
 interface RecordedRequest {
   url: string;

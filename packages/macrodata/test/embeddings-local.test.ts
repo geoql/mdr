@@ -15,7 +15,7 @@ import {
   resetEmbeddingConfigCache,
   resetLocalPipelineForTests,
   EMBEDDING_DIMENSIONS,
-} from '../src/embeddings';
+} from '~/embeddings';
 
 let prevConfigPath: string | undefined;
 

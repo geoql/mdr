@@ -12,7 +12,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { createServer } from '../src/index';
+import { createServer } from '~/index';
 import { createTestContext, addReminder, addJournalEntry, type TestContext } from './helpers';
 
 let ctx: TestContext;

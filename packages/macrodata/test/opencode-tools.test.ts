@@ -8,9 +8,9 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { memoryTools } from '../opencode/tools';
-import { resetMemoryIndexForTests } from '../opencode/search';
-import { resetConversationIndexForTests } from '../opencode/conversations';
+import { memoryTools } from '~~/opencode/tools';
+import { resetMemoryIndexForTests } from '~~/opencode/search';
+import { resetConversationIndexForTests } from '~~/opencode/conversations';
 
 let root: string;
 let prevRoot: string | undefined;

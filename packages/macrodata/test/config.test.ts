@@ -16,7 +16,7 @@ import {
   getRemindersDir,
   getSignalsDir,
   getTopicsDir,
-} from '../src/config';
+} from '~/config';
 
 describe('config', () => {
   let ctx: TestContext;
