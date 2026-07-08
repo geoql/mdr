@@ -20,8 +20,6 @@
     "@nuxtjs/color-mode": "catalog:",
     "@nuxtjs/robots": "catalog:app:marketing",
     "@nuxtjs/sitemap": "catalog:app:marketing",
-    "@vue/compiler-core": "catalog:",
-    "@vue/compiler-sfc": "catalog:",
     "@vueuse/core": "catalog:",
     "@vueuse/nuxt": "catalog:",
     "class-variance-authority": "catalog:",
@@ -52,6 +50,6 @@
     "wrangler": "catalog:"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=24.11.0"
   }
 }
