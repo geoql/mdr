@@ -1,0 +1,113 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+    steps:
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          token: ${{ secrets.RELEASE_PAT }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.releases_created == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Pack tarballs
+        run: |
+          rm -rf .release && mkdir -p .release
+          # The npm set is derived from disk (every plugin package with
+          # private !== true) so it can never drift from the package list.
+          for dir in $(node -e "const f=require('node:fs');for(const p of f.readdirSync('plugins')){const j='plugins/'+p+'/package.json';if(f.existsSync(j)&&JSON.parse(f.readFileSync(j,'utf8')).private!==true)console.log('plugins/'+p)}"); do
+            (cd "$dir" && pnpm pack --pack-destination "$GITHUB_WORKSPACE/.release")
+          done
+
+      - name: Publish to npm with provenance
+        run: |
+          failed=""
+          for tgz in .release/*.tgz; do
+            name=$(tar -xzOf "$tgz" package/package.json | grep '"name"' | head -1 | sed -E 's/.*"name" *: *"([^"]+)".*/\1/')
+            version=$(tar -xzOf "$tgz" package/package.json | grep '"version"' | head -1 | sed -E 's/.*"version" *: *"([^"]+)".*/\1/')
+            if [[ "$version" == *-* ]]; then
+              tag="${version#*-}"
+              tag="${tag%%.*}"
+            else
+              tag="latest"
+            fi
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "Skipping $name@$version (already published)"
+              continue
+            fi
+            echo "Publishing $name@$version under dist-tag: $tag"
+            if ! npm publish "$tgz" --provenance --access public --ignore-scripts --tag "$tag"; then
+              echo "::error::npm publish failed for $name@$version"
+              failed="$failed $name@$version"
+            fi
+          done
+          if [[ -n "$failed" ]]; then
+            echo "::error::npm publish failed for:$failed"
+            exit 1
+          fi
+
+      - name: Sync JSR versions
+        run: node scripts/bump-jsr-version.ts
+
+      - name: Publish to JSR
+        run: |
+          failed=""
+          # The JSR set is every plugin that ships a jsr.json.
+          for dir in $(node -e "const f=require('node:fs');for(const p of f.readdirSync('plugins')){if(f.existsSync('plugins/'+p+'/jsr.json'))console.log('plugins/'+p)}"); do
+            name=$(node -p "require('./$dir/package.json').name")
+            version=$(node -p "require('./$dir/package.json').version")
+            if curl -fsS "https://jsr.io/$name/$version/package.json" >/dev/null 2>&1; then
+              echo "Skipping $name@$version on JSR (already published)"
+              continue
+            fi
+            if ! (cd "$dir" && pnpm dlx jsr publish --allow-dirty --allow-slow-types); then
+              echo "::error::jsr publish failed for $name@$version"
+              failed="$failed $name@$version"
+            fi
+          done
+          if [[ -n "$failed" ]]; then
+            echo "::error::jsr publish failed for:$failed"
+            exit 1
+          fi
