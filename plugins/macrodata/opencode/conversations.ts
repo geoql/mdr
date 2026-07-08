@@ -273,6 +273,9 @@ async function doRebuildConversationIndex(): Promise<{ exchangeCount: number }> 
           },
         });
 
+        /* v8 ignore next 3 -- progress log that only fires past 500 indexed
+           exchanges; seeding 500 real embedded rows per test is impractical and
+           the line has no behavioural effect. */
         if (i > 0 && i % 500 === 0) {
           logger.log(`  ...inserted ${i}/${exchanges.length}`);
         }
