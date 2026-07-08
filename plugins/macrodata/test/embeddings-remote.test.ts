@@ -6,7 +6,7 @@
  * fallback paths are covered by the existing indexer tests.
  */
 
-import { describe, test, expect, beforeEach, afterEach, afterAll } from "vitest";
+import { describe, test, expect, beforeEach, afterEach, afterAll, vi } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -17,6 +17,7 @@ import {
   embed,
   embedBatch,
   embedQuery,
+  preloadModel,
   getRemoteEmbeddingConfig,
   resetEmbeddingConfigCache,
 } from "../src/embeddings";
@@ -140,6 +141,24 @@ describe("getRemoteEmbeddingConfig", () => {
     expect(config?.endpoint).toBe(ENDPOINT);
     expect(config?.model).toBe("test-model");
   });
+
+  test("caches the parsed config across calls", () => {
+    writeConfig({ provider: "openai-compatible", endpoint: ENDPOINT, model: "m" });
+    const first = getRemoteEmbeddingConfig();
+    // Second call returns the memoized instance without re-reading the file.
+    expect(getRemoteEmbeddingConfig()).toBe(first);
+  });
+
+  test("returns null and warns on a malformed config.json", () => {
+    const configPath = join(configDir, "config.json");
+    writeFileSync(configPath, "{ broken json");
+    process.env.MACRODATA_CONFIG_PATH = configPath;
+    resetEmbeddingConfigCache();
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(getRemoteEmbeddingConfig()).toBeNull();
+    expect(errSpy).toHaveBeenCalled();
+    errSpy.mockRestore();
+  });
 });
 
 describe("remote embedding requests", () => {
@@ -221,6 +240,34 @@ describe("remote embedding requests", () => {
     delete process.env.MACRODATA_TEST_EMBED_KEY;
   });
 
+  test("falls back to api_key when api_key_env is unset", async () => {
+    delete process.env.MACRODATA_TEST_EMBED_KEY;
+    writeConfig({
+      provider: "openai-compatible",
+      endpoint: ENDPOINT,
+      api_key: "sk-fallback",
+      api_key_env: "MACRODATA_TEST_EMBED_KEY",
+      model: "test-model",
+    });
+    await embed("hello");
+    expect(recordedRequests[0].authorization).toBe("Bearer sk-fallback");
+  });
+
+  test("sends no auth header when no api key is configured", async () => {
+    writeConfig({ provider: "openai-compatible", endpoint: ENDPOINT, model: "test-model" });
+    await embed("hello");
+    expect(recordedRequests[0].authorization).toBeNull();
+  });
+
+  test("handles a response with no index fields", async () => {
+    respondWith = (input) => Response.json({ data: input.map(() => ({ embedding: [7, 8, 9] })) });
+    const vectors = await embedBatch(["a", "b"]);
+    expect(vectors).toEqual([
+      [7, 8, 9],
+      [7, 8, 9],
+    ]);
+  });
+
   test("throws on HTTP errors instead of returning bad vectors", async () => {
     respondWith = () => new Response("upstream exploded", { status: 502 });
 
@@ -233,10 +280,24 @@ describe("remote embedding requests", () => {
     await expect(embedBatch(["a", "b"])).rejects.toThrow(/mismatch/);
   });
 
+  test("throws when the response omits the data array entirely", async () => {
+    respondWith = () => Response.json({ object: "list" });
+    await expect(embed("hello")).rejects.toThrow(/expected 1 embeddings, got 0/);
+  });
+
   test("embedBatch returns empty array without any request", async () => {
     const vectors = await embedBatch([]);
     expect(vectors).toEqual([]);
     expect(recordedRequests).toHaveLength(0);
+  });
+
+  test("preloadModel skips the local model when a remote provider is set", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    await expect(preloadModel()).resolves.toBeUndefined();
+    expect(logSpy.mock.calls.map((c) => String(c[0])).join("")).toContain(
+      "Remote embedding provider configured"
+    );
+    logSpy.mockRestore();
   });
 
   test("merges extra_body fields into the request payload", async () => {

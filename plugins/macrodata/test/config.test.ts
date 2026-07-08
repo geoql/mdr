@@ -5,8 +5,18 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
+import { join } from "path";
 import { createTestContext, type TestContext } from "./helpers";
-import { getStateRoot, getStateDir, getEntitiesDir, getJournalDir, getIndexDir, getRemindersDir } from "../src/config";
+import {
+  getStateRoot,
+  getStateDir,
+  getEntitiesDir,
+  getJournalDir,
+  getIndexDir,
+  getRemindersDir,
+  getSignalsDir,
+  getTopicsDir,
+} from "../src/config";
 
 describe("config", () => {
   let ctx: TestContext;
@@ -41,6 +51,14 @@ describe("config", () => {
 
   test("getRemindersDir returns reminders subdirectory", () => {
     expect(getRemindersDir()).toBe(ctx.remindersDir);
+  });
+
+  test("getSignalsDir returns signals subdirectory", () => {
+    expect(getSignalsDir()).toBe(join(ctx.root, "signals"));
+  });
+
+  test("getTopicsDir returns topics subdirectory", () => {
+    expect(getTopicsDir()).toBe(join(ctx.root, "topics"));
   });
 
   test("paths update when MACRODATA_ROOT changes", () => {

@@ -75,6 +75,12 @@ export function resetEmbeddingConfigCache(): void {
   cachedRemoteConfig = undefined;
 }
 
+// Test seam: drop the cached local pipeline so the load path can be re-exercised.
+export function resetLocalPipelineForTests(): void {
+  embeddingPipeline = null;
+  pipelineLoading = null;
+}
+
 function resolveApiKey(config: RemoteEmbeddingConfig): string | undefined {
   if (config.api_key_env) {
     const fromEnv = process.env[config.api_key_env];
