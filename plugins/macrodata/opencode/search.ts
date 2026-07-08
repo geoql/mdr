@@ -73,7 +73,7 @@ export async function searchMemory(
   }
 
   const queryVector = await embedQuery(query);
-  const results = await idx.queryItems(queryVector, limit * 2);
+  const results = await idx.queryItems(queryVector, query, limit * 2);
 
   let filtered = results;
   if (type || since) {

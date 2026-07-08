@@ -340,7 +340,7 @@ export async function searchConversations(
   }
 
   const queryVector = await embedQuery(query);
-  const results = await idx.queryItems(queryVector, limit * 3);
+  const results = await idx.queryItems(queryVector, query, limit * 3);
 
   const searchResults: ConversationSearchResult[] = results.map((r) => {
     const meta = r.item.metadata as Record<string, string>;
