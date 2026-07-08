@@ -23,28 +23,63 @@ const oc = await import("../opencode/conversations");
 function makeDb(path: string): DatabaseSync {
   const db = new DatabaseSync(path);
   db.exec(`CREATE TABLE project (id TEXT PRIMARY KEY, worktree TEXT)`);
-  db.exec(`CREATE TABLE session (id TEXT PRIMARY KEY, project_id TEXT, parent_id TEXT, directory TEXT, time_created INTEGER)`);
-  db.exec(`CREATE TABLE message (id TEXT PRIMARY KEY, session_id TEXT, time_created INTEGER, data TEXT)`);
-  db.exec(`CREATE TABLE part (id TEXT PRIMARY KEY, message_id TEXT, session_id TEXT, time_created INTEGER, data TEXT)`);
+  db.exec(
+    `CREATE TABLE session (id TEXT PRIMARY KEY, project_id TEXT, parent_id TEXT, directory TEXT, time_created INTEGER)`,
+  );
+  db.exec(
+    `CREATE TABLE message (id TEXT PRIMARY KEY, session_id TEXT, time_created INTEGER, data TEXT)`,
+  );
+  db.exec(
+    `CREATE TABLE part (id TEXT PRIMARY KEY, message_id TEXT, session_id TEXT, time_created INTEGER, data TEXT)`,
+  );
   return db;
 }
 
 function seed(
   db: DatabaseSync,
-  o: { session: string; u: string; a: string; t: number; text: string; project?: string; worktree?: string; directory?: string }
+  o: {
+    session: string;
+    u: string;
+    a: string;
+    t: number;
+    text: string;
+    project?: string;
+    worktree?: string;
+    directory?: string;
+  },
 ) {
   const project = o.project ?? "prj_1";
-  db.prepare(`INSERT OR IGNORE INTO project (id, worktree) VALUES (?, ?)`).run(project, o.worktree ?? "/tmp/proj");
-  db.prepare(`INSERT OR IGNORE INTO session (id, project_id, parent_id, directory, time_created) VALUES (?, ?, NULL, ?, ?)`).run(
-    o.session,
+  db.prepare(`INSERT OR IGNORE INTO project (id, worktree) VALUES (?, ?)`).run(
     project,
-    o.directory ?? "/tmp/proj",
-    o.t
+    o.worktree ?? "/tmp/proj",
   );
-  db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`).run(o.u, o.session, o.t, JSON.stringify({ role: "user" }));
-  db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`).run(o.a, o.session, o.t + 1000, JSON.stringify({ role: "assistant" }));
-  db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`).run(`${o.u}-p`, o.u, o.session, o.t, JSON.stringify({ type: "text", text: o.text }));
-  db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`).run(`${o.a}-p`, o.a, o.session, o.t + 1000, JSON.stringify({ type: "text", text: "assistant reply text" }));
+  db.prepare(
+    `INSERT OR IGNORE INTO session (id, project_id, parent_id, directory, time_created) VALUES (?, ?, NULL, ?, ?)`,
+  ).run(o.session, project, o.directory ?? "/tmp/proj", o.t);
+  db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`).run(
+    o.u,
+    o.session,
+    o.t,
+    JSON.stringify({ role: "user" }),
+  );
+  db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`).run(
+    o.a,
+    o.session,
+    o.t + 1000,
+    JSON.stringify({ role: "assistant" }),
+  );
+  db.prepare(
+    `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`,
+  ).run(`${o.u}-p`, o.u, o.session, o.t, JSON.stringify({ type: "text", text: o.text }));
+  db.prepare(
+    `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`,
+  ).run(
+    `${o.a}-p`,
+    o.a,
+    o.session,
+    o.t + 1000,
+    JSON.stringify({ type: "text", text: "assistant reply text" }),
+  );
 }
 
 let db: DatabaseSync;
@@ -60,7 +95,13 @@ afterAll(() => {
 
 describe("resetConversationIndexForTests", () => {
   test("drops the cached index so a later query reopens it", async () => {
-    seed(db, { session: "ses_reset", u: "rmu", a: "rma", t: 1_700_000_050_000, text: "reset seam probe" });
+    seed(db, {
+      session: "ses_reset",
+      u: "rmu",
+      a: "rma",
+      t: 1_700_000_050_000,
+      text: "reset seam probe",
+    });
     await oc.rebuildConversationIndex();
     oc.resetConversationIndexForTests();
     // After reset the next call must reopen the on-disk index and still see data.
@@ -71,7 +112,13 @@ describe("resetConversationIndexForTests", () => {
 
 describe("rebuildConversationIndex", () => {
   test("indexes exchanges from the opencode db and is searchable", async () => {
-    seed(db, { session: "ses_a", u: "mu1", a: "ma1", t: 1_700_000_000_000, text: "how to deploy a rust binary" });
+    seed(db, {
+      session: "ses_a",
+      u: "mu1",
+      a: "ma1",
+      t: 1_700_000_000_000,
+      text: "how to deploy a rust binary",
+    });
     const result = await oc.rebuildConversationIndex();
     expect(result.exchangeCount).toBeGreaterThanOrEqual(1);
 
@@ -84,14 +131,23 @@ describe("rebuildConversationIndex", () => {
   }, 90000);
 
   test("coalesces a concurrent rebuild into the in-flight promise", async () => {
-    const [a, b] = await Promise.all([oc.rebuildConversationIndex(), oc.rebuildConversationIndex()]);
+    const [a, b] = await Promise.all([
+      oc.rebuildConversationIndex(),
+      oc.rebuildConversationIndex(),
+    ]);
     expect(a.exchangeCount).toBe(b.exchangeCount);
   }, 90000);
 });
 
 describe("updateConversationIndex", () => {
   test("adds only new exchanges since the last index", async () => {
-    seed(db, { session: "ses_b", u: "mu2", a: "ma2", t: 1_700_000_100_000, text: "a brand new question about caching layers" });
+    seed(db, {
+      session: "ses_b",
+      u: "mu2",
+      a: "ma2",
+      t: 1_700_000_100_000,
+      text: "a brand new question about caching layers",
+    });
     const result = await oc.updateConversationIndex();
     expect(result.newCount).toBeGreaterThanOrEqual(1);
   }, 90000);
@@ -169,7 +225,11 @@ describe("searchConversations project handling", () => {
     const boostedScore = boosted.find((r) => r.exchange.id === id)!.adjustedScore;
     expect(boostedScore).toBeCloseTo(plainScore * 1.5, 5);
 
-    const only = await oc.searchConversations("rust", { currentProject: "/tmp/proj", projectOnly: true, limit: 5 });
+    const only = await oc.searchConversations("rust", {
+      currentProject: "/tmp/proj",
+      projectOnly: true,
+      limit: 5,
+    });
     expect(only.every((r) => r.exchange.projectPath === "/tmp/proj")).toBe(true);
   }, 90000);
 });

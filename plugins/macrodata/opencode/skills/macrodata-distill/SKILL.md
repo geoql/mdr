@@ -14,6 +14,7 @@ Process today's conversations to extract actionable knowledge. This is the core 
 OpenCode stores all session data in a SQLite database at `~/.local/share/opencode/opencode.db`.
 
 **Schema:**
+
 - `session` — id, project_id, parent_id, title, time_created, time_updated
 - `message` — id, session_id, time_created, data (JSON: role, agent, modelID, etc.)
 - `part` — id, message_id, session_id, time_created, data (JSON: type, text, etc.)
@@ -22,6 +23,7 @@ OpenCode stores all session data in a SQLite database at `~/.local/share/opencod
 **Part types:** text, tool, step-start, step-finish, patch, reasoning, compaction, file, subtask
 
 **Key JSON paths:**
+
 - `message.data` → `$.role` (user/assistant), `$.summary` (set on compaction messages)
 - `part.data` → `$.type` (text/tool/etc.), `$.text` (for text parts)
 
@@ -120,17 +122,20 @@ Return ONLY the JSON, no explanation.
 After all sub-agents complete:
 
 **Write distilled actions to journal:**
+
 ```
 For each action in all results:
   macrodata_log_journal(topic="distilled", content=action.summary + " Files: " + action.files.join(", "))
 ```
 
 **Write overall summary to journal:**
+
 ```
 macrodata_log_journal(topic="distill-summary", content="Processed N sessions. Extracted X actions, Y facts.")
 ```
 
 **Update entity files with facts:**
+
 - Group facts by topic
 - For each topic, read existing entity file (if any)
 - Integrate new facts, removing duplicates

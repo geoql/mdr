@@ -64,7 +64,7 @@ export function getRemoteEmbeddingConfig(): RemoteEmbeddingConfig | null {
         cachedRemoteConfig = embedding as RemoteEmbeddingConfig;
       }
     } catch (err) {
-      console.error(`[Embeddings] Failed to parse config.json, using local model: ${err}`);
+      console.error(`[Embeddings] Failed to parse config.json, using local model: ${String(err)}`);
     }
   }
 
@@ -92,14 +92,14 @@ function resolveApiKey(config: RemoteEmbeddingConfig): string | undefined {
 async function embedRemote(
   texts: string[],
   config: RemoteEmbeddingConfig,
-  kind: "passage" | "query"
+  kind: "passage" | "query",
 ): Promise<number[][]> {
   const url = `${config.endpoint.replace(/\/$/, "")}/embeddings`;
   const apiKey = resolveApiKey(config);
   const inputType = kind === "query" ? config.query_input_type : config.input_type;
 
   const body: Record<string, unknown> = {
-    ...(config.extra_body ?? {}),
+    ...config.extra_body,
     model: config.model,
     input: texts,
   };
@@ -119,7 +119,7 @@ async function embedRemote(
   if (!response.ok) {
     const errText = await response.text().catch(() => "");
     throw new Error(
-      `Remote embedding request failed: ${response.status} ${response.statusText} ${errText.slice(0, 300)}`
+      `Remote embedding request failed: ${response.status} ${response.statusText} ${errText.slice(0, 300)}`,
     );
   }
 
@@ -129,7 +129,7 @@ async function embedRemote(
 
   if (!result.data || result.data.length !== texts.length) {
     throw new Error(
-      `Remote embedding response mismatch: expected ${texts.length} embeddings, got ${result.data?.length ?? 0}`
+      `Remote embedding response mismatch: expected ${texts.length} embeddings, got ${result.data?.length ?? 0}`,
     );
   }
 
@@ -141,7 +141,7 @@ async function embedRemote(
 async function embedRemoteBatched(
   texts: string[],
   config: RemoteEmbeddingConfig,
-  kind: "passage" | "query"
+  kind: "passage" | "query",
 ): Promise<number[][]> {
   const batchSize = config.batch_size && config.batch_size > 0 ? config.batch_size : 64;
   const results: number[][] = [];

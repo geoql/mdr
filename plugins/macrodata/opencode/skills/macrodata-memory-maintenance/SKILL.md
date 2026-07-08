@@ -33,16 +33,19 @@ Use these to inform state file updates.
 Review each state file and update if needed:
 
 **today.md**
+
 - Clear completed items
 - Note anything that carried over
 - Leave empty or minimal for morning prep to fill
 
 **workspace.md**
+
 - Update active projects list based on distilled actions
 - Add/remove open threads
 - Note any blocked items or waiting-on dependencies
 
 **human.md**
+
 - Any new preferences or patterns from distilled facts?
 - Communication style insights?
 - Only update if genuinely new information
@@ -50,6 +53,7 @@ Review each state file and update if needed:
 ### 4. Entity Updates
 
 Review `entities/people/` and `entities/projects/`:
+
 - Integrate any facts extracted by distillation
 - Project status changes?
 - New projects to create files for?
@@ -57,6 +61,7 @@ Review `entities/people/` and `entities/projects/`:
 ### 5. Prune Stale Info
 
 Look for outdated information:
+
 - Completed todos still listed as active
 - Old context that's no longer relevant
 - Temporary notes that should be removed
@@ -67,12 +72,14 @@ Remove or archive as appropriate.
 ### 6. Index Maintenance
 
 Check if indexes need rebuilding:
+
 ```
 manage_index(target="memory", action="stats")
 manage_index(target="conversations", action="stats")
 ```
 
 If counts seem low or stale, trigger rebuild:
+
 ```
 manage_index(target="memory", action="rebuild")
 manage_index(target="conversations", action="update")

@@ -131,7 +131,7 @@ export async function searchMemory(
     limit?: number;
     type?: MemoryItemType;
     since?: string;
-  } = {}
+  } = {},
 ): Promise<SearchResult[]> {
   const { limit = 5, type, since } = options;
   const idx = await getIndex();
@@ -211,7 +211,10 @@ function parseJournalForIndexing(): MemoryItem[] {
 /**
  * Parse entity files (people, projects) for indexing
  */
-function parseEntitiesForIndexing(subdir: "people" | "projects", type: MemoryItemType): MemoryItem[] {
+function parseEntitiesForIndexing(
+  subdir: "people" | "projects",
+  type: MemoryItemType,
+): MemoryItem[] {
   const items: MemoryItem[] = [];
   const dir = join(getEntitiesDir(), subdir);
 
@@ -327,7 +330,7 @@ export async function getIndexStats(): Promise<{ itemCount: number }> {
  */
 export async function indexEntityFile(filePath: string): Promise<void> {
   const filename = basename(filePath, ".md");
-  
+
   // Determine type from path
   let type: MemoryItemType;
   if (filePath.includes("/people/")) {

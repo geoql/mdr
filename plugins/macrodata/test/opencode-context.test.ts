@@ -21,9 +21,8 @@ vi.mock("../src/detect-user.js", () => ({
   }),
 }));
 
-const { consumePendingContext, initializeStateRoot, formatContextForPrompt } = await import(
-  "../opencode/context"
-);
+const { consumePendingContext, initializeStateRoot, formatContextForPrompt } =
+  await import("../opencode/context");
 
 let root: string;
 let prevRoot: string | undefined;
@@ -104,14 +103,25 @@ describe("formatContextForPrompt full context", () => {
     writeFileSync(
       join(root, "journal", "2025-01-01.jsonl"),
       [
-        JSON.stringify({ timestamp: "2025-01-01T00:00:00Z", topic: "work", content: "line one\nline two" }),
+        JSON.stringify({
+          timestamp: "2025-01-01T00:00:00Z",
+          topic: "work",
+          content: "line one\nline two",
+        }),
         JSON.stringify({ timestamp: "not-a-date", topic: "bad", content: "unknown date entry" }),
-      ].join("\n") + "\n"
+      ].join("\n") + "\n",
     );
     mkdirSync(join(root, "reminders"), { recursive: true });
     writeFileSync(
       join(root, "reminders", "r1.json"),
-      JSON.stringify({ id: "r1", type: "cron", expression: "0 9 * * *", description: "morning", payload: "p", createdAt: "x" })
+      JSON.stringify({
+        id: "r1",
+        type: "cron",
+        expression: "0 9 * * *",
+        description: "morning",
+        payload: "p",
+        createdAt: "x",
+      }),
     );
     writeState("workspace.md", "the workspace");
     mkdirSync(join(root, "entities", "people"), { recursive: true });
@@ -141,7 +151,13 @@ describe("formatContextForPrompt full context", () => {
     for (let d = 1; d <= 3; d++) {
       const lines = [];
       for (let i = 0; i < 4; i++) {
-        lines.push(JSON.stringify({ timestamp: `2025-01-0${d}T0${i}:00:00Z`, topic: "t", content: `e${d}${i}` }));
+        lines.push(
+          JSON.stringify({
+            timestamp: `2025-01-0${d}T0${i}:00:00Z`,
+            topic: "t",
+            content: `e${d}${i}`,
+          }),
+        );
       }
       writeFileSync(join(root, "journal", `2025-01-0${d}.jsonl`), lines.join("\n") + "\n");
     }
@@ -182,8 +198,16 @@ describe("formatContextForPrompt full context", () => {
               {
                 id: "anthropic",
                 models: {
-                  "claude-x-newer": { family: "claude", release_date: "2025-06-01", capabilities: { toolcall: true } },
-                  "claude-x": { family: "claude", release_date: "2025-01-01", capabilities: { toolcall: true } }, // older, seen after newer
+                  "claude-x-newer": {
+                    family: "claude",
+                    release_date: "2025-06-01",
+                    capabilities: { toolcall: true },
+                  },
+                  "claude-x": {
+                    family: "claude",
+                    release_date: "2025-01-01",
+                    capabilities: { toolcall: true },
+                  }, // older, seen after newer
                   "claude-20240101": { family: "claude", capabilities: { toolcall: true } }, // dated -> skipped
                   "no-tools": { family: "misc", capabilities: { toolcall: false } }, // skipped
                   "no-caps": { family: "other" }, // no capabilities -> skipped
@@ -227,7 +251,11 @@ describe("formatContextForPrompt full context", () => {
     const client = {
       config: {
         providers: async () => ({
-          data: { providers: [{ id: "p", models: { "only-dated-20250101": { capabilities: { toolcall: true } } } }] },
+          data: {
+            providers: [
+              { id: "p", models: { "only-dated-20250101": { capabilities: { toolcall: true } } } },
+            ],
+          },
         }),
       },
     };

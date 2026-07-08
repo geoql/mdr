@@ -21,9 +21,16 @@ import {
 let root: string;
 let prevRoot: string | undefined;
 
-function writeJournal(name: string, ...entries: Array<{ topic: string; content: string; timestamp?: string }>) {
+function writeJournal(
+  name: string,
+  ...entries: Array<{ topic: string; content: string; timestamp?: string }>
+) {
   const lines = entries.map((e) =>
-    JSON.stringify({ timestamp: e.timestamp ?? new Date().toISOString(), topic: e.topic, content: e.content })
+    JSON.stringify({
+      timestamp: e.timestamp ?? new Date().toISOString(),
+      topic: e.topic,
+      content: e.content,
+    }),
   );
   writeFileSync(join(root, "journal", `${name}.jsonl`), lines.join("\n") + "\n");
 }
@@ -51,7 +58,11 @@ afterEach(() => {
 describe("rebuildMemoryIndex", () => {
   test("indexes journal, entities (preamble + sections) and topics", async () => {
     writeJournal("2025-01-01", { topic: "cooking", content: "made pasta carbonara" });
-    writeEntity("people", "alice", "Intro about Alice.\n\n## About\n\nSoftware engineer.\n\n## Empty\n\n");
+    writeEntity(
+      "people",
+      "alice",
+      "Intro about Alice.\n\n## About\n\nSoftware engineer.\n\n## Empty\n\n",
+    );
     writeEntity("projects", "widget", "## Description\n\nA widget factory.");
     writeFileSync(join(root, "topics", "rust.md"), "# Rust\n\nSystems programming language.");
 
@@ -75,7 +86,8 @@ describe("rebuildMemoryIndex", () => {
   test("skips malformed journal lines and unreadable/absent dirs", async () => {
     writeFileSync(
       join(root, "journal", "2025-02-02.jsonl"),
-      JSON.stringify({ timestamp: "2025-02-02T00:00:00Z", topic: "ok", content: "valid" }) + "\n{ bad json\n"
+      JSON.stringify({ timestamp: "2025-02-02T00:00:00Z", topic: "ok", content: "valid" }) +
+        "\n{ bad json\n",
     );
     // Remove the topics dir so its existsSync branch is false.
     rmSync(join(root, "topics"), { recursive: true, force: true });
@@ -99,7 +111,11 @@ describe("searchMemory", () => {
   }, 30000);
 
   test("filters by since date and keeps undated entity results", async () => {
-    writeJournal("old", { topic: "old", content: "ancient note", timestamp: "2024-01-01T00:00:00Z" });
+    writeJournal("old", {
+      topic: "old",
+      content: "ancient note",
+      timestamp: "2024-01-01T00:00:00Z",
+    });
     writeJournal("new", { topic: "new", content: "fresh note", timestamp: "2025-06-01T00:00:00Z" });
     writeEntity("people", "carol", "## Bio\n\ntimeless carol bio");
     await rebuildMemoryIndex();
@@ -144,18 +160,30 @@ describe("search + index edge branches", () => {
 
   test("creates the index dir when it is absent", async () => {
     rmSync(join(root, ".index"), { recursive: true, force: true });
-    await indexJournalEntry({ timestamp: new Date().toISOString(), topic: "t", content: "needs a fresh index dir" });
+    await indexJournalEntry({
+      timestamp: new Date().toISOString(),
+      topic: "t",
+      content: "needs a fresh index dir",
+    });
     expect((await getMemoryIndexStats()).itemCount).toBe(1);
   }, 60000);
 });
 
 describe("indexJournalEntry", () => {
   test("adds a single entry incrementally and reuses the index singleton", async () => {
-    await indexJournalEntry({ timestamp: new Date().toISOString(), topic: "note", content: "incremental content here" });
+    await indexJournalEntry({
+      timestamp: new Date().toISOString(),
+      topic: "note",
+      content: "incremental content here",
+    });
     const stats = await getMemoryIndexStats();
     expect(stats.itemCount).toBe(1);
     // Second call reuses the cached memory index.
-    await indexJournalEntry({ timestamp: new Date(Date.now() + 1).toISOString(), topic: "note2", content: "another one" });
+    await indexJournalEntry({
+      timestamp: new Date(Date.now() + 1).toISOString(),
+      topic: "note2",
+      content: "another one",
+    });
     expect((await getMemoryIndexStats()).itemCount).toBe(2);
   }, 60000);
 });

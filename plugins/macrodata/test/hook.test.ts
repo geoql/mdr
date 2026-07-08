@@ -158,9 +158,7 @@ describe("hook script", () => {
       expect(output).toContain("Test update");
 
       // Pending file should be cleared
-      const remaining = existsSync(pendingFile)
-        ? readFileSync(pendingFile, "utf-8")
-        : "";
+      const remaining = existsSync(pendingFile) ? readFileSync(pendingFile, "utf-8") : "";
       expect(remaining).toBe("");
     });
   });

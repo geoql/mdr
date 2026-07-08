@@ -73,7 +73,11 @@ const pair = () =>
       timestamp: new Date().toISOString(),
       message: { role: "user", content: "a prompt that will fail to upsert" },
     },
-    { type: "assistant", uuid: "a1", message: { role: "assistant", content: [{ type: "text", text: "reply" }] } }
+    {
+      type: "assistant",
+      uuid: "a1",
+      message: { role: "assistant", content: [{ type: "text", text: "reply" }] },
+    },
   );
 
 beforeEach(() => {

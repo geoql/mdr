@@ -13,12 +13,12 @@ Guide new users through initial macrodata setup.
 - User explicitly asks to set up or reset their profile
 - State files are empty or missing
 
-
 ## Onboarding Flow
 
 ### Phase 1: User Info
 
 User info has been pre-detected and is available in the context above as "Detected User Info". This JSON contains:
+
 - `username`, `fullName`, `timezone`
 - `git.name`, `git.email`
 - `github.login`, `github.name`, `github.blog`, `github.bio`
@@ -29,6 +29,7 @@ Use this data throughout onboarding - no need to run detection scripts.
 ### Phase 2: Location
 
 Offer location options. Always include:
+
 - `~/Documents/macrodata` - easy to find
 - `~/.config/macrodata` - hidden, default
 
@@ -49,6 +50,7 @@ kill -HUP $(cat ~/.config/macrodata/.daemon.pid) 2>/dev/null || true
 ```
 
 Then create the directory structure:
+
 - `<root>/state/`
 - `<root>/journal/`
 - `<root>/entities/people/`
@@ -60,6 +62,7 @@ Then create the directory structure:
 Use the info from the detection script to pre-populate.
 
 **Ask the basics:**
+
 - What should I call you? (confirm or correct auto-detected name)
 - What's your GitHub username? (if not detected from gh cli)
 - Do you have a website or blog?
@@ -86,6 +89,7 @@ done | head -200
 ```
 
 Look for patterns:
+
 - Message length (short/direct vs detailed)
 - Tone (casual, formal, technical)
 - How they give feedback (direct corrections, suggestions, questions)
@@ -108,6 +112,7 @@ find ~/.local/share/opencode/storage/part -name "*.json" -mtime -7 -exec cat {} 
 ```
 
 **Working patterns:**
+
 - Ask about current focus areas (or confirm what you detected)
 - Any preferences for how the agent should work?
 
@@ -117,6 +122,7 @@ Write findings to `state/human.md`:
 # Human Profile
 
 ## Basics
+
 - **Name:** [name]
 - **GitHub:** [username]
 - **Website:** [url if provided]
@@ -124,17 +130,21 @@ Write findings to `state/human.md`:
 - **Timezone:** [detected]
 
 ## Communication Style
+
 - [observed patterns from analysis]
 - [stated preferences]
 
 ## Working Patterns
+
 - [current focus areas]
 - [preferences]
 
 ## Current Projects
+
 - [detected from recent sessions]
 
 ## Pending Items
+
 - [empty initially]
 ```
 
@@ -143,11 +153,13 @@ Write findings to `state/human.md`:
 Help define who the agent should be:
 
 **Name and persona:**
+
 - What should the agent be called?
 - What's its role? (assistant, partner, specialist)
 - Any personality traits?
 
 **Values and patterns:**
+
 - What behaviors should it prioritize?
 - How proactive should it be?
 
@@ -157,13 +169,16 @@ Write to `state/identity.md`:
 # [Agent Name] Identity
 
 ## Persona
+
 [Description of who the agent is, its role, personality]
 
 ## Values
+
 - [core value 1]
 - [core value 2]
 
 ## Patterns
+
 - [behavioral pattern 1]
 - [behavioral pattern 2]
 ```
@@ -181,9 +196,11 @@ Set up working context:
 # Today
 
 ## Now
+
 [Current context from conversation]
 
 ## Context
+
 [Background information]
 ```
 
@@ -191,9 +208,11 @@ Set up working context:
 # Workspace
 
 ## Active Projects
+
 - [project 1] - [brief description]
 
 ## Open Threads
+
 - [things in progress]
 ```
 
@@ -224,6 +243,7 @@ Merge with existing settings rather than overwriting. Read the file, add the new
 **First, check available integrations:**
 
 Look at the tools and plugins available in your current context. Note any that might be useful for scheduled tasks - for example:
+
 - Calendar integrations → could check meetings in morning prep
 - Email/messaging tools → could summarize communications
 - Task managers → could review todos
@@ -283,6 +303,7 @@ Dreamtime:
 If the user consents, analyze their OpenCode history for context:
 
 **Context to extract:**
+
 - Recent project directories they've been working in
 - Common file types and technologies
 - Recurring themes or topics
@@ -292,6 +313,7 @@ If the user consents, analyze their OpenCode history for context:
 **Agent:** Welcome to macrodata! Let's get you set up.
 
 First, where would you like me to store your memory files?
+
 1. `~/Documents/macrodata` (easy to find in Finder)
 2. `~/.config/macrodata` (hidden, default)
 

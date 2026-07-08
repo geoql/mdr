@@ -19,7 +19,7 @@ describe("index-conversations entry", () => {
     }));
     expect(code).toBe(0);
     expect(logSpy.mock.calls.map((c) => String(c[0])).join("")).toContain(
-      "Indexed conversations: 3 updated, 1 skipped, 42 total"
+      "Indexed conversations: 3 updated, 1 skipped, 42 total",
     );
     logSpy.mockRestore();
   });

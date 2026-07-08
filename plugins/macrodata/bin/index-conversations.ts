@@ -8,12 +8,12 @@
 import { updateConversationIndex } from "../src/conversations.js";
 
 export async function main(
-  update: typeof updateConversationIndex = updateConversationIndex
+  update: typeof updateConversationIndex = updateConversationIndex,
 ): Promise<number> {
   try {
     const result = await update();
     console.log(
-      `Indexed conversations: ${result.filesUpdated} updated, ${result.skipped} skipped, ${result.exchangeCount} total`
+      `Indexed conversations: ${result.filesUpdated} updated, ${result.skipped} skipped, ${result.exchangeCount} total`,
     );
     return 0;
   } catch (err) {

@@ -59,19 +59,31 @@ let db: DatabaseSync;
 beforeAll(() => {
   db = new DatabaseSync(dbPath);
   db.exec(`CREATE TABLE project (id TEXT PRIMARY KEY, worktree TEXT)`);
-  db.exec(`CREATE TABLE session (id TEXT PRIMARY KEY, project_id TEXT, parent_id TEXT, directory TEXT, time_created INTEGER)`);
-  db.exec(`CREATE TABLE message (id TEXT PRIMARY KEY, session_id TEXT, time_created INTEGER, data TEXT)`);
-  db.exec(`CREATE TABLE part (id TEXT PRIMARY KEY, message_id TEXT, session_id TEXT, time_created INTEGER, data TEXT)`);
+  db.exec(
+    `CREATE TABLE session (id TEXT PRIMARY KEY, project_id TEXT, parent_id TEXT, directory TEXT, time_created INTEGER)`,
+  );
+  db.exec(
+    `CREATE TABLE message (id TEXT PRIMARY KEY, session_id TEXT, time_created INTEGER, data TEXT)`,
+  );
+  db.exec(
+    `CREATE TABLE part (id TEXT PRIMARY KEY, message_id TEXT, session_id TEXT, time_created INTEGER, data TEXT)`,
+  );
   db.exec(`INSERT INTO project (id, worktree) VALUES ('p', '/tmp/w')`);
-  db.exec(`INSERT INTO session (id, project_id, parent_id, directory, time_created) VALUES ('s', 'p', NULL, '/tmp/w', 1000)`);
-  db.exec(`INSERT INTO message (id, session_id, time_created, data) VALUES ('u', 's', 1000, '{"role":"user"}')`);
-  db.exec(`INSERT INTO message (id, session_id, time_created, data) VALUES ('a', 's', 2000, '{"role":"assistant"}')`);
-  db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES ('up', 'u', 's', 1000, ?)`).run(
-    JSON.stringify({ type: "text", text: "a prompt that will fail upsert" })
+  db.exec(
+    `INSERT INTO session (id, project_id, parent_id, directory, time_created) VALUES ('s', 'p', NULL, '/tmp/w', 1000)`,
   );
-  db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES ('ap', 'a', 's', 2000, ?)`).run(
-    JSON.stringify({ type: "text", text: "reply" })
+  db.exec(
+    `INSERT INTO message (id, session_id, time_created, data) VALUES ('u', 's', 1000, '{"role":"user"}')`,
   );
+  db.exec(
+    `INSERT INTO message (id, session_id, time_created, data) VALUES ('a', 's', 2000, '{"role":"assistant"}')`,
+  );
+  db.prepare(
+    `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES ('up', 'u', 's', 1000, ?)`,
+  ).run(JSON.stringify({ type: "text", text: "a prompt that will fail upsert" }));
+  db.prepare(
+    `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES ('ap', 'a', 's', 2000, ?)`,
+  ).run(JSON.stringify({ type: "text", text: "reply" }));
 });
 
 afterAll(() => {
@@ -90,12 +102,12 @@ describe("index lifecycle branches", () => {
     const result = await oc.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(0);
     // Restore the parts for later tests.
-    db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES ('up', 'u', 's', 1000, ?)`).run(
-      JSON.stringify({ type: "text", text: "a prompt that will fail upsert" })
-    );
-    db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES ('ap', 'a', 's', 2000, ?)`).run(
-      JSON.stringify({ type: "text", text: "reply" })
-    );
+    db.prepare(
+      `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES ('up', 'u', 's', 1000, ?)`,
+    ).run(JSON.stringify({ type: "text", text: "a prompt that will fail upsert" }));
+    db.prepare(
+      `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES ('ap', 'a', 's', 2000, ?)`,
+    ).run(JSON.stringify({ type: "text", text: "reply" }));
     hoisted.upsertThrows = true;
   });
 
@@ -122,7 +134,9 @@ describe("upsert failure handling", () => {
 
   test("update cancels the update and rethrows on upsert failure", async () => {
     // An existing item with a timestamp drives the latest-ms narrowing branch.
-    hoisted.existingItems = [{ id: "oc-existing", metadata: { timestamp: new Date(500).toISOString() } }];
+    hoisted.existingItems = [
+      { id: "oc-existing", metadata: { timestamp: new Date(500).toISOString() } },
+    ];
     cancelUpdate.mockClear();
     await expect(oc.updateConversationIndex()).rejects.toThrow(/oc upsert exploded/);
     expect(cancelUpdate).toHaveBeenCalled();
@@ -131,7 +145,9 @@ describe("upsert failure handling", () => {
   test("update reports zero new when every exchange is already indexed", async () => {
     hoisted.upsertThrows = false;
     // Pre-seed the existing set with the id the query will produce.
-    hoisted.existingItems = [{ id: "oc-s-u", metadata: { timestamp: new Date(1000).toISOString() } }];
+    hoisted.existingItems = [
+      { id: "oc-s-u", metadata: { timestamp: new Date(1000).toISOString() } },
+    ];
     const result = await oc.updateConversationIndex();
     expect(result.newCount).toBe(0);
     hoisted.upsertThrows = true;
@@ -161,7 +177,13 @@ describe("upsert failure handling", () => {
   test("searchConversations defaults the weight for an invalid timestamp", async () => {
     hoisted.existingItems = [{ id: "x", metadata: {} }];
     hoisted.queryResults = [
-      { item: { id: "oc-x", metadata: { userPrompt: "p", timestamp: "not-a-date", projectPath: "/tmp/w" } }, score: 0.9 },
+      {
+        item: {
+          id: "oc-x",
+          metadata: { userPrompt: "p", timestamp: "not-a-date", projectPath: "/tmp/w" },
+        },
+        score: 0.9,
+      },
     ];
     const hits = await oc.searchConversations("anything", { limit: 5 });
     expect(hits[0].adjustedScore).toBeCloseTo(hits[0].score * 0.5, 5);

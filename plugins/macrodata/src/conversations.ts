@@ -1,9 +1,9 @@
 /**
  * Claude Conversation Log Parser and Indexer
- * 
+ *
  * Indexes conversation "exchanges" from Claude Code's log files for semantic search.
  * Each exchange = user prompt + assistant's first text response.
- * 
+ *
  * Features:
  * - Project-biased search (current project first, then global)
  * - Time-weighted scoring (recent > old)
@@ -156,10 +156,7 @@ function extractAssistantText(content: string | Array<{ type: string; text?: str
 function isToolResult(content: unknown): boolean {
   if (Array.isArray(content)) {
     // Array content with tool_result or tool_use_id = tool result, not user prompt
-    return content.some(item =>
-      item.type === "tool_result" ||
-      item.tool_use_id !== undefined
-    );
+    return content.some((item) => item.type === "tool_result" || item.tool_use_id !== undefined);
   }
   return false;
 }
@@ -174,19 +171,23 @@ function isNoiseContent(content: string): boolean {
   }
 
   // Skip local command outputs
-  if (content.includes("<local-command-stdout>") ||
-      content.includes("<local-command-caveat>") ||
-      content.includes("<command-name>")) {
+  if (
+    content.includes("<local-command-stdout>") ||
+    content.includes("<local-command-caveat>") ||
+    content.includes("<command-name>")
+  ) {
     return true;
   }
 
   // Skip hook-injected context (standalone, not part of agent context)
-  if (content.startsWith("<current_time>") ||
-      content.startsWith("<context_status>") ||
-      content.startsWith("<state_files>") ||
-      content.startsWith("<system-reminder>") ||
-      content.startsWith("## Current State Files") ||
-      content.startsWith("Base directory for this skill:")) {
+  if (
+    content.startsWith("<current_time>") ||
+    content.startsWith("<context_status>") ||
+    content.startsWith("<state_files>") ||
+    content.startsWith("<system-reminder>") ||
+    content.startsWith("## Current State Files") ||
+    content.startsWith("Base directory for this skill:")
+  ) {
     return true;
   }
 
@@ -309,7 +310,11 @@ function parseConversationFile(filePath: string, projectPath: string): Conversat
 /**
  * Scan all Claude project directories for conversation files
  */
-function* scanConversationFiles(): Generator<{ filePath: string; projectPath: string; mtime: number }> {
+function* scanConversationFiles(): Generator<{
+  filePath: string;
+  projectPath: string;
+  mtime: number;
+}> {
   if (!existsSync(PROJECTS_DIR)) {
     return;
   }
@@ -353,7 +358,7 @@ export async function rebuildConversationIndex(): Promise<{ exchangeCount: numbe
     allExchanges.push(...exchanges);
     newState.files[filePath] = {
       mtime,
-      exchangeIds: exchanges.map(e => e.id),
+      exchangeIds: exchanges.map((e) => e.id),
     };
   }
 
@@ -365,8 +370,8 @@ export async function rebuildConversationIndex(): Promise<{ exchangeCount: numbe
   }
 
   // Create embeddings for all exchanges
-  const texts = allExchanges.map(e =>
-    `${e.project}${e.branch ? ` (${e.branch})` : ""}: ${e.userPrompt}`
+  const texts = allExchanges.map(
+    (e) => `${e.project}${e.branch ? ` (${e.branch})` : ""}: ${e.userPrompt}`,
   );
 
   console.log(`[Conversations] Generating embeddings...`);
@@ -412,7 +417,11 @@ export async function rebuildConversationIndex(): Promise<{ exchangeCount: numbe
 /**
  * Incrementally update the conversation index (only changed files)
  */
-export async function updateConversationIndex(): Promise<{ exchangeCount: number; filesUpdated: number; skipped: number }> {
+export async function updateConversationIndex(): Promise<{
+  exchangeCount: number;
+  filesUpdated: number;
+  skipped: number;
+}> {
   console.log("[Conversations] Starting incremental update...");
   const startTime = Date.now();
 
@@ -448,8 +457,8 @@ export async function updateConversationIndex(): Promise<{ exchangeCount: number
     const exchanges = parseConversationFile(filePath, projectPath);
 
     if (exchanges.length > 0) {
-      const texts = exchanges.map(e =>
-        `${e.project}${e.branch ? ` (${e.branch})` : ""}: ${e.userPrompt}`
+      const texts = exchanges.map(
+        (e) => `${e.project}${e.branch ? ` (${e.branch})` : ""}: ${e.userPrompt}`,
       );
       const vectors = await embedBatch(texts);
 
@@ -482,7 +491,7 @@ export async function updateConversationIndex(): Promise<{ exchangeCount: number
 
     state.files[filePath] = {
       mtime,
-      exchangeIds: exchanges.map(e => e.id),
+      exchangeIds: exchanges.map((e) => e.id),
     };
     filesUpdated++;
     totalExchanges += exchanges.length;
@@ -499,7 +508,9 @@ export async function updateConversationIndex(): Promise<{ exchangeCount: number
   saveIndexState(state);
 
   const duration = Date.now() - startTime;
-  console.log(`[Conversations] Incremental update complete in ${duration}ms (${filesUpdated} files updated, ${skipped} skipped)`);
+  console.log(
+    `[Conversations] Incremental update complete in ${duration}ms (${filesUpdated} files updated, ${skipped} skipped)`,
+  );
 
   return { exchangeCount: totalExchanges, filesUpdated, skipped };
 }
@@ -511,12 +522,12 @@ export async function updateConversationIndex(): Promise<{ exchangeCount: number
 function getTimeWeight(timestamp: string): number {
   const age = Date.now() - new Date(timestamp).getTime();
   const dayMs = 24 * 60 * 60 * 1000;
-  
-  if (age < 7 * dayMs) return 1.0;      // Last week: full weight
-  if (age < 30 * dayMs) return 0.9;     // Last month: 90%
-  if (age < 90 * dayMs) return 0.7;     // Last 3 months: 70%
-  if (age < 365 * dayMs) return 0.5;    // Last year: 50%
-  return 0.3;                            // Older: 30%
+
+  if (age < 7 * dayMs) return 1.0; // Last week: full weight
+  if (age < 30 * dayMs) return 0.9; // Last month: 90%
+  if (age < 90 * dayMs) return 0.7; // Last 3 months: 70%
+  if (age < 365 * dayMs) return 0.5; // Last year: 50%
+  return 0.3; // Older: 30%
 }
 
 /**
@@ -525,30 +536,30 @@ function getTimeWeight(timestamp: string): number {
 export async function searchConversations(
   query: string,
   options: {
-    currentProject?: string;  // Path to current project for boosting
+    currentProject?: string; // Path to current project for boosting
     limit?: number;
-    projectOnly?: boolean;    // Only search current project
-  } = {}
+    projectOnly?: boolean; // Only search current project
+  } = {},
 ): Promise<ConversationSearchResult[]> {
   const { currentProject, limit = 5, projectOnly = false } = options;
-  
+
   const idx = await getConversationIndex();
   const stats = await idx.listItems();
-  
+
   if (stats.length === 0) {
     console.log("[Conversations] Index is empty");
     return [];
   }
-  
+
   const queryVector = await embedQuery(query);
-  
+
   // Get more results than needed for filtering/reranking
-  const results = await idx.queryItems(queryVector, limit * 3);
-  
+  const results = await idx.queryItems(queryVector, query, limit * 3);
+
   // Convert to search results with adjusted scoring
-  const searchResults: ConversationSearchResult[] = results.map(r => {
+  const searchResults: ConversationSearchResult[] = results.map((r) => {
     const meta = r.item.metadata as Record<string, string>;
-    
+
     const exchange: ConversationExchange = {
       id: r.item.id,
       userPrompt: meta.userPrompt,
@@ -561,35 +572,33 @@ export async function searchConversations(
       sessionPath: meta.sessionPath,
       messageUuid: meta.messageUuid,
     };
-    
+
     // Calculate adjusted score
     let adjustedScore = r.score;
-    
+
     // Time weighting
     adjustedScore *= getTimeWeight(exchange.timestamp);
-    
+
     // Project boost (1.5x for current project)
     if (currentProject && exchange.projectPath === currentProject) {
       adjustedScore *= 1.5;
     }
-    
+
     return {
       exchange,
       score: r.score,
       adjustedScore,
     };
   });
-  
+
   // Filter to current project if requested
   let filtered = searchResults;
   if (projectOnly && currentProject) {
-    filtered = searchResults.filter(r => r.exchange.projectPath === currentProject);
+    filtered = searchResults.filter((r) => r.exchange.projectPath === currentProject);
   }
-  
+
   // Sort by adjusted score and limit
-  return filtered
-    .sort((a, b) => b.adjustedScore - a.adjustedScore)
-    .slice(0, limit);
+  return filtered.sort((a, b) => b.adjustedScore - a.adjustedScore).slice(0, limit);
 }
 
 /**
@@ -598,7 +607,7 @@ export async function searchConversations(
 export async function expandConversation(
   sessionPath: string,
   messageUuid: string,
-  contextMessages: number = 10
+  contextMessages: number = 10,
 ): Promise<{
   messages: Array<{ role: string; content: string; timestamp?: string }>;
   project: string;
@@ -668,7 +677,7 @@ export async function expandConversation(
   }
 
   // Find the target message index
-  const targetIdx = messages.findIndex(m => m.uuid === messageUuid);
+  const targetIdx = messages.findIndex((m) => m.uuid === messageUuid);
 
   if (targetIdx === -1) {
     // Return last N messages if target not found

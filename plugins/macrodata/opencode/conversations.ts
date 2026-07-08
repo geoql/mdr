@@ -21,7 +21,8 @@ import { getStateRoot } from "./context.js";
 import { logger } from "./logger.js";
 
 const OPENCODE_DB_PATH =
-  process.env.MACRODATA_OPENCODE_DB_PATH || join(homedir(), ".local", "share", "opencode", "opencode.db");
+  process.env.MACRODATA_OPENCODE_DB_PATH ||
+  join(homedir(), ".local", "share", "opencode", "opencode.db");
 
 // Conversation index singleton
 let convIndex: LocalIndex | null = null;
@@ -81,7 +82,7 @@ function openDb(): DatabaseSync | null {
   try {
     return new DatabaseSync(OPENCODE_DB_PATH, { readOnly: true });
   } catch (err) {
-    logger.error(`Failed to open OpenCode database: ${err}`);
+    logger.error(`Failed to open OpenCode database: ${String(err)}`);
     return null;
   }
 }
@@ -177,7 +178,7 @@ export function queryExchanges(db: DatabaseSync, sinceMs?: number): ExchangeRow[
     // Propagate instead of returning [] so callers can't mistake a schema
     // mismatch for "no new exchanges" (a silent no-op that previously
     // disabled indexing for weeks, see #25).
-    logger.error(`Query failed: ${err}`);
+    logger.error(`Query failed: ${String(err)}`);
     throw err;
   }
 }
@@ -295,7 +296,7 @@ async function doRebuildConversationIndex(): Promise<{ exchangeCount: number }> 
     logger.log(`Conversation index rebuilt: ${exchanges.length} exchanges in ${duration}ms`);
     return { exchangeCount: exchanges.length };
   } catch (err) {
-    logger.error(`Conversation index rebuild failed: ${err}`);
+    logger.error(`Conversation index rebuild failed: ${String(err)}`);
     throw err;
   } finally {
     db.close();
@@ -328,7 +329,7 @@ export async function searchConversations(
     currentProject?: string;
     limit?: number;
     projectOnly?: boolean;
-  } = {}
+  } = {},
 ): Promise<ConversationSearchResult[]> {
   const { currentProject, limit = 5, projectOnly = false } = options;
 

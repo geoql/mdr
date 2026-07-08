@@ -100,7 +100,7 @@ A test agent for integration testing.
 
 - Be concise
 - Test thoroughly
-`
+`,
   );
 
   // Create today file
@@ -111,7 +111,7 @@ A test agent for integration testing.
 ## Now
 
 Running integration tests.
-`
+`,
   );
 
   // Create human file
@@ -120,7 +120,7 @@ Running integration tests.
     `# Human
 
 Test user for integration testing.
-`
+`,
   );
 
   // Create workspace file
@@ -131,19 +131,14 @@ Test user for integration testing.
 ## Active
 
 - Integration testing
-`
+`,
   );
 }
 
 /**
  * Create a test journal entry
  */
-export function addJournalEntry(
-  ctx: TestContext,
-  topic: string,
-  content: string,
-  date?: Date
-) {
+export function addJournalEntry(ctx: TestContext, topic: string, content: string, date?: Date) {
   const entryDate = date || new Date();
   const dateStr = entryDate.toISOString().split("T")[0];
   const journalPath = join(ctx.journalDir, `${dateStr}.jsonl`);
@@ -171,7 +166,7 @@ export function addEntityFile(
   ctx: TestContext,
   type: "people" | "projects",
   name: string,
-  content: string
+  content: string,
 ) {
   const filePath = join(ctx.entitiesDir, type, `${name}.md`);
   writeFileSync(filePath, content);
@@ -189,7 +184,7 @@ export function addReminder(
     description: string;
     payload: string;
     agent?: "claude" | "opencode";
-  }
+  },
 ) {
   const reminder = {
     id,
@@ -198,8 +193,5 @@ export function addReminder(
     createdAt: new Date().toISOString(),
   };
 
-  writeFileSync(
-    join(ctx.remindersDir, `${id}.json`),
-    JSON.stringify(reminder, null, 2)
-  );
+  writeFileSync(join(ctx.remindersDir, `${id}.json`), JSON.stringify(reminder, null, 2));
 }

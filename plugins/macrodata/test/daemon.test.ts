@@ -143,7 +143,7 @@ describe("logging helpers", () => {
     process.env.MACRODATA_ROOT = badRoot;
     writePendingContext("nope");
     expect(readFileSync(join(badRoot, ".daemon.log"), "utf-8")).toContain(
-      "Failed to write pending context"
+      "Failed to write pending context",
     );
     process.env.MACRODATA_ROOT = prev;
   });
@@ -334,7 +334,7 @@ describe("schedule file helpers", () => {
     process.env.MACRODATA_ROOT = badRoot;
     expect(loadAllSchedules()).toEqual([]);
     expect(readFileSync(join(badRoot, ".daemon.log"), "utf-8")).toContain(
-      "Failed to read reminders directory"
+      "Failed to read reminders directory",
     );
     process.env.MACRODATA_ROOT = prev;
   });
@@ -392,7 +392,9 @@ describe("schedule file helpers", () => {
       payload: "p",
       createdAt: new Date().toISOString(),
     });
-    expect(readFileSync(join(badRoot, ".daemon.log"), "utf-8")).toContain("Failed to save schedule");
+    expect(readFileSync(join(badRoot, ".daemon.log"), "utf-8")).toContain(
+      "Failed to save schedule",
+    );
     process.env.MACRODATA_ROOT = prev;
   });
 });
@@ -484,7 +486,7 @@ describe("MacrodataLocalDaemon", () => {
   let exitSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    exitSpy = vi.spyOn(process, "exit").mockImplementation(((): never => undefined as never));
+    exitSpy = vi.spyOn(process, "exit").mockImplementation((): never => undefined as never);
   });
 
   afterEach(() => {
@@ -665,7 +667,7 @@ describe("MacrodataLocalDaemon", () => {
         description: "d",
         payload: "p",
         createdAt: new Date().toISOString(),
-      })
+      }),
     );
     const d = new MacrodataLocalDaemon({ backgroundIndexing: noopIndexing });
     d.loadAndStartSchedules();
@@ -764,7 +766,12 @@ describe("MacrodataLocalDaemon", () => {
 
   test("reloadSchedules starts new jobs, drops expired, and stops removed", () => {
     const d = new MacrodataLocalDaemon({ backgroundIndexing: noopIndexing });
-    addReminder(ctx, "keep", { type: "cron", expression: "0 9 * * *", description: "d", payload: "p" });
+    addReminder(ctx, "keep", {
+      type: "cron",
+      expression: "0 9 * * *",
+      description: "d",
+      payload: "p",
+    });
     d.reloadSchedules();
     expect(d.jobCount).toBe(1);
 
@@ -991,7 +998,7 @@ describe("MacrodataLocalDaemon watchers", () => {
   };
 
   beforeEach(() => {
-    exitSpy = vi.spyOn(process, "exit").mockImplementation(((): never => undefined as never));
+    exitSpy = vi.spyOn(process, "exit").mockImplementation((): never => undefined as never);
     daemon = null;
   });
 
@@ -1038,7 +1045,7 @@ describe("MacrodataLocalDaemon watchers", () => {
         payload: "p",
         agent: "claude",
         createdAt: new Date().toISOString(),
-      })
+      }),
     );
     expect(await waitForLog("Reminder changed: runtime-edit.json")).toBe(true);
 
@@ -1102,7 +1109,7 @@ describe("MacrodataLocalDaemon watchers", () => {
 
 describe("runDaemon", () => {
   test("constructs and starts a daemon instance", async () => {
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(((): never => undefined as never));
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((): never => undefined as never);
     const d = runDaemon();
     await flush();
     expect(d).toBeInstanceOf(MacrodataLocalDaemon);
@@ -1113,7 +1120,7 @@ describe("runDaemon", () => {
   });
 
   test("logs a fatal error and exits when start rejects", async () => {
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(((): never => undefined as never));
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((): never => undefined as never);
     const startSpy = vi
       .spyOn(MacrodataLocalDaemon.prototype, "start")
       .mockRejectedValue(new Error("start blew up"));

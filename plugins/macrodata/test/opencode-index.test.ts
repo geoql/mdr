@@ -163,7 +163,7 @@ describe("system.transform hook", () => {
       },
     };
     await expect(
-      hooks["experimental.chat.system.transform"]({} as never, badOutput as never)
+      hooks["experimental.chat.system.transform"]({} as never, badOutput as never),
     ).resolves.toBeUndefined();
   });
 });
@@ -199,7 +199,7 @@ describe("session.compacting hook", () => {
       },
     };
     await expect(
-      hooks["experimental.session.compacting"]({} as never, badOutput as never)
+      hooks["experimental.session.compacting"]({} as never, badOutput as never),
     ).resolves.toBeUndefined();
   });
 });

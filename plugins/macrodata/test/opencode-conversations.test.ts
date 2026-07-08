@@ -39,38 +39,47 @@ function createOpenCodeDb(): DatabaseSync {
 
 function seedExchange(
   db: DatabaseSync,
-  opts: { sessionId: string; userMsgId: string; assistantMsgId: string; timeMs: number; userText: string }
+  opts: {
+    sessionId: string;
+    userMsgId: string;
+    assistantMsgId: string;
+    timeMs: number;
+    userText: string;
+  },
 ) {
   db.exec(`INSERT OR IGNORE INTO project (id, worktree) VALUES ('prj_1', '/tmp/proj')`);
-  db.prepare(`INSERT OR IGNORE INTO session (id, project_id, parent_id, directory, time_created) VALUES (?, 'prj_1', NULL, '/tmp/proj', ?)`).run(
-    opts.sessionId,
-    opts.timeMs
-  );
+  db.prepare(
+    `INSERT OR IGNORE INTO session (id, project_id, parent_id, directory, time_created) VALUES (?, 'prj_1', NULL, '/tmp/proj', ?)`,
+  ).run(opts.sessionId, opts.timeMs);
   db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`).run(
     opts.userMsgId,
     opts.sessionId,
     opts.timeMs,
-    JSON.stringify({ role: "user" })
+    JSON.stringify({ role: "user" }),
   );
   db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`).run(
     opts.assistantMsgId,
     opts.sessionId,
     opts.timeMs + 1000,
-    JSON.stringify({ role: "assistant" })
+    JSON.stringify({ role: "assistant" }),
   );
-  db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`).run(
+  db.prepare(
+    `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`,
+  ).run(
     `${opts.userMsgId}-p`,
     opts.userMsgId,
     opts.sessionId,
     opts.timeMs,
-    JSON.stringify({ type: "text", text: opts.userText })
+    JSON.stringify({ type: "text", text: opts.userText }),
   );
-  db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`).run(
+  db.prepare(
+    `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`,
+  ).run(
     `${opts.assistantMsgId}-p`,
     opts.assistantMsgId,
     opts.sessionId,
     opts.timeMs + 1000,
-    JSON.stringify({ type: "text", text: "assistant reply" })
+    JSON.stringify({ type: "text", text: "assistant reply" }),
   );
 }
 
@@ -86,8 +95,20 @@ describe("queryExchanges", () => {
   });
 
   test("returns all exchanges without a time filter", () => {
-    seedExchange(db, { sessionId: "ses_1", userMsgId: "msg_u1", assistantMsgId: "msg_a1", timeMs: 1000, userText: "hello" });
-    seedExchange(db, { sessionId: "ses_1", userMsgId: "msg_u2", assistantMsgId: "msg_a2", timeMs: 5000, userText: "world" });
+    seedExchange(db, {
+      sessionId: "ses_1",
+      userMsgId: "msg_u1",
+      assistantMsgId: "msg_a1",
+      timeMs: 1000,
+      userText: "hello",
+    });
+    seedExchange(db, {
+      sessionId: "ses_1",
+      userMsgId: "msg_u2",
+      assistantMsgId: "msg_a2",
+      timeMs: 5000,
+      userText: "world",
+    });
 
     const rows = queryExchanges(db);
 
@@ -97,8 +118,20 @@ describe("queryExchanges", () => {
   });
 
   test("incremental query with sinceMs does not throw and filters correctly (#25)", () => {
-    seedExchange(db, { sessionId: "ses_1", userMsgId: "msg_u1", assistantMsgId: "msg_a1", timeMs: 1000, userText: "old" });
-    seedExchange(db, { sessionId: "ses_1", userMsgId: "msg_u2", assistantMsgId: "msg_a2", timeMs: 5000, userText: "new" });
+    seedExchange(db, {
+      sessionId: "ses_1",
+      userMsgId: "msg_u1",
+      assistantMsgId: "msg_a1",
+      timeMs: 1000,
+      userText: "old",
+    });
+    seedExchange(db, {
+      sessionId: "ses_1",
+      userMsgId: "msg_u2",
+      assistantMsgId: "msg_a2",
+      timeMs: 5000,
+      userText: "new",
+    });
 
     const rows = queryExchanges(db, 2000);
 
@@ -117,11 +150,19 @@ describe("queryExchanges", () => {
   });
 
   test("excludes subtask sessions", () => {
-    seedExchange(db, { sessionId: "ses_parent", userMsgId: "msg_u1", assistantMsgId: "msg_a1", timeMs: 1000, userText: "parent" });
-    db.exec(`INSERT INTO session (id, project_id, parent_id, directory, time_created) VALUES ('ses_child', 'prj_1', 'ses_parent', '/tmp/proj', 2000)`);
-    db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES ('msg_cu', 'ses_child', 2000, ?)`).run(
-      JSON.stringify({ role: "user" })
+    seedExchange(db, {
+      sessionId: "ses_parent",
+      userMsgId: "msg_u1",
+      assistantMsgId: "msg_a1",
+      timeMs: 1000,
+      userText: "parent",
+    });
+    db.exec(
+      `INSERT INTO session (id, project_id, parent_id, directory, time_created) VALUES ('ses_child', 'prj_1', 'ses_parent', '/tmp/proj', 2000)`,
     );
+    db.prepare(
+      `INSERT INTO message (id, session_id, time_created, data) VALUES ('msg_cu', 'ses_child', 2000, ?)`,
+    ).run(JSON.stringify({ role: "user" }));
 
     const rows = queryExchanges(db);
 

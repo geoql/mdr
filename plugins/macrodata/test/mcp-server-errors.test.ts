@@ -30,7 +30,9 @@ vi.mock("../src/conversations.js", () => ({
   searchConversations: vi.fn().mockRejectedValue(new Error("conv search down")),
   expandConversation: vi.fn(),
   rebuildConversationIndex: vi.fn().mockResolvedValue({ exchangeCount: 0 }),
-  updateConversationIndex: vi.fn().mockResolvedValue({ filesUpdated: 0, skipped: 0, exchangeCount: 0 }),
+  updateConversationIndex: vi
+    .fn()
+    .mockResolvedValue({ filesUpdated: 0, skipped: 0, exchangeCount: 0 }),
   getConversationIndexStats: vi.fn().mockRejectedValue(new Error("conv stats down")),
 }));
 

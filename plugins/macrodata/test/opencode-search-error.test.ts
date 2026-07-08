@@ -50,7 +50,11 @@ beforeEach(() => {
   mkdirSync(join(root, ".index"), { recursive: true });
   writeFileSync(
     join(root, "journal", "2025-01-01.jsonl"),
-    JSON.stringify({ timestamp: "2025-01-01T00:00:00Z", topic: "t", content: "will fail to upsert" }) + "\n"
+    JSON.stringify({
+      timestamp: "2025-01-01T00:00:00Z",
+      topic: "t",
+      content: "will fail to upsert",
+    }) + "\n",
   );
   prevRoot = process.env.MACRODATA_ROOT;
   process.env.MACRODATA_ROOT = root;

@@ -2,13 +2,47 @@
   "name": "@geoql/mdr",
   "version": "0.3.0",
   "description": "Persistent layered memory for coding agents (OpenCode, Claude Code) — journal, entities, state files, semantic search, daemon, scheduled reminders. A hard fork of ascorbic/macrodata by Matt Kane.",
+  "keywords": [
+    "agent",
+    "autonomous",
+    "claude-code",
+    "journal",
+    "local",
+    "memory",
+    "opencode",
+    "plugin",
+    "semantic-search"
+  ],
+  "homepage": "https://mdr.geoql.in",
+  "bugs": {
+    "url": "https://github.com/geoql/mdr/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Vinayak Kulkarni",
+    "email": "inbox.vinayak@gmail.com",
+    "url": "https://vinayakkulkarni.dev"
+  },
+  "contributors": [
+    "Matt Kane (https://github.com/ascorbic) — original author of ascorbic/macrodata"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geoql/mdr.git",
+    "directory": "plugins/macrodata"
+  },
+  "files": [
+    "dist",
+    "src",
+    "opencode",
+    "bin",
+    "USAGE.md",
+    "LICENSE"
+  ],
   "type": "module",
   "main": "./dist/opencode/index.js",
   "publishConfig": {
     "access": "public"
-  },
-  "engines": {
-    "node": ">=24.11.0"
   },
   "scripts": {
     "build": "tsdown",
@@ -22,35 +56,6 @@
     "lint:fix": "oxlint --fix",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check ."
-  },
-  "keywords": [
-    "opencode",
-    "claude-code",
-    "plugin",
-    "memory",
-    "agent",
-    "autonomous",
-    "local",
-    "journal",
-    "semantic-search"
-  ],
-  "author": {
-    "name": "Vinayak Kulkarni",
-    "email": "inbox.vinayak@gmail.com",
-    "url": "https://vinayakkulkarni.dev"
-  },
-  "contributors": [
-    "Matt Kane (https://github.com/ascorbic) — original author of ascorbic/macrodata"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/geoql/mdr.git",
-    "directory": "plugins/macrodata"
-  },
-  "homepage": "https://mdr.geoql.in",
-  "bugs": {
-    "url": "https://github.com/geoql/mdr/issues"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -69,19 +74,14 @@
     "oxlint-tsgolint": "latest",
     "tsdown": "latest"
   },
+  "engines": {
+    "node": ">=24.11.0"
+  },
   "opencode": {
     "type": "plugin",
     "hooks": [
       "chat.message",
       "experimental.session.compacting"
     ]
-  },
-  "files": [
-    "dist",
-    "src",
-    "opencode",
-    "bin",
-    "USAGE.md",
-    "LICENSE"
-  ]
+  }
 }

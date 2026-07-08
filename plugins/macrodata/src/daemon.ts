@@ -27,7 +27,13 @@ import {
 import { join, basename } from "path";
 import { Cron } from "croner";
 import { spawn, execSync } from "child_process";
-import { getStateRoot, getEntitiesDir, getJournalDir, getIndexDir, getRemindersDir } from "./config.js";
+import {
+  getStateRoot,
+  getEntitiesDir,
+  getJournalDir,
+  getIndexDir,
+  getRemindersDir,
+} from "./config.js";
 
 // The indexing modules pull in @huggingface/transformers + vectra (multi-second
 // import). Load them lazily so the daemon writes its PID file and starts
@@ -130,7 +136,7 @@ export function writePendingContext(message: string) {
 export async function triggerAgent(
   agent: "opencode" | "claude" | undefined,
   message: string,
-  options: { model?: string; description?: string } = {}
+  options: { model?: string; description?: string } = {},
 ): Promise<boolean> {
   if (!agent) {
     log("No agent specified in schedule, skipping trigger");
@@ -252,7 +258,7 @@ export async function updateAllConversationIndexes(
   loaders: () => Promise<{
     updateClaudeCodeConversations: () => Promise<{ filesUpdated: number; exchangeCount: number }>;
     updateOpenCodeConversations: () => Promise<{ newCount: number; totalCount: number }>;
-  }> = loadConversationIndexers
+  }> = loadConversationIndexers,
 ) {
   const { updateClaudeCodeConversations, updateOpenCodeConversations } = await loaders();
 
@@ -260,7 +266,9 @@ export async function updateAllConversationIndexes(
   try {
     const claude = await updateClaudeCodeConversations();
     if (claude.filesUpdated > 0) {
-      log(`Claude Code conversations: +${claude.filesUpdated} files (${claude.exchangeCount} total)`);
+      log(
+        `Claude Code conversations: +${claude.filesUpdated} files (${claude.exchangeCount} total)`,
+      );
     }
   } catch (err) {
     logError(`Claude Code conversation index failed: ${String(err)}`);
@@ -332,10 +340,12 @@ export interface DaemonOptions {
   indexerLoader?: () => Promise<{ indexEntityFile: (path: string) => Promise<void> }>;
 }
 
-export async function defaultBackgroundIndexing(deps: {
-  loadIndexer?: () => Promise<{ preloadModel: () => Promise<void> }>;
-  updateAll?: typeof updateAllConversationIndexes;
-} = {}): Promise<void> {
+export async function defaultBackgroundIndexing(
+  deps: {
+    loadIndexer?: () => Promise<{ preloadModel: () => Promise<void> }>;
+    updateAll?: typeof updateAllConversationIndexes;
+  } = {},
+): Promise<void> {
   const load = deps.loadIndexer ?? loadIndexer;
   const updateAll = deps.updateAll ?? updateAllConversationIndexes;
   const indexer = await load();
@@ -441,7 +451,7 @@ export class MacrodataLocalDaemon {
       try {
         const schedule = JSON.parse(readFileSync(path, "utf-8")) as Schedule;
         writePendingContext(
-          `<macrodata-update type="schedule-added" id="${schedule.id}">${schedule.description}</macrodata-update>`
+          `<macrodata-update type="schedule-added" id="${schedule.id}">${schedule.description}</macrodata-update>`,
         );
       } catch {
         // Ignore unreadable/malformed reminder writes
@@ -459,7 +469,7 @@ export class MacrodataLocalDaemon {
       try {
         const schedule = JSON.parse(readFileSync(path, "utf-8")) as Schedule;
         writePendingContext(
-          `<macrodata-update type="schedule-updated" id="${schedule.id}">${schedule.description}</macrodata-update>`
+          `<macrodata-update type="schedule-updated" id="${schedule.id}">${schedule.description}</macrodata-update>`,
         );
       } catch {
         // Ignore unreadable/malformed reminder writes
@@ -634,7 +644,7 @@ export class MacrodataLocalDaemon {
           ? `${raw.slice(0, cap)}\n[…truncated: ${cap} of ${raw.length} chars. This file is over budget — compact it.]`
           : raw;
       writePendingContext(
-        `<macrodata-update type="state" file="${basename(path)}">\n${content}\n</macrodata-update>`
+        `<macrodata-update type="state" file="${basename(path)}">\n${content}\n</macrodata-update>`,
       );
     } catch {
       // Ignore unreadable state file

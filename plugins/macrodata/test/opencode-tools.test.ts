@@ -49,7 +49,11 @@ describe("journal tools", () => {
   test("log_journal validates and writes", async () => {
     expect((await json("macrodata_log_journal", { topic: "" })).success).toBe(false);
     expect((await json("macrodata_log_journal", { topic: "t", content: "" })).success).toBe(false);
-    const ok = await json("macrodata_log_journal", { topic: "t", content: "c", agentIntent: "why" });
+    const ok = await json("macrodata_log_journal", {
+      topic: "t",
+      content: "c",
+      agentIntent: "why",
+    });
     expect(ok.success).toBe(true);
     expect(ok.message).toContain("Logged to journal: t");
   }, 60000);
@@ -91,14 +95,21 @@ describe("search tools", () => {
     await run("macrodata_log_journal", { topic: "cook", content: "carbonara with fresh eggs" });
     resetMemoryIndexForTests();
     await run("macrodata_rebuild_memory_index");
-    const hit = await json("macrodata_search_memory", { query: "italian pasta", type: "journal", limit: 3 });
+    const hit = await json("macrodata_search_memory", {
+      query: "italian pasta",
+      type: "journal",
+      limit: 3,
+    });
     expect(hit.count).toBeGreaterThan(0);
     expect(hit.results[0].content).toContain("carbonara");
   }, 90000);
 
   test("search_conversations validates and reports no matches on an empty index", async () => {
     expect((await json("macrodata_search_conversations", {})).success).toBe(false);
-    const empty = await json("macrodata_search_conversations", { query: "anything", projectOnly: true });
+    const empty = await json("macrodata_search_conversations", {
+      query: "anything",
+      projectOnly: true,
+    });
     expect(empty.results).toEqual([]);
   }, 60000);
 
@@ -187,7 +198,12 @@ describe("reminder tools", () => {
 
   test("remove_reminder validates, removes an existing one, and reports a missing one", async () => {
     expect((await json("macrodata_remove_reminder", {})).success).toBe(false);
-    await run("macrodata_schedule_reminder", { id: "rm", cronExpression: "0 9 * * *", description: "d", payload: "p" });
+    await run("macrodata_schedule_reminder", {
+      id: "rm",
+      cronExpression: "0 9 * * *",
+      description: "d",
+      payload: "p",
+    });
     const removed = await json("macrodata_remove_reminder", { id: "rm" });
     expect(removed.success).toBe(true);
     const missing = await json("macrodata_remove_reminder", { id: "nope" });
@@ -196,7 +212,12 @@ describe("reminder tools", () => {
   });
 
   test("list_reminders returns saved schedules and skips malformed files", async () => {
-    await run("macrodata_schedule_reminder", { id: "a", cronExpression: "0 9 * * *", description: "d", payload: "p" });
+    await run("macrodata_schedule_reminder", {
+      id: "a",
+      cronExpression: "0 9 * * *",
+      description: "d",
+      payload: "p",
+    });
     writeFileSync(join(root, "reminders", "bad.json"), "{ not json");
     const out = await json("macrodata_list_reminders");
     expect(out.reminders.map((s: { id: string }) => s.id)).toContain("a");

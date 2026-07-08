@@ -221,9 +221,7 @@ describe("remote embedding requests", () => {
   test("restores response order using the index field", async () => {
     respondWith = (input) =>
       Response.json({
-        data: input
-          .map((_, index) => ({ index, embedding: [index + 1, 0, 0] }))
-          .reverse(),
+        data: input.map((_, index) => ({ index, embedding: [index + 1, 0, 0] })).reverse(),
       });
 
     const vectors = await embedBatch(["first", "second"]);
@@ -315,7 +313,7 @@ describe("remote embedding requests", () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     await expect(preloadModel()).resolves.toBeUndefined();
     expect(logSpy.mock.calls.map((c) => String(c[0])).join("")).toContain(
-      "Remote embedding provider configured"
+      "Remote embedding provider configured",
     );
     logSpy.mockRestore();
   });

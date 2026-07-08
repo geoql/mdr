@@ -58,7 +58,7 @@ describe("rebuild_memory_index background callbacks", () => {
     await rebuild();
     await new Promise((r) => setTimeout(r, 20));
     expect(loggerLog.mock.calls.map((c) => String(c[0])).join("\n")).toContain(
-      "Conversation index rebuilt: 7 exchanges"
+      "Conversation index rebuilt: 7 exchanges",
     );
   });
 
@@ -67,7 +67,7 @@ describe("rebuild_memory_index background callbacks", () => {
     await rebuild();
     await new Promise((r) => setTimeout(r, 20));
     expect(loggerError.mock.calls.map((c) => String(c[0])).join("\n")).toContain(
-      "Conversation index rebuild failed"
+      "Conversation index rebuild failed",
     );
   });
 });

@@ -46,22 +46,18 @@ describe.skipIf(!embeddingsAvailable)("indexer", () => {
   });
 
   describe("indexJournalEntry", () => {
-    test(
-      "indexes a single journal entry",
-      { timeout: 30000 },
-      async () => {
-        const entry = {
-          timestamp: new Date().toISOString(),
-          topic: "test-topic",
-          content: "This is a test journal entry about integration testing",
-        };
+    test("indexes a single journal entry", { timeout: 30000 }, async () => {
+      const entry = {
+        timestamp: new Date().toISOString(),
+        topic: "test-topic",
+        content: "This is a test journal entry about integration testing",
+      };
 
-        await indexer!.indexJournalEntry(entry);
+      await indexer!.indexJournalEntry(entry);
 
-        const stats = await indexer!.getIndexStats();
-        expect(stats.itemCount).toBe(1);
-      }
-    );
+      const stats = await indexer!.getIndexStats();
+      expect(stats.itemCount).toBe(1);
+    });
 
     test("indexed entries are searchable", async () => {
       const entry = {
@@ -105,7 +101,7 @@ Software engineer at Acme Corp.
 ## Notes
 
 Works on frontend development.
-`
+`,
       );
 
       addEntityFile(
@@ -121,7 +117,7 @@ A widget for managing widgets.
 ## Status
 
 In progress.
-`
+`,
       );
 
       const result = await indexer!.rebuildIndex();
@@ -143,7 +139,7 @@ Backend developer specializing in Rust and Go.
 ## Notes
 
 Loves systems programming and performance optimization.
-`
+`,
       );
 
       await indexer!.rebuildIndex();
@@ -226,7 +222,7 @@ DevOps engineer.
 ## Skills
 
 Kubernetes, Docker, CI/CD pipelines.
-`
+`,
       );
 
       await indexer!.indexEntityFile(filePath);
@@ -294,14 +290,23 @@ Kubernetes, Docker, CI/CD pipelines.
   describe("rebuildIndex parsing edge cases", () => {
     test("skips malformed journal lines and still indexes valid ones", async () => {
       const file = join(ctx.journalDir, "2025-01-01.jsonl");
-      const valid = JSON.stringify({ timestamp: "2025-01-01T00:00:00Z", topic: "ok", content: "valid entry" });
+      const valid = JSON.stringify({
+        timestamp: "2025-01-01T00:00:00Z",
+        topic: "ok",
+        content: "valid entry",
+      });
       writeFileSync(file, `${valid}\n{ not json\n\n`);
       const result = await indexer!.rebuildIndex();
       expect(result.itemCount).toBe(1);
     });
 
     test("indexes a preamble before the first heading", async () => {
-      addEntityFile(ctx, "people", "pre", "Intro paragraph before any heading.\n\n## Later\n\nmore");
+      addEntityFile(
+        ctx,
+        "people",
+        "pre",
+        "Intro paragraph before any heading.\n\n## Later\n\nmore",
+      );
       const result = await indexer!.rebuildIndex();
       expect(result.itemCount).toBeGreaterThanOrEqual(2);
       const results = await indexer!.searchMemory("intro paragraph", { limit: 5 });
@@ -375,7 +380,7 @@ Kubernetes, Docker, CI/CD pipelines.
       mkdirSync(join(b.root, "journal"), { recursive: true });
       writeFileSync(
         join(b.root, "journal", "2025-02-02.jsonl"),
-        JSON.stringify({ timestamp: "2025-02-02T00:00:00Z", topic: "t", content: "first" }) + "\n"
+        JSON.stringify({ timestamp: "2025-02-02T00:00:00Z", topic: "t", content: "first" }) + "\n",
       );
       await indexer!.rebuildIndex();
 
@@ -395,7 +400,7 @@ Kubernetes, Docker, CI/CD pipelines.
       mkdirSync(join(b.root, "entities", "people"), { recursive: true });
       writeFileSync(
         join(b.root, "entities", "people", "head.md"),
-        "## Empty\n\n## Filled\n\nreal words here"
+        "## Empty\n\n## Filled\n\nreal words here",
       );
       const result = await indexer!.rebuildIndex();
       expect(result.itemCount).toBe(1);

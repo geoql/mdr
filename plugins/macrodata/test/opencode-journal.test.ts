@@ -78,11 +78,11 @@ describe("getRecentJournal", () => {
       [
         JSON.stringify({ timestamp: "2025-01-01T01:00:00Z", topic: "a", content: "one" }),
         JSON.stringify({ timestamp: "2025-01-01T02:00:00Z", topic: "b", content: "two" }),
-      ].join("\n") + "\n"
+      ].join("\n") + "\n",
     );
     writeFileSync(
       join(root, "journal", "2025-01-02.jsonl"),
-      JSON.stringify({ timestamp: "2025-01-02T01:00:00Z", topic: "a", content: "three" }) + "\n"
+      JSON.stringify({ timestamp: "2025-01-02T01:00:00Z", topic: "a", content: "three" }) + "\n",
     );
 
     const all = getRecentJournal(10);
@@ -99,7 +99,11 @@ describe("getRecentJournal", () => {
       const day = String(d).padStart(2, "0");
       writeFileSync(
         join(root, "journal", `2025-01-${day}.jsonl`),
-        JSON.stringify({ timestamp: `2025-01-${day}T00:00:00Z`, topic: "t", content: `entry ${d}` }) + "\n{ bad\n"
+        JSON.stringify({
+          timestamp: `2025-01-${day}T00:00:00Z`,
+          topic: "t",
+          content: `entry ${d}`,
+        }) + "\n{ bad\n",
       );
     }
     const result = getRecentJournal(2);

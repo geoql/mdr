@@ -13,9 +13,13 @@ import { join } from "path";
 import { homedir } from "os";
 import { spawn } from "child_process";
 import { memoryTools } from "./tools.js";
-import { formatContextForPrompt, consumePendingContext, initializeStateRoot, getStateRoot } from "./context.js";
+import {
+  formatContextForPrompt,
+  consumePendingContext,
+  initializeStateRoot,
+  getStateRoot,
+} from "./context.js";
 import { logger } from "./logger.js";
-
 
 /**
  * Check if a process with given PID is running
@@ -83,11 +87,11 @@ function ensureDaemonRunning(): void {
   try {
     // Ensure config dir exists for PID file
     mkdirSync(configDir, { recursive: true });
-    
+
     const logFile = join(getStateRoot(), ".daemon.log");
     const out = openSync(logFile, "a");
     const err = openSync(logFile, "a");
-    
+
     const child = spawn(process.execPath, [daemonScript], {
       detached: true,
       stdio: ["ignore", out, err],
@@ -133,13 +137,13 @@ function installSkills(): void {
 
   // Copy each skill directory
   const skills = readdirSync(pluginSkillsDir, { withFileTypes: true })
-    .filter(d => d.isDirectory())
-    .map(d => d.name);
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name);
 
   for (const skill of skills) {
     const src = join(pluginSkillsDir, skill);
     const dest = join(globalSkillsDir, skill);
-    
+
     // Always update skills (overwrite existing)
     try {
       cpSync(src, dest, { recursive: true });

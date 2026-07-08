@@ -82,8 +82,8 @@ describe("rebuildConversationIndex", () => {
       "session-1.jsonl",
       jsonl(
         userMsg("how do I deploy a cloudflare worker", { gitBranch: "main" }),
-        assistantMsg("run wrangler deploy from the project root")
-      )
+        assistantMsg("run wrangler deploy from the project root"),
+      ),
     );
     const result = await conversations.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(1);
@@ -100,18 +100,25 @@ describe("rebuildConversationIndex", () => {
     // A plain file where a project dir is expected (skipped: not a directory).
     writeFileSync(join(projectsDir, "loose-file"), "x");
     // agent- file is skipped; the real session file has a mix of skippable msgs.
-    writeProjectFile("-proj", "agent-thing.jsonl", jsonl(userMsg("ignored"), assistantMsg("ignored")));
+    writeProjectFile(
+      "-proj",
+      "agent-thing.jsonl",
+      jsonl(userMsg("ignored"), assistantMsg("ignored")),
+    );
     writeProjectFile(
       "-proj",
       "main.jsonl",
       jsonl(
-        { type: "user", message: { role: "user", content: [{ type: "tool_result", content: "r" }] } },
+        {
+          type: "user",
+          message: { role: "user", content: [{ type: "tool_result", content: "r" }] },
+        },
         userMsg("This session is being continued from a previous conversation about stuff"),
         userMsg("   "),
         userMsg("<system-reminder>hook noise</system-reminder>"),
         userMsg("a genuine question about rust ownership", { uuid: "real", gitBranch: "" }),
-        assistantMsg("rust ownership means each value has a single owner")
-      )
+        assistantMsg("rust ownership means each value has a single owner"),
+      ),
     );
     const result = await conversations.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(1);
@@ -123,7 +130,7 @@ describe("rebuildConversationIndex", () => {
       "-proj",
       "mixed.jsonl",
       "{ not json\n" +
-        jsonl(userMsg("valid prompt about testing"), assistantMsg("here is a testing answer"))
+        jsonl(userMsg("valid prompt about testing"), assistantMsg("here is a testing answer")),
     );
     const result = await conversations.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(1);
@@ -147,8 +154,8 @@ describe("rebuildConversationIndex", () => {
       "agentctx.jsonl",
       jsonl(
         userMsg("# Agent Context\nsome preamble\nUser message: what is vectra"),
-        assistantMsg("vectra is a local vector index")
-      )
+        assistantMsg("vectra is a local vector index"),
+      ),
     );
     const result = await conversations.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(1);
@@ -162,8 +169,8 @@ describe("rebuildConversationIndex", () => {
       "emptyctx.jsonl",
       jsonl(
         userMsg("# Agent Context\nonly preamble, no user line"),
-        assistantMsg("this pair is dropped")
-      )
+        assistantMsg("this pair is dropped"),
+      ),
     );
     const result = await conversations.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(0);
@@ -172,14 +179,22 @@ describe("rebuildConversationIndex", () => {
 
 describe("updateConversationIndex", () => {
   test("indexes new files on a first incremental run", async () => {
-    writeProjectFile("-proj", "s.jsonl", jsonl(userMsg("first prompt here"), assistantMsg("first answer")));
+    writeProjectFile(
+      "-proj",
+      "s.jsonl",
+      jsonl(userMsg("first prompt here"), assistantMsg("first answer")),
+    );
     const result = await conversations.updateConversationIndex();
     expect(result.exchangeCount).toBe(1);
     expect(result.filesUpdated).toBe(1);
   }, 60000);
 
   test("skips unchanged files and indexes new/changed ones", async () => {
-    const p1 = writeProjectFile("-proj", "a.jsonl", jsonl(userMsg("prompt a about caching"), assistantMsg("answer a")));
+    const p1 = writeProjectFile(
+      "-proj",
+      "a.jsonl",
+      jsonl(userMsg("prompt a about caching"), assistantMsg("answer a")),
+    );
     await conversations.rebuildConversationIndex();
 
     // Keep a.jsonl unchanged; add b.jsonl.
@@ -188,14 +203,22 @@ describe("updateConversationIndex", () => {
     // Re-point state mtime by rebuilding state via a fresh update first.
     await conversations.updateConversationIndex();
 
-    writeProjectFile("-proj", "b.jsonl", jsonl(userMsg("prompt b about queues"), assistantMsg("answer b")));
+    writeProjectFile(
+      "-proj",
+      "b.jsonl",
+      jsonl(userMsg("prompt b about queues"), assistantMsg("answer b")),
+    );
     const result = await conversations.updateConversationIndex();
     expect(result.filesUpdated).toBeGreaterThanOrEqual(1);
     expect(result.skipped).toBeGreaterThanOrEqual(1);
   }, 90000);
 
   test("forgets files that disappeared since the last state", async () => {
-    const p = writeProjectFile("-proj", "gone.jsonl", jsonl(userMsg("prompt to vanish"), assistantMsg("ok")));
+    const p = writeProjectFile(
+      "-proj",
+      "gone.jsonl",
+      jsonl(userMsg("prompt to vanish"), assistantMsg("ok")),
+    );
     await conversations.rebuildConversationIndex();
     await conversations.updateConversationIndex();
 
@@ -211,7 +234,10 @@ describe("updateConversationIndex", () => {
     writeProjectFile(
       "-proj",
       "branched.jsonl",
-      jsonl(userMsg("branch prompt about caching", { gitBranch: "feature/cache" }), assistantMsg("cache ok"))
+      jsonl(
+        userMsg("branch prompt about caching", { gitBranch: "feature/cache" }),
+        assistantMsg("cache ok"),
+      ),
     );
     const result = await conversations.updateConversationIndex();
     expect(result.filesUpdated).toBeGreaterThanOrEqual(1);
@@ -237,12 +263,18 @@ describe("searchConversations", () => {
     writeProjectFile(
       "-Users-x-alpha",
       "a.jsonl",
-      jsonl(userMsg("alpha prompt about tiles", { cwd: "/Users/x/alpha" }), assistantMsg("alpha tiles answer"))
+      jsonl(
+        userMsg("alpha prompt about tiles", { cwd: "/Users/x/alpha" }),
+        assistantMsg("alpha tiles answer"),
+      ),
     );
     writeProjectFile(
       "-Users-x-beta",
       "b.jsonl",
-      jsonl(userMsg("beta prompt about tiles", { cwd: "/Users/x/beta" }), assistantMsg("beta tiles answer"))
+      jsonl(
+        userMsg("beta prompt about tiles", { cwd: "/Users/x/beta" }),
+        assistantMsg("beta tiles answer"),
+      ),
     );
     await conversations.rebuildConversationIndex();
 
@@ -265,7 +297,10 @@ describe("searchConversations", () => {
     writeProjectFile(
       "-proj",
       "old.jsonl",
-      jsonl(userMsg("ancient prompt about databases", { timestamp: old }), assistantMsg("db answer"))
+      jsonl(
+        userMsg("ancient prompt about databases", { timestamp: old }),
+        assistantMsg("db answer"),
+      ),
     );
     await conversations.rebuildConversationIndex();
     const hits = await conversations.searchConversations("databases", { limit: 5 });
@@ -277,7 +312,7 @@ describe("searchConversations", () => {
 describe("expandConversation", () => {
   test("throws when the session file is missing", async () => {
     await expect(conversations.expandConversation("/no/such.jsonl", "u")).rejects.toThrow(
-      /Session file not found/
+      /Session file not found/,
     );
   });
 
@@ -292,9 +327,12 @@ describe("expandConversation", () => {
           assistantMsg("first reply"),
           userMsg("second turn target", { uuid: "target", cwd: "/Users/x/widget" }),
           assistantMsg("second reply"),
-          { type: "user", message: { role: "user", content: [{ type: "tool_result", content: "r" }] } },
-          userMsg("<system-reminder>noise</system-reminder>")
-        )
+          {
+            type: "user",
+            message: { role: "user", content: [{ type: "tool_result", content: "r" }] },
+          },
+          userMsg("<system-reminder>noise</system-reminder>"),
+        ),
     );
     const result = await conversations.expandConversation(p, "target", 4);
     expect(result.project).toBe("widget");
@@ -311,15 +349,19 @@ describe("expandConversation", () => {
       jsonl(
         userMsg("a real question", { uuid: "q1", cwd: "/Users/x/proj" }),
         // Assistant whose only block is non-text → extractAssistantText returns "".
-        { type: "assistant", uuid: "empty", message: { role: "assistant", content: [{ type: "thinking", thinking: "x" }] } },
+        {
+          type: "assistant",
+          uuid: "empty",
+          message: { role: "assistant", content: [{ type: "thinking", thinking: "x" }] },
+        },
         // User with an array that has no text block → extractUserText returns "".
         {
           type: "user",
           uuid: "q2",
           message: { role: "user", content: [{ type: "image", source: "data" }] },
         },
-        assistantMsg("a valid reply")
-      )
+        assistantMsg("a valid reply"),
+      ),
     );
     const result = await conversations.expandConversation(p, "q1", 10);
     // The empty-text assistant is not pushed; the array-only user is dropped.
@@ -331,14 +373,11 @@ describe("expandConversation", () => {
     const p = writeProjectFile(
       "-proj",
       "onlyempty.jsonl",
-      jsonl(
-        userMsg("the only real user turn", { uuid: "only", cwd: "/Users/x/proj" }),
-        {
-          type: "assistant",
-          uuid: "e",
-          message: { role: "assistant", content: [{ type: "thinking", thinking: "no text here" }] },
-        }
-      )
+      jsonl(userMsg("the only real user turn", { uuid: "only", cwd: "/Users/x/proj" }), {
+        type: "assistant",
+        uuid: "e",
+        message: { role: "assistant", content: [{ type: "thinking", thinking: "no text here" }] },
+      }),
     );
     const result = await conversations.expandConversation(p, "only", 10);
     expect(result.messages.filter((m) => m.role === "assistant")).toHaveLength(0);
@@ -351,8 +390,8 @@ describe("expandConversation", () => {
       jsonl(
         { type: "file-history-snapshot", uuid: "snap" },
         userMsg("real turn after a snapshot", { uuid: "rt", cwd: "/Users/x/proj" }),
-        assistantMsg("a reply")
-      )
+        assistantMsg("a reply"),
+      ),
     );
     const result = await conversations.expandConversation(p, "rt", 10);
     expect(result.messages.some((m) => m.content === "real turn after a snapshot")).toBe(true);
@@ -362,10 +401,7 @@ describe("expandConversation", () => {
     const p = writeProjectFile(
       "-proj",
       "notfound.jsonl",
-      jsonl(
-        userMsg("only turn", { uuid: "x1", cwd: "/Users/x/solo" }),
-        assistantMsg("only reply")
-      )
+      jsonl(userMsg("only turn", { uuid: "x1", cwd: "/Users/x/solo" }), assistantMsg("only reply")),
     );
     const result = await conversations.expandConversation(p, "does-not-exist", 10);
     expect(result.project).toBe("solo");
@@ -383,8 +419,8 @@ describe("parser branch coverage", () => {
       "strings.jsonl",
       jsonl(
         { type: "user", message: { role: "user", content: "prompt without ids or timestamp" } },
-        { type: "assistant", message: { role: "assistant", content: "a plain string reply" } }
-      )
+        { type: "assistant", message: { role: "assistant", content: "a plain string reply" } },
+      ),
     );
     const result = await conversations.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(1);
@@ -397,10 +433,10 @@ describe("parser branch coverage", () => {
     writeProjectFile(
       "-proj",
       "notext.jsonl",
-      jsonl(
-        userMsg("prompt with a thinking-only reply"),
-        { type: "assistant", message: { role: "assistant", content: [{ type: "thinking", thinking: "hmm" }] } }
-      )
+      jsonl(userMsg("prompt with a thinking-only reply"), {
+        type: "assistant",
+        message: { role: "assistant", content: [{ type: "thinking", thinking: "hmm" }] },
+      }),
     );
     const result = await conversations.rebuildConversationIndex();
     // No assistant text still forms a pair (assistantSummary is empty) but the
@@ -420,10 +456,13 @@ describe("parser branch coverage", () => {
           sessionId: "s",
           cwd: "/Users/x/proj",
           timestamp: new Date().toISOString(),
-          message: { role: "user", content: [{ type: "text", text: "real array prompt about lasers" }] },
+          message: {
+            role: "user",
+            content: [{ type: "text", text: "real array prompt about lasers" }],
+          },
         },
-        assistantMsg("lasers are focused light")
-      )
+        assistantMsg("lasers are focused light"),
+      ),
     );
     const result = await conversations.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(1);
@@ -437,8 +476,8 @@ describe("parser branch coverage", () => {
         userMsg("<local-command-stdout>output</local-command-stdout>"),
         assistantMsg("reply a"),
         userMsg("<command-name>foo</command-name>"),
-        assistantMsg("reply b")
-      )
+        assistantMsg("reply b"),
+      ),
     );
     const result = await conversations.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(0);
@@ -450,23 +489,34 @@ describe("time weight bands", () => {
     ["14d", 14, "recent-month"],
     ["60d", 60, "recent-quarter"],
     ["180d", 180, "recent-year"],
-  ])("applies a reduced weight at %s old", async (_label, days) => {
-    const ts = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-    writeProjectFile(
-      "-proj",
-      `age.jsonl`,
-      jsonl(userMsg("aged prompt about networking", { timestamp: ts }), assistantMsg("net answer"))
-    );
-    await conversations.rebuildConversationIndex();
-    const hits = await conversations.searchConversations("networking", { limit: 5 });
-    expect(hits[0].adjustedScore).toBeLessThan(hits[0].score);
-  }, 60000);
+  ])(
+    "applies a reduced weight at %s old",
+    async (_label, days) => {
+      const ts = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+      writeProjectFile(
+        "-proj",
+        `age.jsonl`,
+        jsonl(
+          userMsg("aged prompt about networking", { timestamp: ts }),
+          assistantMsg("net answer"),
+        ),
+      );
+      await conversations.rebuildConversationIndex();
+      const hits = await conversations.searchConversations("networking", { limit: 5 });
+      expect(hits[0].adjustedScore).toBeLessThan(hits[0].score);
+    },
+    60000,
+  );
 });
 
 describe("directory creation + update no-exchange branch", () => {
   test("creates the index directory when it is absent", async () => {
     rmSync(join(stateRoot, ".index"), { recursive: true, force: true });
-    writeProjectFile("-proj", "s.jsonl", jsonl(userMsg("prompt needing a fresh index dir"), assistantMsg("ok")));
+    writeProjectFile(
+      "-proj",
+      "s.jsonl",
+      jsonl(userMsg("prompt needing a fresh index dir"), assistantMsg("ok")),
+    );
     const result = await conversations.rebuildConversationIndex();
     expect(result.exchangeCount).toBe(1);
   }, 60000);
@@ -479,7 +529,11 @@ describe("directory creation + update no-exchange branch", () => {
   });
 
   test("a changed file that yields no exchanges updates state without indexing", async () => {
-    const p = writeProjectFile("-proj", "c.jsonl", jsonl(userMsg("original prompt"), assistantMsg("ok")));
+    const p = writeProjectFile(
+      "-proj",
+      "c.jsonl",
+      jsonl(userMsg("original prompt"), assistantMsg("ok")),
+    );
     await conversations.rebuildConversationIndex();
     await conversations.updateConversationIndex();
     // Rewrite the file with only noise so the changed file has zero exchanges.
@@ -512,14 +566,22 @@ describe("index reuse", () => {
 
 describe("index state + stats", () => {
   test("getConversationIndexStats reflects indexed exchanges", async () => {
-    writeProjectFile("-proj", "s.jsonl", jsonl(userMsg("stats prompt"), assistantMsg("stats answer")));
+    writeProjectFile(
+      "-proj",
+      "s.jsonl",
+      jsonl(userMsg("stats prompt"), assistantMsg("stats answer")),
+    );
     await conversations.rebuildConversationIndex();
     const stats = await conversations.getConversationIndexStats();
     expect(stats.exchangeCount).toBe(1);
   }, 60000);
 
   test("recovers from a corrupted index-state file", async () => {
-    writeProjectFile("-proj", "s.jsonl", jsonl(userMsg("prompt after corruption"), assistantMsg("ok")));
+    writeProjectFile(
+      "-proj",
+      "s.jsonl",
+      jsonl(userMsg("prompt after corruption"), assistantMsg("ok")),
+    );
     await conversations.rebuildConversationIndex();
     // Corrupt the state AFTER the rebuild wrote it, so update's load hits the catch.
     writeFileSync(join(stateRoot, ".index", "conversations-state.json"), "{ corrupt");

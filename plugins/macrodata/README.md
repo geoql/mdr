@@ -100,11 +100,11 @@ config.json          # optional (remote embedding provider, etc.)
 
 ### Environment variables
 
-| Variable                     | Purpose                                                                                                |
+| Variable                     | Purpose                                                                                               |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `MACRODATA_ROOT`             | Override the memory root directory (default `~/.config/macrodata`).                                    |
-| `MACRODATA_CONFIG_PATH`      | Override the path to `config.json` (default `~/.config/macrodata/config.json`).                        |
-| `MACRODATA_CHILD_TIMEOUT_MS` | Hard timeout for scheduled agent children before the daemon kills the process group (default 10 min).  |
+| `MACRODATA_ROOT`             | Override the memory root directory (default `~/.config/macrodata`).                                   |
+| `MACRODATA_CONFIG_PATH`      | Override the path to `config.json` (default `~/.config/macrodata/config.json`).                       |
+| `MACRODATA_CHILD_TIMEOUT_MS` | Hard timeout for scheduled agent children before the daemon kills the process group (default 10 min). |
 
 ### Remote embedding provider (optional)
 

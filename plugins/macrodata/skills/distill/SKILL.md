@@ -70,17 +70,20 @@ Return ONLY the JSON, no explanation.
 After all sub-agents complete:
 
 **Write distilled actions to journal:**
+
 ```
 For each action in all results:
   log_journal(topic="distilled", content=action.summary + " Files: " + action.files.join(", "))
 ```
 
 **Write overall summary to journal:**
+
 ```
 log_journal(topic="distill-summary", content="Processed N conversations. Extracted X actions, Y facts.")
 ```
 
 **Update entity files with facts:**
+
 - Group facts by topic
 - For each topic, read existing entity file (if any)
 - Integrate new facts, removing duplicates

@@ -58,7 +58,7 @@ describe("tool registration", () => {
         "schedule",
         "search_conversations",
         "search_memory",
-      ].sort()
+      ].sort(),
     );
   });
 });
@@ -122,15 +122,14 @@ describe("search_memory", () => {
 
   test("formats entity results with sections and truncates long content", async () => {
     const { addEntityFile } = await import("./helpers");
-    addEntityFile(
-      ctx,
-      "people",
-      "long",
-      `# Long\n\n## Bio\n\n${"detailed narrative ".repeat(60)}`
-    );
+    addEntityFile(ctx, "people", "long", `# Long\n\n## Bio\n\n${"detailed narrative ".repeat(60)}`);
     await call("manage_index", { target: "memory", action: "rebuild" });
 
-    const out = await call("search_memory", { query: "detailed narrative bio", type: "person", limit: 5 });
+    const out = await call("search_memory", {
+      query: "detailed narrative bio",
+      type: "person",
+      limit: 5,
+    });
     expect(out).toContain("person");
     expect(out).toContain("/ Bio");
     expect(out).toContain("...");
@@ -338,7 +337,7 @@ describe("expand_conversation", () => {
         sessionId: "s2",
         cwd: "/tmp/solo",
         message: { role: "user", content: "hello there" },
-      }) + "\n"
+      }) + "\n",
     );
     const out = await call("expand_conversation", { sessionPath });
     expect(out).toContain("Project: solo");
@@ -357,7 +356,12 @@ describe("directory bootstrapping", () => {
   test("list_reminders is empty before any reminder exists", async () => {
     const list = JSON.parse(await call("list_reminders"));
     expect(list).toEqual([]);
-    addReminder(ctx, "x", { type: "cron", expression: "0 0 * * *", description: "d", payload: "p" });
+    addReminder(ctx, "x", {
+      type: "cron",
+      expression: "0 0 * * *",
+      description: "d",
+      payload: "p",
+    });
     const after = JSON.parse(await call("list_reminders"));
     expect(after.length).toBe(1);
   });
@@ -386,7 +390,10 @@ describe("bare root (no pre-created directories)", () => {
   });
 
   test("log_journal bootstraps every directory from nothing", async () => {
-    const r = await bareClient.callTool({ name: "log_journal", arguments: { topic: "t", content: "c" } });
+    const r = await bareClient.callTool({
+      name: "log_journal",
+      arguments: { topic: "t", content: "c" },
+    });
     expect(textOf(r)).toContain("Logged to journal");
     expect(existsSync(join(bareRoot, "entities", "people"))).toBe(true);
   });
@@ -399,7 +406,13 @@ describe("bare root (no pre-created directories)", () => {
   test("schedule creates the reminders dir on demand", async () => {
     const r = await bareClient.callTool({
       name: "schedule",
-      arguments: { type: "cron", id: "b1", expression: "0 9 * * *", description: "d", payload: "p" },
+      arguments: {
+        type: "cron",
+        id: "b1",
+        expression: "0 9 * * *",
+        description: "d",
+        payload: "p",
+      },
     });
     expect(textOf(r)).toContain("Created recurring reminder: b1");
     expect(existsSync(join(bareRoot, "reminders", "b1.json"))).toBe(true);
