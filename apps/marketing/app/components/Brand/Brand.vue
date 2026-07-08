@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  const { version } = useMacrodataVersion();
+  const { version } = useMdrVersion();
   withDefaults(
     defineProps<{ showWordmark?: boolean; showBadge?: boolean }>(),
     { showWordmark: true, showBadge: true },
