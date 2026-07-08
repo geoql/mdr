@@ -15,6 +15,11 @@ import { logger } from "./logger.js";
 // Memory index singleton
 let memoryIndex: LocalIndex | null = null;
 
+// Test seam: drop the cached index so a new MACRODATA_ROOT is picked up.
+export function resetMemoryIndexForTests(): void {
+  memoryIndex = null;
+}
+
 async function getMemoryIndex(): Promise<LocalIndex> {
   if (memoryIndex) return memoryIndex;
 
