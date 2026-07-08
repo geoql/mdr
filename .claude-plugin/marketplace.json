@@ -1,18 +1,18 @@
 {
-	"name": "mdr",
-	"owner": {
-		"name": "Vinayak Kulkarni",
-		"url": "https://vinayakkulkarni.dev"
-	},
-	"metadata": {
-		"description": "Stateful agent tools. Learns who you are, remembers what you're working on, schedules tasks, maintains itself."
-	},
-	"plugins": [
-		{
-			"name": "refiner",
-			"source": "./packages/macrodata",
-			"description": "Stateful agent tools for Claude Code. Local-only memory, scheduling, and autonomy.",
-			"version": "0.0.0"
-		}
-	]
+  "name": "mdr",
+  "owner": {
+    "name": "Vinayak Kulkarni",
+    "url": "https://vinayakkulkarni.dev"
+  },
+  "metadata": {
+    "description": "Stateful agent tools. Learns who you are, remembers what you're working on, schedules tasks, maintains itself."
+  },
+  "plugins": [
+    {
+      "name": "refiner",
+      "source": "./packages/macrodata",
+      "description": "Stateful agent tools for Claude Code. Local-only memory, scheduling, and autonomy.",
+      "version": "0.0.0"
+    }
+  ]
 }
