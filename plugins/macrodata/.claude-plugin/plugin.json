@@ -3,10 +3,10 @@
 	"version": "0.3.0",
 	"description": "Stateful agent tools for Claude Code. Learns who you are, remembers what you're working on, schedules tasks, maintains itself.",
 	"author": {
-		"name": "Matt Kane",
-		"url": "https://mk.gg"
+		"name": "Vinayak Kulkarni",
+		"url": "https://vinayakkulkarni.dev"
 	},
-	"repository": "https://github.com/ascorbic/macrodata",
+	"repository": "https://github.com/geoql/macrodata",
 	"license": "MIT",
 	"keywords": [
 		"memory",

@@ -1,11 +1,14 @@
 {
-  "name": "@macrodata/opencode",
+  "name": "@geoql/macrodata",
   "version": "0.3.0",
-  "description": "Stateful agent tools for OpenCode. Learns who you are, remembers what you're working on, schedules tasks, maintains itself.",
+  "description": "Persistent layered memory for coding agents (OpenCode, Claude Code) — journal, entities, state files, semantic search, daemon, scheduled reminders. A hard fork of ascorbic/macrodata by Matt Kane.",
   "type": "module",
   "main": "./dist/opencode/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
-    "node": ">=24"
+    "node": ">=24.11.0"
   },
   "scripts": {
     "build": "tsdown",
@@ -17,7 +20,8 @@
     "check": "oxlint --type-aware --type-check",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "format": "oxfmt"
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
   },
   "keywords": [
     "opencode",
@@ -30,16 +34,23 @@
     "journal",
     "semantic-search"
   ],
-  "author": "Matt Kane",
+  "author": {
+    "name": "Vinayak Kulkarni",
+    "email": "inbox.vinayak@gmail.com",
+    "url": "https://vinayakkulkarni.dev"
+  },
+  "contributors": [
+    "Matt Kane (https://github.com/ascorbic) — original author of ascorbic/macrodata"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ascorbic/macrodata.git",
+    "url": "git+https://github.com/geoql/macrodata.git",
     "directory": "plugins/macrodata"
   },
-  "homepage": "https://github.com/ascorbic/macrodata#readme",
+  "homepage": "https://macrodata.geoql.in",
   "bugs": {
-    "url": "https://github.com/ascorbic/macrodata/issues"
+    "url": "https://github.com/geoql/macrodata/issues"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -70,6 +81,7 @@
     "src",
     "opencode",
     "bin",
-    "USAGE.md"
+    "USAGE.md",
+    "LICENSE"
   ]
 }
