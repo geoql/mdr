@@ -11,7 +11,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 
-const spawnMock = vi.fn(() => ({ unref: () => {} }));
+const spawnMock = vi.fn((..._args: unknown[]) => ({ unref: () => {} }));
 let fakeHome: string;
 
 vi.mock("child_process", () => ({ spawn: (...a: unknown[]) => spawnMock(...a) }));
@@ -41,8 +41,14 @@ function makeCtx(overrides: Record<string, unknown> = {}) {
   } as never;
 }
 
-async function loadPlugin(ctx = makeCtx()) {
-  return MacrodataPlugin(ctx);
+type PluginHooks = {
+  tool: unknown;
+  "experimental.chat.system.transform": (input: never, output: never) => Promise<void>;
+  "experimental.session.compacting": (input: never, output: never) => Promise<void>;
+};
+
+async function loadPlugin(ctx = makeCtx()): Promise<PluginHooks> {
+  return (await MacrodataPlugin(ctx)) as unknown as PluginHooks;
 }
 
 beforeEach(() => {

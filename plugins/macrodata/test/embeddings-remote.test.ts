@@ -7,7 +7,7 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach, afterAll, vi } from "vitest";
-import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "fs";
+import { mkdtempSync, rmSync, writeFileSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from "node:http";
@@ -56,6 +56,8 @@ function readBody(req: IncomingMessage): Promise<string> {
   });
 }
 
+let rawResponder: ((res: ServerResponse) => void) | null = null;
+
 async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const raw = await readBody(req);
   const body = JSON.parse(raw) as RecordedRequest["body"];
@@ -64,6 +66,11 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
     authorization: req.headers.authorization ?? null,
     body,
   });
+
+  if (rawResponder) {
+    rawResponder(res);
+    return;
+  }
 
   const response = respondWith(body.input);
   res.statusCode = response.status;
@@ -95,6 +102,7 @@ beforeEach(() => {
   configDir = mkdtempSync(join(tmpdir(), "macrodata-embed-test-"));
   recordedRequests.length = 0;
   respondWith = defaultResponder;
+  rawResponder = null;
 });
 
 afterEach(() => {
@@ -272,6 +280,18 @@ describe("remote embedding requests", () => {
     respondWith = () => new Response("upstream exploded", { status: 502 });
 
     await expect(embed("hello")).rejects.toThrow(/502/);
+  });
+
+  test("still throws when reading the error body itself fails", async () => {
+    // A non-2xx response that claims gzip encoding but sends plain bytes, so
+    // response.text() rejects on decompression and the .catch(() => "") runs.
+    rawResponder = (res) => {
+      res.statusCode = 500;
+      res.setHeader("Content-Encoding", "gzip");
+      res.setHeader("Content-Type", "text/plain");
+      res.end("this is definitely not valid gzip data");
+    };
+    await expect(embed("hello")).rejects.toThrow(/failed/);
   });
 
   test("throws when the response count does not match the input count", async () => {

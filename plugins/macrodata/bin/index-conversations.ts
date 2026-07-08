@@ -30,5 +30,5 @@ export function isRunAsMain(argv1: string | undefined, moduleUrl: string): boole
    entry (node dist/bin/index-conversations.js), a subprocess vitest cannot
    instrument. main() and isRunAsMain() are covered directly. */
 if (isRunAsMain(process.argv[1], import.meta.url)) {
-  main().then((code) => process.exit(code));
+  void main().then((code) => process.exit(code));
 }
