@@ -29,31 +29,28 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Install Root Dependencies
-        run: bun install
-
-      - name: Install Plugin Dependencies
-        run: bun install
-        working-directory: plugins/macrodata
-
-      - name: Lint
-        run: bun run check
-        working-directory: plugins/macrodata
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: latest
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run check
+        working-directory: plugins/macrodata
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
-          version: bun run version
+          version: pnpm run version
           publish: npm publish --workspace=@macrodata/opencode
           commit: "ci: release"
           title: "ci: release"

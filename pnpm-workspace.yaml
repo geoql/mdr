@@ -1,0 +1,10 @@
+packages:
+  - 'plugins/*'
+
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  sharp: true
+  onnxruntime-node: true
+  protobufjs: true
+  msgpackr-extract: true
