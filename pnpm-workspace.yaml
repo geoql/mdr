@@ -82,6 +82,8 @@ minimumReleaseAgeExclude:
   - workerd
   - '@types/*'
   - '@lucide/*'
+  - typescript
+  - '@typescript/*'
   - oxfmt
   - '@oxfmt/*'
   - vite-plus
