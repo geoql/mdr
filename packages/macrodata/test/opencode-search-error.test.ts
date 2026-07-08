@@ -3,14 +3,14 @@
  * rethrow) by mocking vectra so upsertItem throws.
  */
 
-import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
 const cancelUpdate = vi.fn();
 
-vi.mock("vectra", () => ({
+vi.mock('vectra', () => ({
   LocalIndex: class {
     async isIndexCreated() {
       return true;
@@ -25,7 +25,7 @@ vi.mock("vectra", () => ({
       cancelUpdate();
     }
     async upsertItem() {
-      throw new Error("memory upsert exploded");
+      throw new Error('memory upsert exploded');
     }
     async queryItems() {
       return [];
@@ -33,28 +33,28 @@ vi.mock("vectra", () => ({
   },
 }));
 
-vi.mock("../src/embeddings.js", () => ({
+vi.mock('../src/embeddings.js', () => ({
   embed: async () => [0.1, 0.2, 0.3],
   embedBatch: async (t: string[]) => t.map(() => [0.1, 0.2, 0.3]),
   embedQuery: async () => [0.1, 0.2, 0.3],
 }));
 
-const { rebuildMemoryIndex, resetMemoryIndexForTests } = await import("../opencode/search");
+const { rebuildMemoryIndex, resetMemoryIndexForTests } = await import('../opencode/search');
 
 let root: string;
 let prevRoot: string | undefined;
 
 beforeEach(() => {
-  root = mkdtempSync(join(tmpdir(), "macrodata-ocsearch-err-"));
-  mkdirSync(join(root, "journal"), { recursive: true });
-  mkdirSync(join(root, ".index"), { recursive: true });
+  root = mkdtempSync(join(tmpdir(), 'macrodata-ocsearch-err-'));
+  mkdirSync(join(root, 'journal'), { recursive: true });
+  mkdirSync(join(root, '.index'), { recursive: true });
   writeFileSync(
-    join(root, "journal", "2025-01-01.jsonl"),
+    join(root, 'journal', '2025-01-01.jsonl'),
     JSON.stringify({
-      timestamp: "2025-01-01T00:00:00Z",
-      topic: "t",
-      content: "will fail to upsert",
-    }) + "\n",
+      timestamp: '2025-01-01T00:00:00Z',
+      topic: 't',
+      content: 'will fail to upsert',
+    }) + '\n',
   );
   prevRoot = process.env.MACRODATA_ROOT;
   process.env.MACRODATA_ROOT = root;
@@ -68,8 +68,8 @@ afterEach(() => {
   else process.env.MACRODATA_ROOT = prevRoot;
 });
 
-describe("rebuildMemoryIndex upsert failure", () => {
-  test("cancels the update and rethrows", async () => {
+describe('rebuildMemoryIndex upsert failure', () => {
+  test('cancels the update and rethrows', async () => {
     await expect(rebuildMemoryIndex()).rejects.toThrow(/memory upsert exploded/);
     expect(cancelUpdate).toHaveBeenCalled();
   });

@@ -4,36 +4,36 @@
  * Tests the shell script that integrates with Claude Code
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "vitest";
-import { execSync } from "child_process";
-import { existsSync, readFileSync, writeFileSync, unlinkSync } from "fs";
-import { join, dirname } from "path";
+import { describe, test, expect, beforeEach, afterEach } from 'vitest';
+import { execSync } from 'child_process';
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
+import { join, dirname } from 'path';
 import {
   createTestContext,
   setupMinimalState,
   addJournalEntry,
   addReminder,
   type TestContext,
-} from "./helpers";
+} from './helpers';
 
 // Get the hook script path
-const HOOK_SCRIPT = join(dirname(import.meta.dirname), "bin", "macrodata-hook.sh");
+const HOOK_SCRIPT = join(dirname(import.meta.dirname), 'bin', 'macrodata-hook.sh');
 
-function runHook(ctx: TestContext, command: "session-start" | "prompt-submit"): string {
+function runHook(ctx: TestContext, command: 'session-start' | 'prompt-submit'): string {
   try {
     return execSync(`MACRODATA_ROOT="${ctx.root}" bash "${HOOK_SCRIPT}" ${command}`, {
-      encoding: "utf-8",
+      encoding: 'utf-8',
       timeout: 10000,
       env: { ...process.env, MACRODATA_ROOT: ctx.root },
     });
   } catch (err: unknown) {
     // Hook might fail if daemon can't start, but we still get output
     const error = err as { stdout?: string; stderr?: string };
-    return error.stdout || "";
+    return error.stdout || '';
   }
 }
 
-describe("hook script", () => {
+describe('hook script', () => {
   let ctx: TestContext;
 
   beforeEach(() => {
@@ -43,10 +43,10 @@ describe("hook script", () => {
 
   afterEach(() => {
     // Kill any daemon that might have started
-    const pidFile = join(ctx.root, ".daemon.pid");
+    const pidFile = join(ctx.root, '.daemon.pid');
     if (existsSync(pidFile)) {
       try {
-        const pid = readFileSync(pidFile, "utf-8").trim();
+        const pid = readFileSync(pidFile, 'utf-8').trim();
         execSync(`kill ${pid} 2>/dev/null || true`);
       } catch {
         // Ignore
@@ -55,111 +55,111 @@ describe("hook script", () => {
     ctx.cleanup();
   });
 
-  describe("session-start", () => {
-    test("outputs macrodata context wrapper", () => {
-      const output = runHook(ctx, "session-start");
-      expect(output).toContain("<macrodata>");
-      expect(output).toContain("</macrodata>");
+  describe('session-start', () => {
+    test('outputs macrodata context wrapper', () => {
+      const output = runHook(ctx, 'session-start');
+      expect(output).toContain('<macrodata>');
+      expect(output).toContain('</macrodata>');
     });
 
-    test("includes identity section", () => {
-      const output = runHook(ctx, "session-start");
-      expect(output).toContain("<macrodata-identity>");
-      expect(output).toContain("Test Identity");
-      expect(output).toContain("</macrodata-identity>");
+    test('includes identity section', () => {
+      const output = runHook(ctx, 'session-start');
+      expect(output).toContain('<macrodata-identity>');
+      expect(output).toContain('Test Identity');
+      expect(output).toContain('</macrodata-identity>');
     });
 
-    test("includes today section", () => {
-      const output = runHook(ctx, "session-start");
-      expect(output).toContain("<macrodata-today>");
-      expect(output).toContain("Running integration tests");
-      expect(output).toContain("</macrodata-today>");
+    test('includes today section', () => {
+      const output = runHook(ctx, 'session-start');
+      expect(output).toContain('<macrodata-today>');
+      expect(output).toContain('Running integration tests');
+      expect(output).toContain('</macrodata-today>');
     });
 
-    test("includes flags section", () => {
-      const output = runHook(ctx, "session-start");
-      expect(output).toContain("<macrodata-flags>");
+    test('includes flags section', () => {
+      const output = runHook(ctx, 'session-start');
+      expect(output).toContain('<macrodata-flags>');
     });
 
-    test("human is available as a file, not force-injected", () => {
+    test('human is available as a file, not force-injected', () => {
       // human.md is not injected as a section (kept under the cmux size cap);
       // it's listed in files so the agent reads it on demand.
-      const output = runHook(ctx, "session-start");
-      expect(output).not.toContain("<macrodata-human>");
-      expect(output).toContain("state/human.md");
+      const output = runHook(ctx, 'session-start');
+      expect(output).not.toContain('<macrodata-human>');
+      expect(output).toContain('state/human.md');
     });
 
-    test("includes workspace section", () => {
-      const output = runHook(ctx, "session-start");
-      expect(output).toContain("<macrodata-workspace>");
-      expect(output).toContain("Integration testing");
-      expect(output).toContain("</macrodata-workspace>");
+    test('includes workspace section', () => {
+      const output = runHook(ctx, 'session-start');
+      expect(output).toContain('<macrodata-workspace>');
+      expect(output).toContain('Integration testing');
+      expect(output).toContain('</macrodata-workspace>');
     });
 
-    test("includes journal entries", () => {
-      addJournalEntry(ctx, "test-topic", "A journal entry for testing");
+    test('includes journal entries', () => {
+      addJournalEntry(ctx, 'test-topic', 'A journal entry for testing');
 
-      const output = runHook(ctx, "session-start");
-      expect(output).toContain("<macrodata-journal>");
-      expect(output).toContain("test-topic");
+      const output = runHook(ctx, 'session-start');
+      expect(output).toContain('<macrodata-journal>');
+      expect(output).toContain('test-topic');
     });
 
-    test("includes schedules section", () => {
-      addReminder(ctx, "test-schedule", {
-        type: "cron",
-        expression: "0 9 * * *",
-        description: "Morning check",
-        payload: "Check stuff",
+    test('includes schedules section', () => {
+      addReminder(ctx, 'test-schedule', {
+        type: 'cron',
+        expression: '0 9 * * *',
+        description: 'Morning check',
+        payload: 'Check stuff',
       });
 
-      const output = runHook(ctx, "session-start");
-      expect(output).toContain("<macrodata-schedules>");
-      expect(output).toContain("Morning check");
+      const output = runHook(ctx, 'session-start');
+      expect(output).toContain('<macrodata-schedules>');
+      expect(output).toContain('Morning check');
     });
 
-    test("includes files listing", () => {
-      const output = runHook(ctx, "session-start");
-      expect(output).toContain("<macrodata-files");
+    test('includes files listing', () => {
+      const output = runHook(ctx, 'session-start');
+      expect(output).toContain('<macrodata-files');
       expect(output).toContain(`root="${ctx.root}"`);
-      expect(output).toContain("state/identity.md");
+      expect(output).toContain('state/identity.md');
     });
 
-    test("writes context file", () => {
-      runHook(ctx, "session-start");
-      const contextFile = join(ctx.root, ".claude-context.md");
+    test('writes context file', () => {
+      runHook(ctx, 'session-start');
+      const contextFile = join(ctx.root, '.claude-context.md');
       expect(existsSync(contextFile)).toBe(true);
 
-      const content = readFileSync(contextFile, "utf-8");
-      expect(content).toContain("<macrodata>");
+      const content = readFileSync(contextFile, 'utf-8');
+      expect(content).toContain('<macrodata>');
     });
   });
 
-  describe("first-run detection", () => {
-    test("shows first-run message when no identity file", () => {
+  describe('first-run detection', () => {
+    test('shows first-run message when no identity file', () => {
       // Remove identity file
-      const identityFile = join(ctx.stateDir, "identity.md");
+      const identityFile = join(ctx.stateDir, 'identity.md');
       if (existsSync(identityFile)) {
         unlinkSync(identityFile);
       }
 
-      const output = runHook(ctx, "session-start");
-      expect(output).toContain("<macrodata-first-run");
-      expect(output).toContain("/onboarding");
+      const output = runHook(ctx, 'session-start');
+      expect(output).toContain('<macrodata-first-run');
+      expect(output).toContain('/onboarding');
     });
   });
 
-  describe("prompt-submit", () => {
-    test("injects pending context", () => {
+  describe('prompt-submit', () => {
+    test('injects pending context', () => {
       // Write some pending context
-      const pendingFile = join(ctx.root, ".pending-context");
-      writeFileSync(pendingFile, "<macrodata-update>Test update</macrodata-update>\n");
+      const pendingFile = join(ctx.root, '.pending-context');
+      writeFileSync(pendingFile, '<macrodata-update>Test update</macrodata-update>\n');
 
-      const output = runHook(ctx, "prompt-submit");
-      expect(output).toContain("Test update");
+      const output = runHook(ctx, 'prompt-submit');
+      expect(output).toContain('Test update');
 
       // Pending file should be cleared
-      const remaining = existsSync(pendingFile) ? readFileSync(pendingFile, "utf-8") : "";
-      expect(remaining).toBe("");
+      const remaining = existsSync(pendingFile) ? readFileSync(pendingFile, 'utf-8') : '';
+      expect(remaining).toBe('');
     });
   });
 });

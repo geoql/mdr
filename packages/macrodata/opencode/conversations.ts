@@ -11,18 +11,18 @@
  *   - project: id, worktree
  */
 
-import { existsSync, mkdirSync } from "fs";
-import { join, basename } from "path";
-import { homedir } from "os";
-import { DatabaseSync } from "node:sqlite";
-import { LocalIndex } from "vectra";
-import { embedBatch, embedQuery } from "../src/embeddings.js";
-import { getStateRoot } from "./context.js";
-import { logger } from "./logger.js";
+import { existsSync, mkdirSync } from 'fs';
+import { join, basename } from 'path';
+import { homedir } from 'os';
+import { DatabaseSync } from 'node:sqlite';
+import { LocalIndex } from 'vectra';
+import { embedBatch, embedQuery } from '../src/embeddings.js';
+import { getStateRoot } from './context.js';
+import { logger } from './logger.js';
 
 const OPENCODE_DB_PATH =
   process.env.MACRODATA_OPENCODE_DB_PATH ||
-  join(homedir(), ".local", "share", "opencode", "opencode.db");
+  join(homedir(), '.local', 'share', 'opencode', 'opencode.db');
 
 // Conversation index singleton
 let convIndex: LocalIndex | null = null;
@@ -36,9 +36,9 @@ async function getConversationIndex(): Promise<LocalIndex> {
   if (convIndex) return convIndex;
 
   const stateRoot = getStateRoot();
-  const indexPath = join(stateRoot, ".index", "oc-conversations");
+  const indexPath = join(stateRoot, '.index', 'oc-conversations');
 
-  const indexDir = join(stateRoot, ".index");
+  const indexDir = join(stateRoot, '.index');
   if (!existsSync(indexDir)) {
     mkdirSync(indexDir, { recursive: true });
   }
@@ -46,7 +46,7 @@ async function getConversationIndex(): Promise<LocalIndex> {
   convIndex = new LocalIndex(indexPath);
 
   if (!(await convIndex.isIndexCreated())) {
-    logger.log("Creating new conversation index...");
+    logger.log('Creating new conversation index...');
     await convIndex.createIndex();
   }
 
@@ -110,7 +110,7 @@ interface ExchangeRow {
 export function queryExchanges(db: DatabaseSync, sinceMs?: number): ExchangeRow[] {
   // Interpolated inside the user_messages CTE body, where only `m` and `s`
   // are in scope (`um` is the outer query's alias and must not be used here).
-  const whereClause = sinceMs ? "AND m.time_created > ?" : "";
+  const whereClause = sinceMs ? 'AND m.time_created > ?' : '';
   const params = sinceMs ? [sinceMs] : [];
 
   // Get user-assistant pairs with their text content.
@@ -190,11 +190,11 @@ function rowsToExchanges(rows: ExchangeRow[]): ConversationExchange[] {
   return rows.map((row) => {
     // Use project worktree, but fall back to session directory for "global" sessions
     // where worktree is "/" (the root filesystem, not a real project)
-    const worktree = row.worktree && row.worktree !== "/" ? row.worktree : "";
-    const directory = row.directory || "";
+    const worktree = row.worktree && row.worktree !== '/' ? row.worktree : '';
+    const directory = row.directory || '';
     const projectPath = worktree || directory;
-    const name = projectPath ? basename(projectPath) : "";
-    const projectName = name || "unknown";
+    const name = projectPath ? basename(projectPath) : '';
+    const projectName = name || 'unknown';
 
     return {
       id: `oc-${row.session_id}-${row.user_msg_id}`,
@@ -217,7 +217,7 @@ let rebuildInProgress: Promise<{ exchangeCount: number }> | null = null;
  */
 export async function rebuildConversationIndex(): Promise<{ exchangeCount: number }> {
   if (rebuildInProgress) {
-    logger.log("Conversation index rebuild already in progress, waiting...");
+    logger.log('Conversation index rebuild already in progress, waiting...');
     return rebuildInProgress;
   }
 
@@ -230,7 +230,7 @@ export async function rebuildConversationIndex(): Promise<{ exchangeCount: numbe
 }
 
 async function doRebuildConversationIndex(): Promise<{ exchangeCount: number }> {
-  logger.log("Rebuilding OpenCode conversation index...");
+  logger.log('Rebuilding OpenCode conversation index...');
   const startTime = Date.now();
 
   const db = openDb();
@@ -392,7 +392,7 @@ export async function getConversationIndexStats(): Promise<{ exchangeCount: numb
  * Incrementally update conversation index (only new exchanges)
  */
 export async function updateConversationIndex(): Promise<{ newCount: number; totalCount: number }> {
-  logger.log("Updating OpenCode conversation index...");
+  logger.log('Updating OpenCode conversation index...');
   const startTime = Date.now();
 
   const db = openDb();

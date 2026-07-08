@@ -22,13 +22,13 @@
  *   }
  */
 
-import { existsSync, readFileSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
-import type { FeatureExtractionPipeline } from "@huggingface/transformers";
+import { existsSync, readFileSync } from 'fs';
+import { homedir } from 'os';
+import { join } from 'path';
+import type { FeatureExtractionPipeline } from '@huggingface/transformers';
 
 export interface RemoteEmbeddingConfig {
-  provider: "openai-compatible";
+  provider: 'openai-compatible';
   endpoint: string;
   api_key?: string;
   api_key_env?: string;
@@ -48,18 +48,18 @@ export function getRemoteEmbeddingConfig(): RemoteEmbeddingConfig | null {
   if (cachedRemoteConfig !== undefined) return cachedRemoteConfig;
 
   const configPath =
-    process.env.MACRODATA_CONFIG_PATH || join(homedir(), ".config", "macrodata", "config.json");
+    process.env.MACRODATA_CONFIG_PATH || join(homedir(), '.config', 'macrodata', 'config.json');
 
   cachedRemoteConfig = null;
   if (existsSync(configPath)) {
     try {
-      const config = JSON.parse(readFileSync(configPath, "utf-8"));
+      const config = JSON.parse(readFileSync(configPath, 'utf-8'));
       const embedding = config.embedding;
       if (
         embedding &&
-        embedding.provider === "openai-compatible" &&
-        typeof embedding.endpoint === "string" &&
-        typeof embedding.model === "string"
+        embedding.provider === 'openai-compatible' &&
+        typeof embedding.endpoint === 'string' &&
+        typeof embedding.model === 'string'
       ) {
         cachedRemoteConfig = embedding as RemoteEmbeddingConfig;
       }
@@ -92,11 +92,11 @@ function resolveApiKey(config: RemoteEmbeddingConfig): string | undefined {
 async function embedRemote(
   texts: string[],
   config: RemoteEmbeddingConfig,
-  kind: "passage" | "query",
+  kind: 'passage' | 'query',
 ): Promise<number[][]> {
-  const url = `${config.endpoint.replace(/\/$/, "")}/embeddings`;
+  const url = `${config.endpoint.replace(/\/$/, '')}/embeddings`;
   const apiKey = resolveApiKey(config);
-  const inputType = kind === "query" ? config.query_input_type : config.input_type;
+  const inputType = kind === 'query' ? config.query_input_type : config.input_type;
 
   const body: Record<string, unknown> = {
     ...config.extra_body,
@@ -108,16 +108,16 @@ async function embedRemote(
   }
 
   const response = await fetch(url, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
     },
     body: JSON.stringify(body),
   });
 
   if (!response.ok) {
-    const errText = await response.text().catch(() => "");
+    const errText = await response.text().catch(() => '');
     throw new Error(
       `Remote embedding request failed: ${response.status} ${response.statusText} ${errText.slice(0, 300)}`,
     );
@@ -141,7 +141,7 @@ async function embedRemote(
 async function embedRemoteBatched(
   texts: string[],
   config: RemoteEmbeddingConfig,
-  kind: "passage" | "query",
+  kind: 'passage' | 'query',
 ): Promise<number[][]> {
   const batchSize = config.batch_size && config.batch_size > 0 ? config.batch_size : 64;
   const results: number[][] = [];
@@ -173,16 +173,16 @@ async function getEmbeddingPipeline(): Promise<FeatureExtractionPipeline> {
   }
 
   pipelineLoading = (async () => {
-    const { pipeline } = await import("@huggingface/transformers");
-    return pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2", {
+    const { pipeline } = await import('@huggingface/transformers');
+    return pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
       // Use quantized model for faster loading
-      dtype: "q8",
+      dtype: 'q8',
     });
   })();
 
   try {
     embeddingPipeline = await pipelineLoading;
-    console.log("[Embeddings] Model loaded successfully");
+    console.log('[Embeddings] Model loaded successfully');
     return embeddingPipeline;
   } finally {
     pipelineLoading = null;
@@ -199,7 +199,7 @@ async function embedLocal(texts: string[]): Promise<number[][]> {
   for (let i = 0; i < texts.length; i += batchSize) {
     const batch = texts.slice(i, i + batchSize);
     const outputs = await pipe(batch, {
-      pooling: "mean",
+      pooling: 'mean',
       normalize: true,
     });
 
@@ -229,7 +229,7 @@ export async function embed(text: string): Promise<number[]> {
 export async function embedQuery(text: string): Promise<number[]> {
   const remote = getRemoteEmbeddingConfig();
   if (remote) {
-    const [vector] = await embedRemoteBatched([text], remote, "query");
+    const [vector] = await embedRemoteBatched([text], remote, 'query');
     return vector;
   }
   const [vector] = await embedLocal([text]);
@@ -244,7 +244,7 @@ export async function embedBatch(texts: string[]): Promise<number[][]> {
 
   const remote = getRemoteEmbeddingConfig();
   if (remote) {
-    return embedRemoteBatched(texts, remote, "passage");
+    return embedRemoteBatched(texts, remote, 'passage');
   }
   return embedLocal(texts);
 }
@@ -255,7 +255,7 @@ export async function embedBatch(texts: string[]): Promise<number[][]> {
  */
 export async function preloadModel(): Promise<void> {
   if (getRemoteEmbeddingConfig()) {
-    console.log("[Embeddings] Remote embedding provider configured, skipping local model load");
+    console.log('[Embeddings] Remote embedding provider configured, skipping local model load');
     return;
   }
   await getEmbeddingPipeline();

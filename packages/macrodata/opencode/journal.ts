@@ -4,11 +4,11 @@
  * Write journal entries and search memory
  */
 
-import { existsSync, appendFileSync, mkdirSync, readFileSync, readdirSync } from "fs";
-import { join } from "path";
-import { getStateRoot } from "./context.js";
-import { indexJournalEntry } from "./search.js";
-import { logger } from "./logger.js";
+import { existsSync, appendFileSync, mkdirSync, readFileSync, readdirSync } from 'fs';
+import { join } from 'path';
+import { getStateRoot } from './context.js';
+import { indexJournalEntry } from './search.js';
+import { logger } from './logger.js';
 
 interface JournalEntry {
   timestamp: string;
@@ -24,11 +24,11 @@ function ensureDirectories(): void {
   const stateRoot = getStateRoot();
   const dirs = [
     stateRoot,
-    join(stateRoot, "state"),
-    join(stateRoot, "entities"),
-    join(stateRoot, "entities", "people"),
-    join(stateRoot, "entities", "projects"),
-    join(stateRoot, "journal"),
+    join(stateRoot, 'state'),
+    join(stateRoot, 'entities'),
+    join(stateRoot, 'entities', 'people'),
+    join(stateRoot, 'entities', 'projects'),
+    join(stateRoot, 'journal'),
   ];
 
   for (const dir of dirs) {
@@ -40,8 +40,8 @@ function ensureDirectories(): void {
 
 function getTodayJournalPath(): string {
   const stateRoot = getStateRoot();
-  const today = new Date().toISOString().split("T")[0];
-  return join(stateRoot, "journal", `${today}.jsonl`);
+  const today = new Date().toISOString().split('T')[0];
+  return join(stateRoot, 'journal', `${today}.jsonl`);
 }
 
 /**
@@ -58,11 +58,11 @@ export async function logJournal(
     timestamp: new Date().toISOString(),
     topic,
     content,
-    metadata: metadata || { source: "opencode-plugin" },
+    metadata: metadata || { source: 'opencode-plugin' },
   };
 
   const journalPath = getTodayJournalPath();
-  appendFileSync(journalPath, JSON.stringify(entry) + "\n");
+  appendFileSync(journalPath, JSON.stringify(entry) + '\n');
 
   // Index the entry for semantic search
   try {
@@ -77,22 +77,22 @@ export async function logJournal(
  */
 export function getRecentJournal(count: number, topic?: string): JournalEntry[] {
   const stateRoot = getStateRoot();
-  const journalDir = join(stateRoot, "journal");
+  const journalDir = join(stateRoot, 'journal');
   let entries: JournalEntry[] = [];
 
   if (!existsSync(journalDir)) return entries;
 
   try {
     const files = readdirSync(journalDir)
-      .filter((f) => f.endsWith(".jsonl"))
+      .filter((f) => f.endsWith('.jsonl'))
       .sort()
       .reverse();
 
     for (const file of files) {
       if (entries.length >= count * 2) break; // Get more for filtering
 
-      const content = readFileSync(join(journalDir, file), "utf-8");
-      const lines = content.trim().split("\n").filter(Boolean);
+      const content = readFileSync(join(journalDir, file), 'utf-8');
+      const lines = content.trim().split('\n').filter(Boolean);
 
       for (const line of lines.reverse()) {
         try {
@@ -119,7 +119,7 @@ export function getRecentJournal(count: number, topic?: string): JournalEntry[] 
  * Get recent conversation summaries
  */
 export function getRecentSummaries(count: number): JournalEntry[] {
-  return getRecentJournal(count, "conversation-summary");
+  return getRecentJournal(count, 'conversation-summary');
 }
 
 /**
@@ -135,19 +135,19 @@ export async function saveConversationSummary(options: {
   const parts = [options.summary];
 
   if (options.keyDecisions?.length) {
-    parts.push(`Decisions: ${options.keyDecisions.join(", ")}`);
+    parts.push(`Decisions: ${options.keyDecisions.join(', ')}`);
   }
   if (options.openThreads?.length) {
-    parts.push(`Open threads: ${options.openThreads.join(", ")}`);
+    parts.push(`Open threads: ${options.openThreads.join(', ')}`);
   }
   if (options.learnedPatterns?.length) {
-    parts.push(`Learned: ${options.learnedPatterns.join(", ")}`);
+    parts.push(`Learned: ${options.learnedPatterns.join(', ')}`);
   }
   if (options.notes) {
     parts.push(`Notes: ${options.notes}`);
   }
 
-  await logJournal("conversation-summary", parts.join("\n"), {
-    source: "opencode-plugin",
+  await logJournal('conversation-summary', parts.join('\n'), {
+    source: 'opencode-plugin',
   });
 }

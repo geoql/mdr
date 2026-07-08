@@ -5,11 +5,11 @@
  * so that config changes take effect without restart.
  */
 
-import { existsSync, readFileSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
+import { existsSync, readFileSync } from 'fs';
+import { homedir } from 'os';
+import { join } from 'path';
 
-const DEFAULT_ROOT = join(homedir(), ".config", "macrodata");
+const DEFAULT_ROOT = join(homedir(), '.config', 'macrodata');
 
 /**
  * Get the macrodata state root directory.
@@ -24,10 +24,10 @@ export function getStateRoot(): string {
   }
 
   // Check config file in default location
-  const configPath = join(DEFAULT_ROOT, "config.json");
+  const configPath = join(DEFAULT_ROOT, 'config.json');
   if (existsSync(configPath)) {
     try {
-      const config = JSON.parse(readFileSync(configPath, "utf-8"));
+      const config = JSON.parse(readFileSync(configPath, 'utf-8'));
       if (config.root) return config.root;
     } catch {
       // Ignore parse errors
@@ -38,29 +38,29 @@ export function getStateRoot(): string {
 }
 
 export function getStateDir(): string {
-  return join(getStateRoot(), "state");
+  return join(getStateRoot(), 'state');
 }
 
 export function getEntitiesDir(): string {
-  return join(getStateRoot(), "entities");
+  return join(getStateRoot(), 'entities');
 }
 
 export function getJournalDir(): string {
-  return join(getStateRoot(), "journal");
+  return join(getStateRoot(), 'journal');
 }
 
 export function getSignalsDir(): string {
-  return join(getStateRoot(), "signals");
+  return join(getStateRoot(), 'signals');
 }
 
 export function getIndexDir(): string {
-  return join(getStateRoot(), ".index");
+  return join(getStateRoot(), '.index');
 }
 
 export function getTopicsDir(): string {
-  return join(getStateRoot(), "topics");
+  return join(getStateRoot(), 'topics');
 }
 
 export function getRemindersDir(): string {
-  return join(getStateRoot(), "reminders");
+  return join(getStateRoot(), 'reminders');
 }

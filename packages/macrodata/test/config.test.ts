@@ -4,9 +4,9 @@
  * Tests that MACRODATA_ROOT env var properly controls all paths
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "vitest";
-import { join } from "path";
-import { createTestContext, type TestContext } from "./helpers";
+import { describe, test, expect, beforeEach, afterEach } from 'vitest';
+import { join } from 'path';
+import { createTestContext, type TestContext } from './helpers';
 import {
   getStateRoot,
   getStateDir,
@@ -16,9 +16,9 @@ import {
   getRemindersDir,
   getSignalsDir,
   getTopicsDir,
-} from "../src/config";
+} from '../src/config';
 
-describe("config", () => {
+describe('config', () => {
   let ctx: TestContext;
 
   beforeEach(() => {
@@ -29,43 +29,43 @@ describe("config", () => {
     ctx.cleanup();
   });
 
-  test("getStateRoot returns MACRODATA_ROOT env var", () => {
+  test('getStateRoot returns MACRODATA_ROOT env var', () => {
     expect(getStateRoot()).toBe(ctx.root);
   });
 
-  test("getStateDir returns state subdirectory", () => {
+  test('getStateDir returns state subdirectory', () => {
     expect(getStateDir()).toBe(ctx.stateDir);
   });
 
-  test("getEntitiesDir returns entities subdirectory", () => {
+  test('getEntitiesDir returns entities subdirectory', () => {
     expect(getEntitiesDir()).toBe(ctx.entitiesDir);
   });
 
-  test("getJournalDir returns journal subdirectory", () => {
+  test('getJournalDir returns journal subdirectory', () => {
     expect(getJournalDir()).toBe(ctx.journalDir);
   });
 
-  test("getIndexDir returns .index subdirectory", () => {
+  test('getIndexDir returns .index subdirectory', () => {
     expect(getIndexDir()).toBe(ctx.indexDir);
   });
 
-  test("getRemindersDir returns reminders subdirectory", () => {
+  test('getRemindersDir returns reminders subdirectory', () => {
     expect(getRemindersDir()).toBe(ctx.remindersDir);
   });
 
-  test("getSignalsDir returns signals subdirectory", () => {
-    expect(getSignalsDir()).toBe(join(ctx.root, "signals"));
+  test('getSignalsDir returns signals subdirectory', () => {
+    expect(getSignalsDir()).toBe(join(ctx.root, 'signals'));
   });
 
-  test("getTopicsDir returns topics subdirectory", () => {
-    expect(getTopicsDir()).toBe(join(ctx.root, "topics"));
+  test('getTopicsDir returns topics subdirectory', () => {
+    expect(getTopicsDir()).toBe(join(ctx.root, 'topics'));
   });
 
-  test("paths update when MACRODATA_ROOT changes", () => {
+  test('paths update when MACRODATA_ROOT changes', () => {
     const originalRoot = ctx.root;
 
     // Create a second test context (with different root)
-    const ctx2 = createTestContext("macrodata-test-2-");
+    const ctx2 = createTestContext('macrodata-test-2-');
 
     // Now getStateRoot should return the new root
     expect(getStateRoot()).toBe(ctx2.root);

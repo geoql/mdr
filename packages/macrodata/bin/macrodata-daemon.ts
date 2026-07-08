@@ -14,7 +14,7 @@
  *   MACRODATA_ROOT=/path/to/state
  */
 
-import { runDaemon } from "../src/daemon.js";
+import { runDaemon } from '../src/daemon.js';
 
 export function isRunAsMain(argv1: string | undefined, moduleUrl: string): boolean {
   return Boolean(argv1) && moduleUrl === `file://${argv1}`;

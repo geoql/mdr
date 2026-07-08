@@ -5,7 +5,7 @@
  * Called by hooks at session end / after compact to keep the conversation index fresh.
  */
 
-import { updateConversationIndex } from "../src/conversations.js";
+import { updateConversationIndex } from '../src/conversations.js';
 
 export async function main(
   update: typeof updateConversationIndex = updateConversationIndex,
@@ -17,7 +17,7 @@ export async function main(
     );
     return 0;
   } catch (err) {
-    console.error("Failed to index conversations:", err);
+    console.error('Failed to index conversations:', err);
     return 1;
   }
 }

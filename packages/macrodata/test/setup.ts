@@ -9,9 +9,9 @@
  * suite always resolves to the local, offline embedding model unless a test
  * explicitly opts in by setting its own `MACRODATA_CONFIG_PATH`.
  */
-import { beforeEach } from "vitest";
+import { beforeEach } from 'vitest';
 
-const HERMETIC_CONFIG_PATH = "/nonexistent/macrodata-test/config.json";
+const HERMETIC_CONFIG_PATH = '/nonexistent/macrodata-test/config.json';
 
 beforeEach(() => {
   process.env.MACRODATA_CONFIG_PATH = HERMETIC_CONFIG_PATH;

@@ -9,14 +9,14 @@
  * Uses Vectra for storage and embeddings.ts for vector generation.
  */
 
-import { LocalIndex } from "vectra";
-import { join, basename } from "path";
-import { readFileSync, readdirSync, existsSync, mkdirSync } from "fs";
-import { embed, embedBatch, embedQuery, preloadModel as preloadEmbeddings } from "./embeddings.js";
-import { getIndexDir, getEntitiesDir, getJournalDir } from "./config.js";
+import { LocalIndex } from 'vectra';
+import { join, basename } from 'path';
+import { readFileSync, readdirSync, existsSync, mkdirSync } from 'fs';
+import { embed, embedBatch, embedQuery, preloadModel as preloadEmbeddings } from './embeddings.js';
+import { getIndexDir, getEntitiesDir, getJournalDir } from './config.js';
 
 // Item types for filtering
-export type MemoryItemType = "journal" | "person" | "project";
+export type MemoryItemType = 'journal' | 'person' | 'project';
 
 export interface MemoryItem {
   id: string;
@@ -46,7 +46,7 @@ let indexPath: string | null = null;
  */
 async function getIndex(): Promise<LocalIndex> {
   const currentIndexDir = getIndexDir();
-  const currentIndexPath = join(currentIndexDir, "vectors");
+  const currentIndexPath = join(currentIndexDir, 'vectors');
 
   // Invalidate cache if path changed
   if (index && indexPath !== currentIndexPath) {
@@ -66,7 +66,7 @@ async function getIndex(): Promise<LocalIndex> {
 
   // Create if doesn't exist
   if (!(await index.isIndexCreated())) {
-    console.log("[Indexer] Creating new index...");
+    console.log('[Indexer] Creating new index...');
     await index.createIndex();
   }
 
@@ -139,7 +139,7 @@ export async function searchMemory(
   // Check if index has items
   const stats = await idx.listItems();
   if (stats.length === 0) {
-    console.log("[Indexer] Index is empty");
+    console.log('[Indexer] Index is empty');
     return [];
   }
 
@@ -179,19 +179,19 @@ function parseJournalForIndexing(): MemoryItem[] {
 
   if (!existsSync(journalDir)) return items;
 
-  const files = readdirSync(journalDir).filter((f) => f.endsWith(".jsonl"));
+  const files = readdirSync(journalDir).filter((f) => f.endsWith('.jsonl'));
 
   for (const file of files) {
     try {
-      const content = readFileSync(join(journalDir, file), "utf-8");
-      const lines = content.trim().split("\n").filter(Boolean);
+      const content = readFileSync(join(journalDir, file), 'utf-8');
+      const lines = content.trim().split('\n').filter(Boolean);
 
       for (let i = 0; i < lines.length; i++) {
         try {
           const entry = JSON.parse(lines[i]);
           items.push({
             id: `journal-${file}-${i}`,
-            type: "journal",
+            type: 'journal',
             content: `[${entry.topic}] ${entry.content}`,
             source: file,
             timestamp: entry.timestamp,
@@ -212,7 +212,7 @@ function parseJournalForIndexing(): MemoryItem[] {
  * Parse entity files (people, projects) for indexing
  */
 function parseEntitiesForIndexing(
-  subdir: "people" | "projects",
+  subdir: 'people' | 'projects',
   type: MemoryItemType,
 ): MemoryItem[] {
   const items: MemoryItem[] = [];
@@ -220,12 +220,12 @@ function parseEntitiesForIndexing(
 
   if (!existsSync(dir)) return items;
 
-  const files = readdirSync(dir).filter((f) => f.endsWith(".md"));
+  const files = readdirSync(dir).filter((f) => f.endsWith('.md'));
 
   for (const file of files) {
     try {
-      const content = readFileSync(join(dir, file), "utf-8");
-      const filename = file.replace(".md", "");
+      const content = readFileSync(join(dir, file), 'utf-8');
+      const filename = file.replace('.md', '');
 
       // Split by ## headers for section-level indexing
       const sections = content.split(/^## /m);
@@ -237,14 +237,14 @@ function parseEntitiesForIndexing(
           type,
           content: sections[0].trim(),
           source: `${subdir}/${file}`,
-          section: "preamble",
+          section: 'preamble',
         });
       }
 
       // Each section
       for (let i = 1; i < sections.length; i++) {
         const section = sections[i];
-        const firstLine = section.split("\n")[0];
+        const firstLine = section.split('\n')[0];
         const sectionTitle = firstLine.trim();
         const sectionContent = section.slice(firstLine.length).trim();
 
@@ -270,22 +270,22 @@ function parseEntitiesForIndexing(
  * Rebuild the entire index from scratch
  */
 export async function rebuildIndex(): Promise<{ itemCount: number }> {
-  console.log("[Indexer] Starting full index rebuild...");
+  console.log('[Indexer] Starting full index rebuild...');
   const startTime = Date.now();
 
   const allItems: MemoryItem[] = [];
 
   // 1. Index journal entries
-  console.log("[Indexer] Parsing journal...");
+  console.log('[Indexer] Parsing journal...');
   allItems.push(...parseJournalForIndexing());
 
   // 2. Index people
-  console.log("[Indexer] Parsing people...");
-  allItems.push(...parseEntitiesForIndexing("people", "person"));
+  console.log('[Indexer] Parsing people...');
+  allItems.push(...parseEntitiesForIndexing('people', 'person'));
 
   // 3. Index projects
-  console.log("[Indexer] Parsing projects...");
-  allItems.push(...parseEntitiesForIndexing("projects", "project"));
+  console.log('[Indexer] Parsing projects...');
+  allItems.push(...parseEntitiesForIndexing('projects', 'project'));
 
   // Index all items
   console.log(`[Indexer] Indexing ${allItems.length} items...`);
@@ -307,9 +307,9 @@ export async function indexJournalEntry(entry: {
 }): Promise<void> {
   const item: MemoryItem = {
     id: `journal-${entry.timestamp}`,
-    type: "journal",
+    type: 'journal',
     content: `[${entry.topic}] ${entry.content}`,
-    source: "journal",
+    source: 'journal',
     timestamp: entry.timestamp,
   };
   await indexItem(item);
@@ -329,23 +329,23 @@ export async function getIndexStats(): Promise<{ itemCount: number }> {
  * Called by daemon when files change
  */
 export async function indexEntityFile(filePath: string): Promise<void> {
-  const filename = basename(filePath, ".md");
+  const filename = basename(filePath, '.md');
 
   // Determine type from path
   let type: MemoryItemType;
-  if (filePath.includes("/people/")) {
-    type = "person";
-  } else if (filePath.includes("/projects/")) {
-    type = "project";
+  if (filePath.includes('/people/')) {
+    type = 'person';
+  } else if (filePath.includes('/projects/')) {
+    type = 'project';
   } else {
     console.error(`[Indexer] Unknown entity type for: ${filePath}`);
     return;
   }
 
   try {
-    const content = readFileSync(filePath, "utf-8");
+    const content = readFileSync(filePath, 'utf-8');
     const items: MemoryItem[] = [];
-    const subdir = type === "person" ? "people" : "projects";
+    const subdir = type === 'person' ? 'people' : 'projects';
 
     // Split by ## headers for section-level indexing
     const sections = content.split(/^## /m);
@@ -357,14 +357,14 @@ export async function indexEntityFile(filePath: string): Promise<void> {
         type,
         content: sections[0].trim(),
         source: `${subdir}/${basename(filePath)}`,
-        section: "preamble",
+        section: 'preamble',
       });
     }
 
     // Each section
     for (let i = 1; i < sections.length; i++) {
       const section = sections[i];
-      const firstLine = section.split("\n")[0];
+      const firstLine = section.split('\n')[0];
       const sectionTitle = firstLine.trim();
       const sectionContent = section.slice(firstLine.length).trim();
 

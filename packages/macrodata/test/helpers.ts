@@ -4,9 +4,9 @@
  * Provides isolated test environments with temp directories
  */
 
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync, appendFileSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync, appendFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
 export interface TestContext {
   /** Root directory for this test (set as MACRODATA_ROOT) */
@@ -33,20 +33,20 @@ export interface TestContext {
  * Sets MACRODATA_ROOT env var and creates the directory structure.
  * Call cleanup() when done to remove the temp directory and restore env.
  */
-export function createTestContext(prefix = "macrodata-test-"): TestContext {
+export function createTestContext(prefix = 'macrodata-test-'): TestContext {
   // Create temp directory
   const root = mkdtempSync(join(tmpdir(), prefix));
 
   // Create directory structure
-  const stateDir = join(root, "state");
-  const entitiesDir = join(root, "entities");
-  const journalDir = join(root, "journal");
-  const indexDir = join(root, ".index");
-  const remindersDir = join(root, "reminders");
+  const stateDir = join(root, 'state');
+  const entitiesDir = join(root, 'entities');
+  const journalDir = join(root, 'journal');
+  const indexDir = join(root, '.index');
+  const remindersDir = join(root, 'reminders');
 
   mkdirSync(stateDir, { recursive: true });
-  mkdirSync(join(entitiesDir, "people"), { recursive: true });
-  mkdirSync(join(entitiesDir, "projects"), { recursive: true });
+  mkdirSync(join(entitiesDir, 'people'), { recursive: true });
+  mkdirSync(join(entitiesDir, 'projects'), { recursive: true });
   mkdirSync(journalDir, { recursive: true });
   mkdirSync(indexDir, { recursive: true });
   mkdirSync(remindersDir, { recursive: true });
@@ -91,7 +91,7 @@ export function createTestContext(prefix = "macrodata-test-"): TestContext {
 export function setupMinimalState(ctx: TestContext) {
   // Create identity file
   writeFileSync(
-    join(ctx.stateDir, "identity.md"),
+    join(ctx.stateDir, 'identity.md'),
     `# Test Identity
 
 A test agent for integration testing.
@@ -105,7 +105,7 @@ A test agent for integration testing.
 
   // Create today file
   writeFileSync(
-    join(ctx.stateDir, "today.md"),
+    join(ctx.stateDir, 'today.md'),
     `# Today
 
 ## Now
@@ -116,7 +116,7 @@ Running integration tests.
 
   // Create human file
   writeFileSync(
-    join(ctx.stateDir, "human.md"),
+    join(ctx.stateDir, 'human.md'),
     `# Human
 
 Test user for integration testing.
@@ -125,7 +125,7 @@ Test user for integration testing.
 
   // Create workspace file
   writeFileSync(
-    join(ctx.stateDir, "workspace.md"),
+    join(ctx.stateDir, 'workspace.md'),
     `# Workspace
 
 ## Active
@@ -140,17 +140,17 @@ Test user for integration testing.
  */
 export function addJournalEntry(ctx: TestContext, topic: string, content: string, date?: Date) {
   const entryDate = date || new Date();
-  const dateStr = entryDate.toISOString().split("T")[0];
+  const dateStr = entryDate.toISOString().split('T')[0];
   const journalPath = join(ctx.journalDir, `${dateStr}.jsonl`);
 
   const entry = {
     timestamp: entryDate.toISOString(),
     topic,
     content,
-    metadata: { source: "test" },
+    metadata: { source: 'test' },
   };
 
-  const line = JSON.stringify(entry) + "\n";
+  const line = JSON.stringify(entry) + '\n';
 
   if (existsSync(journalPath)) {
     appendFileSync(journalPath, line);
@@ -164,7 +164,7 @@ export function addJournalEntry(ctx: TestContext, topic: string, content: string
  */
 export function addEntityFile(
   ctx: TestContext,
-  type: "people" | "projects",
+  type: 'people' | 'projects',
   name: string,
   content: string,
 ) {
@@ -179,17 +179,17 @@ export function addReminder(
   ctx: TestContext,
   id: string,
   options: {
-    type: "cron" | "once";
+    type: 'cron' | 'once';
     expression: string;
     description: string;
     payload: string;
-    agent?: "claude" | "opencode";
+    agent?: 'claude' | 'opencode';
   },
 ) {
   const reminder = {
     id,
     ...options,
-    agent: options.agent || "claude",
+    agent: options.agent || 'claude',
     createdAt: new Date().toISOString(),
   };
 

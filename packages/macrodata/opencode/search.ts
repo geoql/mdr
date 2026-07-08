@@ -5,12 +5,12 @@
  * (local Transformers.js by default, remote provider when configured).
  */
 
-import { LocalIndex } from "vectra";
-import { existsSync, readFileSync, readdirSync, mkdirSync } from "fs";
-import { join } from "path";
-import { embed, embedBatch, embedQuery } from "../src/embeddings.js";
-import { getStateRoot } from "./context.js";
-import { logger } from "./logger.js";
+import { LocalIndex } from 'vectra';
+import { existsSync, readFileSync, readdirSync, mkdirSync } from 'fs';
+import { join } from 'path';
+import { embed, embedBatch, embedQuery } from '../src/embeddings.js';
+import { getStateRoot } from './context.js';
+import { logger } from './logger.js';
 
 // Memory index singleton
 let memoryIndex: LocalIndex | null = null;
@@ -24,9 +24,9 @@ async function getMemoryIndex(): Promise<LocalIndex> {
   if (memoryIndex) return memoryIndex;
 
   const stateRoot = getStateRoot();
-  const indexPath = join(stateRoot, ".index", "vectors");
+  const indexPath = join(stateRoot, '.index', 'vectors');
 
-  const indexDir = join(stateRoot, ".index");
+  const indexDir = join(stateRoot, '.index');
   if (!existsSync(indexDir)) {
     mkdirSync(indexDir, { recursive: true });
   }
@@ -34,14 +34,14 @@ async function getMemoryIndex(): Promise<LocalIndex> {
   memoryIndex = new LocalIndex(indexPath);
 
   if (!(await memoryIndex.isIndexCreated())) {
-    logger.log("Creating new memory index...");
+    logger.log('Creating new memory index...');
     await memoryIndex.createIndex();
   }
 
   return memoryIndex;
 }
 
-export type MemoryItemType = "journal" | "person" | "project" | "topic";
+export type MemoryItemType = 'journal' | 'person' | 'project' | 'topic';
 
 export interface SearchResult {
   content: string;
@@ -102,7 +102,7 @@ export async function searchMemory(
  * Rebuild memory index from journal and entity files
  */
 export async function rebuildMemoryIndex(): Promise<{ itemCount: number }> {
-  logger.log("Rebuilding memory index...");
+  logger.log('Rebuilding memory index...');
   const startTime = Date.now();
   const stateRoot = getStateRoot();
 
@@ -118,19 +118,19 @@ export async function rebuildMemoryIndex(): Promise<{ itemCount: number }> {
   const allItems: MemoryItem[] = [];
 
   // Index journal entries
-  const journalDir = join(stateRoot, "journal");
+  const journalDir = join(stateRoot, 'journal');
   if (existsSync(journalDir)) {
-    const files = readdirSync(journalDir).filter((f) => f.endsWith(".jsonl"));
+    const files = readdirSync(journalDir).filter((f) => f.endsWith('.jsonl'));
     for (const file of files) {
       try {
-        const content = readFileSync(join(journalDir, file), "utf-8");
-        const lines = content.trim().split("\n").filter(Boolean);
+        const content = readFileSync(join(journalDir, file), 'utf-8');
+        const lines = content.trim().split('\n').filter(Boolean);
         for (let i = 0; i < lines.length; i++) {
           try {
             const entry = JSON.parse(lines[i]);
             allItems.push({
               id: `journal-${file}-${i}`,
-              type: "journal",
+              type: 'journal',
               content: `[${entry.topic}] ${entry.content}`,
               source: file,
               timestamp: entry.timestamp,
@@ -146,19 +146,19 @@ export async function rebuildMemoryIndex(): Promise<{ itemCount: number }> {
   }
 
   // Index entity files (people, projects)
-  const entitiesDir = join(stateRoot, "entities");
+  const entitiesDir = join(stateRoot, 'entities');
   for (const [subdir, type] of [
-    ["people", "person"],
-    ["projects", "project"],
+    ['people', 'person'],
+    ['projects', 'project'],
   ] as const) {
     const dir = join(entitiesDir, subdir);
     if (!existsSync(dir)) continue;
 
-    const files = readdirSync(dir).filter((f) => f.endsWith(".md"));
+    const files = readdirSync(dir).filter((f) => f.endsWith('.md'));
     for (const file of files) {
       try {
-        const content = readFileSync(join(dir, file), "utf-8");
-        const filename = file.replace(".md", "");
+        const content = readFileSync(join(dir, file), 'utf-8');
+        const filename = file.replace('.md', '');
 
         // Split by ## headers
         const sections = content.split(/^## /m);
@@ -169,13 +169,13 @@ export async function rebuildMemoryIndex(): Promise<{ itemCount: number }> {
             type,
             content: sections[0].trim(),
             source: `${subdir}/${file}`,
-            section: "preamble",
+            section: 'preamble',
           });
         }
 
         for (let i = 1; i < sections.length; i++) {
           const section = sections[i];
-          const firstLine = section.split("\n")[0];
+          const firstLine = section.split('\n')[0];
           const sectionTitle = firstLine.trim();
           const sectionContent = section.slice(firstLine.length).trim();
 
@@ -196,16 +196,16 @@ export async function rebuildMemoryIndex(): Promise<{ itemCount: number }> {
   }
 
   // Index topics
-  const topicsDir = join(stateRoot, "topics");
+  const topicsDir = join(stateRoot, 'topics');
   if (existsSync(topicsDir)) {
-    const files = readdirSync(topicsDir).filter((f) => f.endsWith(".md"));
+    const files = readdirSync(topicsDir).filter((f) => f.endsWith('.md'));
     for (const file of files) {
       try {
-        const content = readFileSync(join(topicsDir, file), "utf-8");
-        const filename = file.replace(".md", "");
+        const content = readFileSync(join(topicsDir, file), 'utf-8');
+        const filename = file.replace('.md', '');
         allItems.push({
           id: `topic-${filename}`,
-          type: "topic",
+          type: 'topic',
           content: content.trim(),
           source: `topics/${file}`,
         });
@@ -279,9 +279,9 @@ export async function indexJournalEntry(entry: {
     id: `journal-${entry.timestamp}`,
     vector,
     metadata: {
-      type: "journal",
+      type: 'journal',
       content: `[${entry.topic}] ${entry.content}`,
-      source: "journal",
+      source: 'journal',
       timestamp: entry.timestamp,
     },
   });

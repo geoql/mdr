@@ -7,12 +7,12 @@
  * re-index and silently disabled indexing.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "vitest";
-import { DatabaseSync } from "node:sqlite";
-import { queryExchanges } from "../opencode/conversations";
+import { describe, test, expect, beforeEach, afterEach } from 'vitest';
+import { DatabaseSync } from 'node:sqlite';
+import { queryExchanges } from '../opencode/conversations';
 
 function createOpenCodeDb(): DatabaseSync {
-  const db = new DatabaseSync(":memory:");
+  const db = new DatabaseSync(':memory:');
   db.exec(`CREATE TABLE project (id TEXT PRIMARY KEY, worktree TEXT)`);
   db.exec(`CREATE TABLE session (
     id TEXT PRIMARY KEY,
@@ -55,13 +55,13 @@ function seedExchange(
     opts.userMsgId,
     opts.sessionId,
     opts.timeMs,
-    JSON.stringify({ role: "user" }),
+    JSON.stringify({ role: 'user' }),
   );
   db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`).run(
     opts.assistantMsgId,
     opts.sessionId,
     opts.timeMs + 1000,
-    JSON.stringify({ role: "assistant" }),
+    JSON.stringify({ role: 'assistant' }),
   );
   db.prepare(
     `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`,
@@ -70,7 +70,7 @@ function seedExchange(
     opts.userMsgId,
     opts.sessionId,
     opts.timeMs,
-    JSON.stringify({ type: "text", text: opts.userText }),
+    JSON.stringify({ type: 'text', text: opts.userText }),
   );
   db.prepare(
     `INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`,
@@ -79,11 +79,11 @@ function seedExchange(
     opts.assistantMsgId,
     opts.sessionId,
     opts.timeMs + 1000,
-    JSON.stringify({ type: "text", text: "assistant reply" }),
+    JSON.stringify({ type: 'text', text: 'assistant reply' }),
   );
 }
 
-describe("queryExchanges", () => {
+describe('queryExchanges', () => {
   let db: DatabaseSync;
 
   beforeEach(() => {
@@ -94,54 +94,54 @@ describe("queryExchanges", () => {
     db.close();
   });
 
-  test("returns all exchanges without a time filter", () => {
+  test('returns all exchanges without a time filter', () => {
     seedExchange(db, {
-      sessionId: "ses_1",
-      userMsgId: "msg_u1",
-      assistantMsgId: "msg_a1",
+      sessionId: 'ses_1',
+      userMsgId: 'msg_u1',
+      assistantMsgId: 'msg_a1',
       timeMs: 1000,
-      userText: "hello",
+      userText: 'hello',
     });
     seedExchange(db, {
-      sessionId: "ses_1",
-      userMsgId: "msg_u2",
-      assistantMsgId: "msg_a2",
+      sessionId: 'ses_1',
+      userMsgId: 'msg_u2',
+      assistantMsgId: 'msg_a2',
       timeMs: 5000,
-      userText: "world",
+      userText: 'world',
     });
 
     const rows = queryExchanges(db);
 
     expect(rows).toHaveLength(2);
-    expect(rows[0].user_text).toBe("hello");
-    expect(rows[1].user_text).toBe("world");
+    expect(rows[0].user_text).toBe('hello');
+    expect(rows[1].user_text).toBe('world');
   });
 
-  test("incremental query with sinceMs does not throw and filters correctly (#25)", () => {
+  test('incremental query with sinceMs does not throw and filters correctly (#25)', () => {
     seedExchange(db, {
-      sessionId: "ses_1",
-      userMsgId: "msg_u1",
-      assistantMsgId: "msg_a1",
+      sessionId: 'ses_1',
+      userMsgId: 'msg_u1',
+      assistantMsgId: 'msg_a1',
       timeMs: 1000,
-      userText: "old",
+      userText: 'old',
     });
     seedExchange(db, {
-      sessionId: "ses_1",
-      userMsgId: "msg_u2",
-      assistantMsgId: "msg_a2",
+      sessionId: 'ses_1',
+      userMsgId: 'msg_u2',
+      assistantMsgId: 'msg_a2',
       timeMs: 5000,
-      userText: "new",
+      userText: 'new',
     });
 
     const rows = queryExchanges(db, 2000);
 
     expect(rows).toHaveLength(1);
-    expect(rows[0].user_text).toBe("new");
-    expect(rows[0].user_msg_id).toBe("msg_u2");
+    expect(rows[0].user_text).toBe('new');
+    expect(rows[0].user_msg_id).toBe('msg_u2');
   });
 
-  test("throws on schema mismatch instead of returning an empty no-op result (#25)", () => {
-    const broken = new DatabaseSync(":memory:");
+  test('throws on schema mismatch instead of returning an empty no-op result (#25)', () => {
+    const broken = new DatabaseSync(':memory:');
     broken.exec(`CREATE TABLE message (id TEXT PRIMARY KEY)`);
 
     expect(() => queryExchanges(broken, 1000)).toThrow();
@@ -149,24 +149,24 @@ describe("queryExchanges", () => {
     broken.close();
   });
 
-  test("excludes subtask sessions", () => {
+  test('excludes subtask sessions', () => {
     seedExchange(db, {
-      sessionId: "ses_parent",
-      userMsgId: "msg_u1",
-      assistantMsgId: "msg_a1",
+      sessionId: 'ses_parent',
+      userMsgId: 'msg_u1',
+      assistantMsgId: 'msg_a1',
       timeMs: 1000,
-      userText: "parent",
+      userText: 'parent',
     });
     db.exec(
       `INSERT INTO session (id, project_id, parent_id, directory, time_created) VALUES ('ses_child', 'prj_1', 'ses_parent', '/tmp/proj', 2000)`,
     );
     db.prepare(
       `INSERT INTO message (id, session_id, time_created, data) VALUES ('msg_cu', 'ses_child', 2000, ?)`,
-    ).run(JSON.stringify({ role: "user" }));
+    ).run(JSON.stringify({ role: 'user' }));
 
     const rows = queryExchanges(db);
 
     expect(rows).toHaveLength(1);
-    expect(rows[0].user_text).toBe("parent");
+    expect(rows[0].user_text).toBe('parent');
   });
 });

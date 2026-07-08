@@ -4,21 +4,21 @@
  * Reads state files and formats them for injection into conversations
  */
 
-import { existsSync, readFileSync, readdirSync, mkdirSync, unlinkSync } from "fs";
+import { existsSync, readFileSync, readdirSync, mkdirSync, unlinkSync } from 'fs';
 
-import { join } from "path";
-import { getStateRoot, getJournalDir, getRemindersDir } from "../src/config.js";
-import { detectUser } from "../src/detect-user.js";
+import { join } from 'path';
+import { getStateRoot, getJournalDir, getRemindersDir } from '../src/config.js';
+import { detectUser } from '../src/detect-user.js';
 
 /**
  * Read and clear pending context from daemon
  */
 export function consumePendingContext(): string | null {
-  const pendingPath = join(getStateRoot(), ".pending-context");
+  const pendingPath = join(getStateRoot(), '.pending-context');
   if (!existsSync(pendingPath)) return null;
 
   try {
-    const content = readFileSync(pendingPath, "utf-8").trim();
+    const content = readFileSync(pendingPath, 'utf-8').trim();
     unlinkSync(pendingPath);
     return content || null;
   } catch {
@@ -27,7 +27,7 @@ export function consumePendingContext(): string | null {
 }
 
 // Re-export for compatibility
-export { getStateRoot } from "../src/config.js";
+export { getStateRoot } from '../src/config.js';
 
 /**
  * Initialize state directory structure (directories only, no default files)
@@ -39,12 +39,12 @@ export function initializeStateRoot(): void {
   // Create directories only - files created during onboarding
   const dirs = [
     stateRoot,
-    join(stateRoot, "state"),
-    join(stateRoot, "journal"),
-    join(stateRoot, "entities"),
-    join(stateRoot, "entities", "people"),
-    join(stateRoot, "entities", "projects"),
-    join(stateRoot, "topics"),
+    join(stateRoot, 'state'),
+    join(stateRoot, 'journal'),
+    join(stateRoot, 'entities'),
+    join(stateRoot, 'entities', 'people'),
+    join(stateRoot, 'entities', 'projects'),
+    join(stateRoot, 'topics'),
   ];
 
   for (const dir of dirs) {
@@ -57,12 +57,12 @@ export function initializeStateRoot(): void {
 function readFileOrEmpty(path: string): string {
   try {
     if (existsSync(path)) {
-      return readFileSync(path, "utf-8");
+      return readFileSync(path, 'utf-8');
     }
   } catch {
     // Ignore
   }
-  return "";
+  return '';
 }
 
 interface JournalEntry {
@@ -80,15 +80,15 @@ function getRecentJournal(count: number): JournalEntry[] {
 
   try {
     const files = readdirSync(journalDir)
-      .filter((f) => f.endsWith(".jsonl"))
+      .filter((f) => f.endsWith('.jsonl'))
       .sort()
       .reverse();
 
     for (const file of files) {
       if (entries.length >= count) break;
 
-      const content = readFileSync(join(journalDir, file), "utf-8");
-      const lines = content.trim().split("\n").filter(Boolean);
+      const content = readFileSync(join(journalDir, file), 'utf-8');
+      const lines = content.trim().split('\n').filter(Boolean);
 
       for (const line of lines.reverse()) {
         if (entries.length >= count) break;
@@ -108,7 +108,7 @@ function getRecentJournal(count: number): JournalEntry[] {
 
 interface Schedule {
   id: string;
-  type: "cron" | "once";
+  type: 'cron' | 'once';
   expression: string;
   description: string;
   payload: string;
@@ -121,10 +121,10 @@ function getSchedules(): Schedule[] {
 
   const schedules: Schedule[] = [];
   try {
-    const files = readdirSync(remindersDir).filter((f) => f.endsWith(".json"));
+    const files = readdirSync(remindersDir).filter((f) => f.endsWith('.json'));
     for (const file of files) {
       try {
-        const content = readFileSync(join(remindersDir, file), "utf-8");
+        const content = readFileSync(join(remindersDir, file), 'utf-8');
         schedules.push(JSON.parse(content));
       } catch {
         // Skip malformed files
@@ -153,7 +153,7 @@ interface FormatOptions {
 export async function formatContextForPrompt(options: FormatOptions = {}): Promise<string | null> {
   const { forCompaction = false, client } = options;
   const stateRoot = getStateRoot();
-  const identityPath = join(stateRoot, "state", "identity.md");
+  const identityPath = join(stateRoot, 'state', 'identity.md');
   const isFirstRun = !existsSync(identityPath);
 
   // First run - return minimal context with onboarding pointer and detected user info
@@ -179,54 +179,54 @@ Use this pre-detected info during onboarding instead of running detection script
   }
 
   const identity = readFileOrEmpty(identityPath);
-  const today = readFileOrEmpty(join(stateRoot, "state", "today.md"));
-  const human = readFileOrEmpty(join(stateRoot, "state", "human.md"));
-  const workspace = readFileOrEmpty(join(stateRoot, "state", "workspace.md"));
+  const today = readFileOrEmpty(join(stateRoot, 'state', 'today.md'));
+  const human = readFileOrEmpty(join(stateRoot, 'state', 'human.md'));
+  const workspace = readFileOrEmpty(join(stateRoot, 'state', 'workspace.md'));
 
   // Get recent journal
   const journalEntries = getRecentJournal(forCompaction ? 10 : 5);
   const journalFormatted = journalEntries
     .map((e) => {
       const ts = new Date(e.timestamp);
-      const date = isNaN(ts.getTime()) ? "unknown" : ts.toLocaleDateString();
-      return `- [${e.topic}] ${e.content.split("\n")[0]} (${date})`;
+      const date = isNaN(ts.getTime()) ? 'unknown' : ts.toLocaleDateString();
+      return `- [${e.topic}] ${e.content.split('\n')[0]} (${date})`;
     })
-    .join("\n");
+    .join('\n');
 
   // Get schedules
   const schedules = getSchedules();
   const schedulesFormatted =
     schedules.length > 0
-      ? schedules.map((s) => `- ${s.description} (${s.type}: ${s.expression})`).join("\n")
-      : "_No active schedules_";
+      ? schedules.map((s) => `- ${s.description} (${s.type}: ${s.expression})`).join('\n')
+      : '_No active schedules_';
 
   const sections = [
-    `<macrodata-identity>\n${identity || "_Not configured_"}\n</macrodata-identity>`,
-    `<macrodata-today>\n${today || "_Empty_"}\n</macrodata-today>`,
-    `<macrodata-human>\n${human || "_Empty_"}\n</macrodata-human>`,
+    `<macrodata-identity>\n${identity || '_Not configured_'}\n</macrodata-identity>`,
+    `<macrodata-today>\n${today || '_Empty_'}\n</macrodata-today>`,
+    `<macrodata-human>\n${human || '_Empty_'}\n</macrodata-human>`,
   ];
 
   if (workspace) {
     sections.push(`<macrodata-workspace>\n${workspace}\n</macrodata-workspace>`);
   }
 
-  sections.push(`<macrodata-journal>\n${journalFormatted || "_No entries_"}\n</macrodata-journal>`);
+  sections.push(`<macrodata-journal>\n${journalFormatted || '_No entries_'}\n</macrodata-journal>`);
 
   if (!forCompaction) {
     sections.push(`<macrodata-schedules>\n${schedulesFormatted}\n</macrodata-schedules>`);
 
     // List state files
-    const stateDir = join(stateRoot, "state");
+    const stateDir = join(stateRoot, 'state');
     /* v8 ignore next -- unreachable: this path only runs post-first-run, which
        means identity.md exists under stateDir, so stateDir always exists. */
     const stateFiles = existsSync(stateDir)
       ? readdirSync(stateDir)
-          .filter((f) => f.endsWith(".md"))
+          .filter((f) => f.endsWith('.md'))
           .map((f) => `state/${f}`)
       : [];
 
     // List entity files (scan all subdirs dynamically)
-    const entitiesDir = join(stateRoot, "entities");
+    const entitiesDir = join(stateRoot, 'entities');
     const entityFiles: string[] = [];
     if (existsSync(entitiesDir)) {
       for (const subdir of readdirSync(entitiesDir)) {
@@ -235,7 +235,7 @@ Use this pre-detected info during onboarding instead of running detection script
           /* v8 ignore next -- redundant guard: subdir came from readdirSync so it
              exists, and a non-directory throws below and is caught, not skipped here. */
           if (!existsSync(dir) || !readdirSync(dir)) continue;
-          for (const f of readdirSync(dir).filter((f) => f.endsWith(".md"))) {
+          for (const f of readdirSync(dir).filter((f) => f.endsWith('.md'))) {
             entityFiles.push(`entities/${subdir}/${f}`);
           }
         } catch {
@@ -248,13 +248,13 @@ Use this pre-detected info during onboarding instead of running detection script
     /* v8 ignore next -- unreachable: post-first-run always has state files
        (identity.md etc.), so allFiles is never empty here. */
     const filesFormatted =
-      allFiles.length > 0 ? allFiles.map((f) => `- ${f}`).join("\n") : "_No files yet_";
+      allFiles.length > 0 ? allFiles.map((f) => `- ${f}`).join('\n') : '_No files yet_';
 
     // Read usage from shared file
-    const usagePath = new URL("../USAGE.md", import.meta.url).pathname;
+    const usagePath = new URL('../USAGE.md', import.meta.url).pathname;
     /* v8 ignore next -- USAGE.md is always shipped alongside the built plugin,
        so the empty-usage fallback is defensive only. */
-    const usage = existsSync(usagePath) ? readFileSync(usagePath, "utf-8").trim() : "";
+    const usage = existsSync(usagePath) ? readFileSync(usagePath, 'utf-8').trim() : '';
 
     /* v8 ignore next 3 -- usage is always populated (USAGE.md ships with the
        plugin), so the no-usage skip is defensive only. */
@@ -288,7 +288,7 @@ Use this pre-detected info during onboarding instead of running detection script
                 allModels.push({
                   fullId: `${provider.id}/${modelId}`,
                   family: m.family || `${provider.id}/${modelId}`,
-                  releaseDate: m.release_date || "1970-01-01",
+                  releaseDate: m.release_date || '1970-01-01',
                 });
               }
             }
@@ -308,7 +308,7 @@ Use this pre-detected info during onboarding instead of running detection script
             .sort();
           if (models.length > 0) {
             sections.push(
-              `<macrodata-models>\nAvailable models for scheduling: ${models.join(", ")}\n</macrodata-models>`,
+              `<macrodata-models>\nAvailable models for scheduling: ${models.join(', ')}\n</macrodata-models>`,
             );
           }
         }
@@ -318,5 +318,5 @@ Use this pre-detected info during onboarding instead of running detection script
     }
   }
 
-  return `<macrodata>\n${sections.join("\n\n")}\n</macrodata>`;
+  return `<macrodata>\n${sections.join('\n\n')}\n</macrodata>`;
 }

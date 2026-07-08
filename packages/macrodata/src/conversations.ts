@@ -10,12 +10,12 @@
  * - Metadata: project, branch, timestamp, session
  */
 
-import { readdirSync, readFileSync, existsSync, statSync, writeFileSync, mkdirSync } from "fs";
-import { join, basename } from "path";
-import { homedir } from "os";
-import { embedBatch, embedQuery } from "./embeddings.js";
-import { LocalIndex } from "vectra";
-import { getIndexDir } from "./config.js";
+import { readdirSync, readFileSync, existsSync, statSync, writeFileSync, mkdirSync } from 'fs';
+import { join, basename } from 'path';
+import { homedir } from 'os';
+import { embedBatch, embedQuery } from './embeddings.js';
+import { LocalIndex } from 'vectra';
+import { getIndexDir } from './config.js';
 
 // Index state tracking for incremental updates
 interface IndexState {
@@ -24,19 +24,19 @@ interface IndexState {
 }
 
 function getIndexStatePath(): string {
-  return join(getIndexDir(), "conversations-state.json");
+  return join(getIndexDir(), 'conversations-state.json');
 }
 
 function loadIndexState(): IndexState {
   const statePath = getIndexStatePath();
   if (existsSync(statePath)) {
     try {
-      return JSON.parse(readFileSync(statePath, "utf-8"));
+      return JSON.parse(readFileSync(statePath, 'utf-8'));
     } catch {
-      console.warn("[Conversations] Index state corrupted, starting fresh");
+      console.warn('[Conversations] Index state corrupted, starting fresh');
     }
   }
-  return { files: {}, lastUpdate: "" };
+  return { files: {}, lastUpdate: '' };
 }
 
 function saveIndexState(state: IndexState): void {
@@ -49,12 +49,12 @@ function saveIndexState(state: IndexState): void {
 }
 
 // Configuration
-const CLAUDE_DIR = join(homedir(), ".claude");
-const PROJECTS_DIR = join(CLAUDE_DIR, "projects");
+const CLAUDE_DIR = join(homedir(), '.claude');
+const PROJECTS_DIR = join(CLAUDE_DIR, 'projects');
 
 // Types
 interface ConversationMessage {
-  type: "user" | "assistant" | "file-history-snapshot";
+  type: 'user' | 'assistant' | 'file-history-snapshot';
   message?: {
     role: string;
     content: string | Array<{ type: string; text?: string; thinking?: string }>;
@@ -92,7 +92,7 @@ let convIndexPath: string | null = null;
 
 async function getConversationIndex(): Promise<LocalIndex> {
   const currentIndexDir = getIndexDir();
-  const currentIndexPath = join(currentIndexDir, "conversations");
+  const currentIndexPath = join(currentIndexDir, 'conversations');
 
   // Invalidate cache if path changed
   if (convIndex && convIndexPath !== currentIndexPath) {
@@ -103,7 +103,7 @@ async function getConversationIndex(): Promise<LocalIndex> {
   if (convIndex) return convIndex;
 
   if (!existsSync(currentIndexDir)) {
-    const { mkdirSync } = await import("fs");
+    const { mkdirSync } = await import('fs');
     mkdirSync(currentIndexDir, { recursive: true });
   }
 
@@ -111,7 +111,7 @@ async function getConversationIndex(): Promise<LocalIndex> {
   convIndexPath = currentIndexPath;
 
   if (!(await convIndex.isIndexCreated())) {
-    console.log("[Conversations] Creating new conversation index...");
+    console.log('[Conversations] Creating new conversation index...');
     await convIndex.createIndex();
   }
 
@@ -123,7 +123,7 @@ async function getConversationIndex(): Promise<LocalIndex> {
  * e.g., "-Users-alex-Repos-my-project" -> "/Users/alex/Repos/my-project"
  */
 function decodeProjectPath(encoded: string): string {
-  return encoded.replace(/^-/, "/").replace(/-/g, "/");
+  return encoded.replace(/^-/, '/').replace(/-/g, '/');
 }
 
 /**
@@ -137,17 +137,17 @@ function getProjectName(projectPath: string): string {
  * Extract first text content from assistant message
  */
 function extractAssistantText(content: string | Array<{ type: string; text?: string }>): string {
-  if (typeof content === "string") {
+  if (typeof content === 'string') {
     return content.slice(0, 500);
   }
 
   for (const block of content) {
-    if (block.type === "text" && block.text) {
+    if (block.type === 'text' && block.text) {
       return block.text.slice(0, 500);
     }
   }
 
-  return "";
+  return '';
 }
 
 /**
@@ -156,7 +156,7 @@ function extractAssistantText(content: string | Array<{ type: string; text?: str
 function isToolResult(content: unknown): boolean {
   if (Array.isArray(content)) {
     // Array content with tool_result or tool_use_id = tool result, not user prompt
-    return content.some((item) => item.type === "tool_result" || item.tool_use_id !== undefined);
+    return content.some((item) => item.type === 'tool_result' || item.tool_use_id !== undefined);
   }
   return false;
 }
@@ -166,27 +166,27 @@ function isToolResult(content: unknown): boolean {
  */
 function isNoiseContent(content: string): boolean {
   // Skip compacted session summaries
-  if (content.startsWith("This session is being continued from a previous conversation")) {
+  if (content.startsWith('This session is being continued from a previous conversation')) {
     return true;
   }
 
   // Skip local command outputs
   if (
-    content.includes("<local-command-stdout>") ||
-    content.includes("<local-command-caveat>") ||
-    content.includes("<command-name>")
+    content.includes('<local-command-stdout>') ||
+    content.includes('<local-command-caveat>') ||
+    content.includes('<command-name>')
   ) {
     return true;
   }
 
   // Skip hook-injected context (standalone, not part of agent context)
   if (
-    content.startsWith("<current_time>") ||
-    content.startsWith("<context_status>") ||
-    content.startsWith("<state_files>") ||
-    content.startsWith("<system-reminder>") ||
-    content.startsWith("## Current State Files") ||
-    content.startsWith("Base directory for this skill:")
+    content.startsWith('<current_time>') ||
+    content.startsWith('<context_status>') ||
+    content.startsWith('<state_files>') ||
+    content.startsWith('<system-reminder>') ||
+    content.startsWith('## Current State Files') ||
+    content.startsWith('Base directory for this skill:')
   ) {
     return true;
   }
@@ -203,9 +203,9 @@ function isNoiseContent(content: string): boolean {
  * Extract actual user text from message content, filtering out tool results
  */
 function extractUserText(content: string | unknown[]): string {
-  let text = "";
+  let text = '';
 
-  if (typeof content === "string") {
+  if (typeof content === 'string') {
     text = content;
   } else {
     // Array content - try to find actual text blocks
@@ -213,28 +213,28 @@ function extractUserText(content: string | unknown[]): string {
       const b = block as Record<string, unknown>;
       /* v8 ignore next 3 -- defensive: callers pre-filter tool-result arrays via
          isToolResult(), so this redundant guard is never the deciding skip. */
-      if (b.type === "tool_result" || b.tool_use_id !== undefined) {
+      if (b.type === 'tool_result' || b.tool_use_id !== undefined) {
         continue;
       }
       // Look for text content
-      if (b.type === "text" && typeof b.text === "string") {
+      if (b.type === 'text' && typeof b.text === 'string') {
         text = b.text;
         break;
       }
     }
   }
 
-  if (!text) return "";
+  if (!text) return '';
 
   // Extract actual user message from agent context blocks
   // These have format: "# Agent Context\n...\nUser message: <actual message>"
-  if (text.startsWith("# Agent Context") || text.includes("\nUser message: ")) {
+  if (text.startsWith('# Agent Context') || text.includes('\nUser message: ')) {
     const userMsgMatch = text.match(/\nUser message: (.+)$/s);
     if (userMsgMatch) {
       return userMsgMatch[1].trim();
     }
     // No user message found in context block - skip it
-    return "";
+    return '';
   }
 
   return text;
@@ -248,8 +248,8 @@ function parseConversationFile(filePath: string, projectPath: string): Conversat
   const projectName = getProjectName(projectPath);
 
   try {
-    const content = readFileSync(filePath, "utf-8");
-    const lines = content.trim().split("\n").filter(Boolean);
+    const content = readFileSync(filePath, 'utf-8');
+    const lines = content.trim().split('\n').filter(Boolean);
 
     let currentUser: { msg: ConversationMessage; text: string } | null = null;
     let malformedLines = 0;
@@ -258,7 +258,7 @@ function parseConversationFile(filePath: string, projectPath: string): Conversat
       try {
         const msg: ConversationMessage = JSON.parse(line);
 
-        if (msg.type === "user" && msg.message?.content) {
+        if (msg.type === 'user' && msg.message?.content) {
           // Skip tool results - these aren't actual user prompts
           if (isToolResult(msg.message.content)) {
             continue;
@@ -273,7 +273,7 @@ function parseConversationFile(filePath: string, projectPath: string): Conversat
           }
 
           currentUser = { msg, text: userText };
-        } else if (msg.type === "assistant" && currentUser && msg.message?.content) {
+        } else if (msg.type === 'assistant' && currentUser && msg.message?.content) {
           // Found a user-assistant pair. currentUser.text is always non-empty
           // here (only truthy user text is stored above), so it needs no guard.
           const assistantText = extractAssistantText(msg.message.content);
@@ -285,9 +285,9 @@ function parseConversationFile(filePath: string, projectPath: string): Conversat
             projectPath: projectPath,
             branch: currentUser.msg.gitBranch,
             timestamp: currentUser.msg.timestamp || new Date().toISOString(),
-            sessionId: currentUser.msg.sessionId || basename(filePath, ".jsonl"),
+            sessionId: currentUser.msg.sessionId || basename(filePath, '.jsonl'),
             sessionPath: filePath,
-            messageUuid: currentUser.msg.uuid || "",
+            messageUuid: currentUser.msg.uuid || '',
           });
 
           currentUser = null; // Reset for next exchange
@@ -322,7 +322,7 @@ function* scanConversationFiles(): Generator<{
   const projectDirs = readdirSync(PROJECTS_DIR);
 
   for (const projectDir of projectDirs) {
-    if (projectDir.startsWith(".")) continue;
+    if (projectDir.startsWith('.')) continue;
 
     const projectPath = decodeProjectPath(projectDir);
     const projectFullPath = join(PROJECTS_DIR, projectDir);
@@ -333,7 +333,7 @@ function* scanConversationFiles(): Generator<{
 
     for (const file of files) {
       // Skip agent files, only process main conversation files
-      if (!file.endsWith(".jsonl") || file.startsWith("agent-")) continue;
+      if (!file.endsWith('.jsonl') || file.startsWith('agent-')) continue;
 
       const filePath = join(projectFullPath, file);
       const mtime = statSync(filePath).mtimeMs;
@@ -347,7 +347,7 @@ function* scanConversationFiles(): Generator<{
  * Rebuild the conversation index from scratch
  */
 export async function rebuildConversationIndex(): Promise<{ exchangeCount: number }> {
-  console.log("[Conversations] Starting full index rebuild...");
+  console.log('[Conversations] Starting full index rebuild...');
   const startTime = Date.now();
 
   const allExchanges: ConversationExchange[] = [];
@@ -371,7 +371,7 @@ export async function rebuildConversationIndex(): Promise<{ exchangeCount: numbe
 
   // Create embeddings for all exchanges
   const texts = allExchanges.map(
-    (e) => `${e.project}${e.branch ? ` (${e.branch})` : ""}: ${e.userPrompt}`,
+    (e) => `${e.project}${e.branch ? ` (${e.branch})` : ''}: ${e.userPrompt}`,
   );
 
   console.log(`[Conversations] Generating embeddings...`);
@@ -392,7 +392,7 @@ export async function rebuildConversationIndex(): Promise<{ exchangeCount: numbe
           assistantSummary: exchange.assistantSummary,
           project: exchange.project,
           projectPath: exchange.projectPath,
-          branch: exchange.branch || "",
+          branch: exchange.branch || '',
           timestamp: exchange.timestamp,
           sessionId: exchange.sessionId,
           sessionPath: exchange.sessionPath,
@@ -422,7 +422,7 @@ export async function updateConversationIndex(): Promise<{
   filesUpdated: number;
   skipped: number;
 }> {
-  console.log("[Conversations] Starting incremental update...");
+  console.log('[Conversations] Starting incremental update...');
   const startTime = Date.now();
 
   const state = loadIndexState();
@@ -432,7 +432,7 @@ export async function updateConversationIndex(): Promise<{
      the index, so isIndexCreated() is never false here; this full-rebuild
      fallback only guards a future change to that contract. */
   if (!(await idx.isIndexCreated())) {
-    console.log("[Conversations] No existing index, doing full rebuild");
+    console.log('[Conversations] No existing index, doing full rebuild');
     const result = await rebuildConversationIndex();
     return { exchangeCount: result.exchangeCount, filesUpdated: 0, skipped: 0 };
   }
@@ -458,7 +458,7 @@ export async function updateConversationIndex(): Promise<{
 
     if (exchanges.length > 0) {
       const texts = exchanges.map(
-        (e) => `${e.project}${e.branch ? ` (${e.branch})` : ""}: ${e.userPrompt}`,
+        (e) => `${e.project}${e.branch ? ` (${e.branch})` : ''}: ${e.userPrompt}`,
       );
       const vectors = await embedBatch(texts);
 
@@ -474,7 +474,7 @@ export async function updateConversationIndex(): Promise<{
               assistantSummary: exchange.assistantSummary,
               project: exchange.project,
               projectPath: exchange.projectPath,
-              branch: exchange.branch || "",
+              branch: exchange.branch || '',
               timestamp: exchange.timestamp,
               sessionId: exchange.sessionId,
               sessionPath: exchange.sessionPath,
@@ -547,7 +547,7 @@ export async function searchConversations(
   const stats = await idx.listItems();
 
   if (stats.length === 0) {
-    console.log("[Conversations] Index is empty");
+    console.log('[Conversations] Index is empty');
     return [];
   }
 
@@ -617,11 +617,11 @@ export async function expandConversation(
     throw new Error(`Session file not found: ${sessionPath}`);
   }
 
-  const content = readFileSync(sessionPath, "utf-8");
-  const lines = content.trim().split("\n").filter(Boolean);
+  const content = readFileSync(sessionPath, 'utf-8');
+  const lines = content.trim().split('\n').filter(Boolean);
 
   const messages: Array<{ role: string; content: string; timestamp?: string; uuid?: string }> = [];
-  let project = "";
+  let project = '';
   let branch: string | undefined;
   let malformedLines = 0;
 
@@ -630,7 +630,7 @@ export async function expandConversation(
     try {
       const msg: ConversationMessage = JSON.parse(line);
 
-      if (msg.type === "user" && msg.message?.content) {
+      if (msg.type === 'user' && msg.message?.content) {
         // Skip tool results
         if (isToolResult(msg.message.content)) {
           continue;
@@ -644,7 +644,7 @@ export async function expandConversation(
         }
 
         messages.push({
-          role: "user",
+          role: 'user',
           content: text,
           timestamp: msg.timestamp,
           uuid: msg.uuid,
@@ -656,11 +656,11 @@ export async function expandConversation(
         if (!branch && msg.gitBranch) {
           branch = msg.gitBranch;
         }
-      } else if (msg.type === "assistant" && msg.message?.content) {
+      } else if (msg.type === 'assistant' && msg.message?.content) {
         const text = extractAssistantText(msg.message.content);
         if (text) {
           messages.push({
-            role: "assistant",
+            role: 'assistant',
             content: text,
             timestamp: msg.timestamp,
             uuid: msg.uuid,

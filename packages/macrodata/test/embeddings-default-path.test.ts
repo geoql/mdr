@@ -3,19 +3,19 @@
  * MACRODATA_CONFIG_PATH set) with os.homedir redirected to a temp dir.
  */
 
-import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdtempSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+import { mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 
-const fakeHome = mkdtempSync(join(tmpdir(), "macrodata-embed-home-"));
+const fakeHome = mkdtempSync(join(tmpdir(), 'macrodata-embed-home-'));
 
-vi.mock("os", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("os")>();
+vi.mock('os', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('os')>();
   return { ...actual, homedir: () => fakeHome };
 });
 
-const { getRemoteEmbeddingConfig, resetEmbeddingConfigCache } = await import("../src/embeddings");
+const { getRemoteEmbeddingConfig, resetEmbeddingConfigCache } = await import('../src/embeddings');
 
 let prev: string | undefined;
 
@@ -31,8 +31,8 @@ afterEach(() => {
   resetEmbeddingConfigCache();
 });
 
-describe("getRemoteEmbeddingConfig default path", () => {
-  test("returns null when the default config.json is absent", () => {
+describe('getRemoteEmbeddingConfig default path', () => {
+  test('returns null when the default config.json is absent', () => {
     expect(getRemoteEmbeddingConfig()).toBeNull();
   });
 });

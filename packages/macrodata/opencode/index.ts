@@ -7,19 +7,19 @@
  * - Custom `macrodata` tool for memory operations
  */
 
-import type { Plugin, PluginInput } from "@opencode-ai/plugin";
-import { existsSync, mkdirSync, cpSync, readdirSync, readFileSync, openSync } from "fs";
-import { join } from "path";
-import { homedir } from "os";
-import { spawn } from "child_process";
-import { memoryTools } from "./tools.js";
+import type { Plugin, PluginInput } from '@opencode-ai/plugin';
+import { existsSync, mkdirSync, cpSync, readdirSync, readFileSync, openSync } from 'fs';
+import { join } from 'path';
+import { homedir } from 'os';
+import { spawn } from 'child_process';
+import { memoryTools } from './tools.js';
 import {
   formatContextForPrompt,
   consumePendingContext,
   initializeStateRoot,
   getStateRoot,
-} from "./context.js";
-import { logger } from "./logger.js";
+} from './context.js';
+import { logger } from './logger.js';
 
 /**
  * Check if a process with given PID is running
@@ -37,13 +37,13 @@ function isProcessRunning(pid: number): boolean {
  * Send SIGHUP to the daemon to reload config
  */
 function signalDaemonReload(): void {
-  const pidFile = join(homedir(), ".config", "macrodata", ".daemon.pid");
+  const pidFile = join(homedir(), '.config', 'macrodata', '.daemon.pid');
   if (!existsSync(pidFile)) return;
 
   try {
-    const pid = parseInt(readFileSync(pidFile, "utf-8").trim(), 10);
+    const pid = parseInt(readFileSync(pidFile, 'utf-8').trim(), 10);
     if (isProcessRunning(pid)) {
-      process.kill(pid, "SIGHUP");
+      process.kill(pid, 'SIGHUP');
     }
   } catch {
     // Ignore errors
@@ -58,22 +58,22 @@ const HEARTBEAT_STALE_MS = 15 * 60_000;
  * the heartbeat file is stale (wedged daemon, see #25).
  */
 function ensureDaemonRunning(): void {
-  const configDir = join(homedir(), ".config", "macrodata");
-  const pidFile = join(configDir, ".daemon.pid");
+  const configDir = join(homedir(), '.config', 'macrodata');
+  const pidFile = join(configDir, '.daemon.pid');
   const stateRoot = getStateRoot();
-  const heartbeatFile = join(stateRoot, ".daemon.heartbeat");
-  const daemonScript = join(import.meta.dirname, "..", "bin", "macrodata-daemon.js");
+  const heartbeatFile = join(stateRoot, '.daemon.heartbeat');
+  const daemonScript = join(import.meta.dirname, '..', 'bin', 'macrodata-daemon.js');
 
   if (existsSync(pidFile)) {
     try {
-      const pid = parseInt(readFileSync(pidFile, "utf-8").trim(), 10);
+      const pid = parseInt(readFileSync(pidFile, 'utf-8').trim(), 10);
       if (isProcessRunning(pid)) {
         if (!isHeartbeatStale(heartbeatFile)) {
           return;
         }
         logger.warn(`Daemon PID ${pid} alive but heartbeat stale, restarting`);
         try {
-          process.kill(pid, "SIGKILL");
+          process.kill(pid, 'SIGKILL');
         } catch {
           // Already gone
         }
@@ -88,13 +88,13 @@ function ensureDaemonRunning(): void {
     // Ensure config dir exists for PID file
     mkdirSync(configDir, { recursive: true });
 
-    const logFile = join(getStateRoot(), ".daemon.log");
-    const out = openSync(logFile, "a");
-    const err = openSync(logFile, "a");
+    const logFile = join(getStateRoot(), '.daemon.log');
+    const out = openSync(logFile, 'a');
+    const err = openSync(logFile, 'a');
 
     const child = spawn(process.execPath, [daemonScript], {
       detached: true,
-      stdio: ["ignore", out, err],
+      stdio: ['ignore', out, err],
       env: { ...process.env, MACRODATA_ROOT: stateRoot },
     });
     child.unref();
@@ -108,7 +108,7 @@ function isHeartbeatStale(heartbeatFile: string): boolean {
     return false;
   }
   try {
-    const lastBeat = parseInt(readFileSync(heartbeatFile, "utf-8").trim(), 10);
+    const lastBeat = parseInt(readFileSync(heartbeatFile, 'utf-8').trim(), 10);
     return Number.isFinite(lastBeat) && Date.now() - lastBeat > HEARTBEAT_STALE_MS;
   } catch {
     return false;
@@ -120,9 +120,9 @@ function isHeartbeatStale(heartbeatFile: string): boolean {
  * Skills are copied from the plugin's skills directory on first load
  */
 function installSkills(): void {
-  const globalSkillsDir = join(homedir(), ".config", "opencode", "skills");
+  const globalSkillsDir = join(homedir(), '.config', 'opencode', 'skills');
   // import.meta.dirname is the opencode/ folder
-  const pluginSkillsDir = join(import.meta.dirname, "skills");
+  const pluginSkillsDir = join(import.meta.dirname, 'skills');
 
   /* v8 ignore next 3 -- the skills/ directory always ships next to the built
      plugin, so this missing-dir bail-out is defensive only. */
@@ -168,7 +168,7 @@ export const MacrodataPlugin: Plugin = async (ctx: PluginInput) => {
 
   return {
     // Inject memory context into system prompt
-    "experimental.chat.system.transform": async (_input, output) => {
+    'experimental.chat.system.transform': async (_input, output) => {
       try {
         const pendingContext = consumePendingContext();
         if (pendingContext) {
@@ -187,7 +187,7 @@ export const MacrodataPlugin: Plugin = async (ctx: PluginInput) => {
     },
 
     // Inject memory context before compaction
-    "experimental.session.compacting": async (_input, output) => {
+    'experimental.session.compacting': async (_input, output) => {
       try {
         const memoryContext = await formatContextForPrompt({ forCompaction: true });
 

@@ -14,7 +14,7 @@
  *   MACRODATA_CHILD_TIMEOUT_MS=<ms>  (default: 10 minutes)
  */
 
-import { watch } from "chokidar";
+import { watch } from 'chokidar';
 import {
   existsSync,
   readFileSync,
@@ -23,29 +23,29 @@ import {
   mkdirSync,
   readdirSync,
   unlinkSync,
-} from "fs";
-import { join, basename } from "path";
-import { Cron } from "croner";
-import { spawn, execSync } from "child_process";
+} from 'fs';
+import { join, basename } from 'path';
+import { Cron } from 'croner';
+import { spawn, execSync } from 'child_process';
 import {
   getStateRoot,
   getEntitiesDir,
   getJournalDir,
   getIndexDir,
   getRemindersDir,
-} from "./config.js";
+} from './config.js';
 
 // The indexing modules pull in @huggingface/transformers + vectra (multi-second
 // import). Load them lazily so the daemon writes its PID file and starts
 // scheduling immediately instead of blocking on heavy imports.
 export async function loadIndexer() {
-  return import("./indexer.js");
+  return import('./indexer.js');
 }
 
 export async function loadConversationIndexers() {
   const [oc, cc] = await Promise.all([
-    import("../opencode/conversations.js"),
-    import("./conversations.js"),
+    import('../opencode/conversations.js'),
+    import('./conversations.js'),
   ]);
   return {
     updateOpenCodeConversations: oc.updateConversationIndex,
@@ -58,7 +58,7 @@ export async function loadConversationIndexers() {
  */
 export async function findExecutable(name: string): Promise<string | null> {
   try {
-    const result = execSync(`which ${name}`, { encoding: "utf-8" }).trim();
+    const result = execSync(`which ${name}`, { encoding: 'utf-8' }).trim();
     return result || null;
   } catch {
     return null;
@@ -72,19 +72,19 @@ export function getDaemonDir() {
 }
 
 export function getPidFile() {
-  return join(getDaemonDir(), ".daemon.pid");
+  return join(getDaemonDir(), '.daemon.pid');
 }
 
 export function getLogFile() {
-  return join(getDaemonDir(), ".daemon.log");
+  return join(getDaemonDir(), '.daemon.log');
 }
 
 export function getPendingContext() {
-  return join(getStateRoot(), ".pending-context");
+  return join(getStateRoot(), '.pending-context');
 }
 
 export function getHeartbeatFile() {
-  return join(getDaemonDir(), ".daemon.heartbeat");
+  return join(getDaemonDir(), '.daemon.heartbeat');
 }
 
 export const HEARTBEAT_INTERVAL_MS = 60_000;
@@ -101,11 +101,11 @@ export function getChildTimeoutMs(): number {
 
 export interface Schedule {
   id: string;
-  type: "cron" | "once";
+  type: 'cron' | 'once';
   expression: string; // cron expression or ISO datetime
   description: string;
   payload: string;
-  agent?: "opencode" | "claude"; // Which agent to trigger
+  agent?: 'opencode' | 'claude'; // Which agent to trigger
   model?: string; // Optional model override (e.g., "anthropic/claude-opus-4-6")
   createdAt: string;
 }
@@ -124,7 +124,7 @@ export function logError(message: string) {
 
 export function writePendingContext(message: string) {
   try {
-    appendFileSync(getPendingContext(), message + "\n");
+    appendFileSync(getPendingContext(), message + '\n');
   } catch (err) {
     logError(`Failed to write pending context: ${String(err)}`);
   }
@@ -134,17 +134,17 @@ export function writePendingContext(message: string) {
  * Trigger an agent with a message
  */
 export async function triggerAgent(
-  agent: "opencode" | "claude" | undefined,
+  agent: 'opencode' | 'claude' | undefined,
   message: string,
   options: { model?: string; description?: string } = {},
 ): Promise<boolean> {
   if (!agent) {
-    log("No agent specified in schedule, skipping trigger");
+    log('No agent specified in schedule, skipping trigger');
     return false;
   }
 
   const timestamp = new Date().toLocaleString();
-  const fullMessage = `[Scheduled reminder: ${options.description || "reminder"}]
+  const fullMessage = `[Scheduled reminder: ${options.description || 'reminder'}]
 Current time: ${timestamp}
 
 IMPORTANT: Use the macrodata_* tools (e.g., macrodata_log_journal, macrodata_search_memory) for memory operations. You are running in a non-interactive scheduled context.
@@ -152,29 +152,29 @@ IMPORTANT: Use the macrodata_* tools (e.g., macrodata_log_journal, macrodata_sea
 ${message}`;
 
   try {
-    if (agent === "opencode") {
+    if (agent === 'opencode') {
       // opencode run "message" --model provider/model
-      const args = ["run", fullMessage];
+      const args = ['run', fullMessage];
       if (options.model) {
-        args.push("--model", options.model);
+        args.push('--model', options.model);
       }
 
       // Find opencode in PATH or use npx as fallback
-      const opencodePath = (await findExecutable("opencode")) || "npx";
-      const finalArgs = opencodePath === "npx" ? ["opencode", ...args] : args;
+      const opencodePath = (await findExecutable('opencode')) || 'npx';
+      const finalArgs = opencodePath === 'npx' ? ['opencode', ...args] : args;
 
-      log(`Triggering OpenCode: ${opencodePath} ${finalArgs.join(" ").substring(0, 50)}...`);
+      log(`Triggering OpenCode: ${opencodePath} ${finalArgs.join(' ').substring(0, 50)}...`);
 
-      spawnSupervisedChild(opencodePath, finalArgs, "opencode");
+      spawnSupervisedChild(opencodePath, finalArgs, 'opencode');
 
       return true;
     } else {
       // claude --print "message" or claude -p "message"
-      const args = ["--print", fullMessage];
+      const args = ['--print', fullMessage];
 
       log(`Triggering Claude Code: claude --print "..."`);
 
-      spawnSupervisedChild("claude", args, "claude");
+      spawnSupervisedChild('claude', args, 'claude');
 
       return true;
     }
@@ -193,7 +193,7 @@ ${message}`;
 export function spawnSupervisedChild(command: string, args: string[], label: string) {
   const childTimeoutMs = getChildTimeoutMs();
   const proc = spawn(command, args, {
-    stdio: ["ignore", "pipe", "pipe"],
+    stdio: ['ignore', 'pipe', 'pipe'],
     detached: true,
     env: { ...process.env, PATH: process.env.PATH },
   });
@@ -204,10 +204,10 @@ export function spawnSupervisedChild(command: string, args: string[], label: str
     log(`[${label}] child exceeded ${childTimeoutMs}ms timeout, killing process group ${proc.pid}`);
     if (proc.pid) {
       try {
-        process.kill(-proc.pid, "SIGKILL");
+        process.kill(-proc.pid, 'SIGKILL');
       } catch {
         try {
-          proc.kill("SIGKILL");
+          proc.kill('SIGKILL');
         } catch {
           // Child already gone
         }
@@ -216,17 +216,17 @@ export function spawnSupervisedChild(command: string, args: string[], label: str
   }, childTimeoutMs);
   killTimer.unref();
 
-  proc.stdout?.on("data", (data) => {
+  proc.stdout?.on('data', (data) => {
     log(`[${label} stdout] ${data.toString().trim()}`);
   });
-  proc.stderr?.on("data", (data) => {
+  proc.stderr?.on('data', (data) => {
     log(`[${label} stderr] ${data.toString().trim()}`);
   });
-  proc.on("error", (err) => {
+  proc.on('error', (err) => {
     clearTimeout(killTimer);
     logError(`[${label}] child process error: ${String(err)}`);
   });
-  proc.on("exit", (code, signal) => {
+  proc.on('exit', (code, signal) => {
     clearTimeout(killTimer);
     log(`[${label}] child exited (code=${code}, signal=${signal})`);
   });
@@ -243,8 +243,8 @@ export function ensureDirectories() {
     entitiesDir,
     getJournalDir(),
     getRemindersDir(),
-    join(entitiesDir, "people"),
-    join(entitiesDir, "projects"),
+    join(entitiesDir, 'people'),
+    join(entitiesDir, 'projects'),
   ];
   for (const dir of dirs) {
     if (!existsSync(dir)) {
@@ -292,10 +292,10 @@ export function loadAllSchedules(): Schedule[] {
   try {
     if (!existsSync(remindersDir)) return schedules;
 
-    const files = readdirSync(remindersDir).filter((f) => f.endsWith(".json"));
+    const files = readdirSync(remindersDir).filter((f) => f.endsWith('.json'));
     for (const file of files) {
       try {
-        const content = readFileSync(join(remindersDir, file), "utf-8");
+        const content = readFileSync(join(remindersDir, file), 'utf-8');
         const schedule = JSON.parse(content) as Schedule;
         schedules.push(schedule);
       } catch (err) {
@@ -350,7 +350,7 @@ export async function defaultBackgroundIndexing(
   const updateAll = deps.updateAll ?? updateAllConversationIndexes;
   const indexer = await load();
   await indexer.preloadModel();
-  log("Embedding model preloaded");
+  log('Embedding model preloaded');
   await updateAll();
 }
 
@@ -369,14 +369,14 @@ export class MacrodataLocalDaemon {
   }
 
   async start() {
-    log("Starting macrodata local daemon");
+    log('Starting macrodata local daemon');
     log(`State root: ${getStateRoot()}`);
 
     // Check if already running
     ensureDirectories();
     const pidFile = getPidFile();
     if (existsSync(pidFile)) {
-      const existingPid = readFileSync(pidFile, "utf-8").trim();
+      const existingPid = readFileSync(pidFile, 'utf-8').trim();
       try {
         process.kill(parseInt(existingPid, 10), 0); // Check if process exists
         log(`Daemon already running (PID ${existingPid}), exiting`);
@@ -391,16 +391,16 @@ export class MacrodataLocalDaemon {
     writeFileSync(pidFile, process.pid.toString());
 
     // Set up signal handlers
-    process.on("SIGTERM", () => this.shutdown("SIGTERM"));
-    process.on("SIGINT", () => this.shutdown("SIGINT"));
-    process.on("SIGHUP", () => this.reload());
+    process.on('SIGTERM', () => this.shutdown('SIGTERM'));
+    process.on('SIGINT', () => this.shutdown('SIGINT'));
+    process.on('SIGHUP', () => this.reload());
 
     // The daemon must be hard to stop: a failed child, watcher error, or
     // rejected background promise should be logged, never fatal (#25).
-    process.on("unhandledRejection", (reason) => {
+    process.on('unhandledRejection', (reason) => {
       logError(`Unhandled rejection (daemon continues): ${String(reason)}`);
     });
-    process.on("uncaughtException", (err) => {
+    process.on('uncaughtException', (err) => {
       logError(`Uncaught exception (daemon continues): ${String(err?.stack || err)}`);
     });
 
@@ -420,7 +420,7 @@ export class MacrodataLocalDaemon {
     this.startHeartbeat();
 
     // Keep process alive
-    log("Daemon running");
+    log('Daemon running');
   }
 
   private startHeartbeat() {
@@ -444,12 +444,12 @@ export class MacrodataLocalDaemon {
       awaitWriteFinish: { stabilityThreshold: 100 },
     });
 
-    this.schedulesWatcher.on("add", (path) => {
-      if (!path.endsWith(".json")) return;
+    this.schedulesWatcher.on('add', (path) => {
+      if (!path.endsWith('.json')) return;
       log(`Reminder added: ${basename(path)}`);
       this.reloadSchedules();
       try {
-        const schedule = JSON.parse(readFileSync(path, "utf-8")) as Schedule;
+        const schedule = JSON.parse(readFileSync(path, 'utf-8')) as Schedule;
         writePendingContext(
           `<macrodata-update type="schedule-added" id="${schedule.id}">${schedule.description}</macrodata-update>`,
         );
@@ -458,16 +458,16 @@ export class MacrodataLocalDaemon {
       }
     });
 
-    this.schedulesWatcher.on("error", (err) => {
+    this.schedulesWatcher.on('error', (err) => {
       logError(`Reminders watcher error: ${String(err)}`);
     });
 
-    this.schedulesWatcher.on("change", (path) => {
-      if (!path.endsWith(".json")) return;
+    this.schedulesWatcher.on('change', (path) => {
+      if (!path.endsWith('.json')) return;
       log(`Reminder changed: ${basename(path)}`);
       this.reloadSchedules();
       try {
-        const schedule = JSON.parse(readFileSync(path, "utf-8")) as Schedule;
+        const schedule = JSON.parse(readFileSync(path, 'utf-8')) as Schedule;
         writePendingContext(
           `<macrodata-update type="schedule-updated" id="${schedule.id}">${schedule.description}</macrodata-update>`,
         );
@@ -476,12 +476,12 @@ export class MacrodataLocalDaemon {
       }
     });
 
-    this.schedulesWatcher.on("unlink", (path) => this.onReminderUnlinked(path));
+    this.schedulesWatcher.on('unlink', (path) => this.onReminderUnlinked(path));
   }
 
   private onReminderUnlinked(path: string) {
-    if (!path.endsWith(".json")) return;
-    const id = basename(path, ".json");
+    if (!path.endsWith('.json')) return;
+    const id = basename(path, '.json');
     log(`Reminder removed: ${id}`);
     writePendingContext(`<macrodata-update type="schedule-removed" id="${id}" />`);
     if (this.cronJobs.has(id)) {
@@ -491,11 +491,11 @@ export class MacrodataLocalDaemon {
   }
 
   private scheduleFor(schedule: Schedule) {
-    if (schedule.type === "cron") {
+    if (schedule.type === 'cron') {
       this.startCronJob(schedule);
       return;
     }
-    if (schedule.type === "once") {
+    if (schedule.type === 'once') {
       if (new Date(schedule.expression).getTime() > Date.now()) {
         this.startOnceJob(schedule);
       } else {
@@ -587,7 +587,7 @@ export class MacrodataLocalDaemon {
     saveSchedule(schedule);
 
     // Start the job
-    if (schedule.type === "cron") {
+    if (schedule.type === 'cron') {
       this.startCronJob(schedule);
     } else {
       this.startOnceJob(schedule);
@@ -603,7 +603,7 @@ export class MacrodataLocalDaemon {
   private startFileWatcher() {
     const stateRoot = getStateRoot();
     const entitiesDir = getEntitiesDir();
-    const stateDir = join(stateRoot, "state");
+    const stateDir = join(stateRoot, 'state');
 
     // Watch both state files and entities
     this.watcher = watch([stateDir, entitiesDir], {
@@ -611,18 +611,18 @@ export class MacrodataLocalDaemon {
       persistent: true,
     });
 
-    this.watcher.on("all", (event, path) => this.onWatchedFileEvent(event, path));
+    this.watcher.on('all', (event, path) => this.onWatchedFileEvent(event, path));
 
     log(`Watching for state/entity changes in: ${stateRoot}`);
   }
 
   onWatchedFileEvent(event: string, path: string) {
-    if (!path.endsWith(".md")) return;
-    if (event !== "add" && event !== "change") return;
+    if (!path.endsWith('.md')) return;
+    if (event !== 'add' && event !== 'change') return;
 
     log(`File ${event}: ${path}`);
 
-    const stateDir = join(getStateRoot(), "state");
+    const stateDir = join(getStateRoot(), 'state');
     const entitiesDir = getEntitiesDir();
 
     if (path.startsWith(stateDir)) {
@@ -636,7 +636,7 @@ export class MacrodataLocalDaemon {
 
   private injectStateFileDelta(path: string) {
     try {
-      const raw = readFileSync(path, "utf-8");
+      const raw = readFileSync(path, 'utf-8');
       const cap = 4000;
       // Cap the injected delta so a mid-session write can't blow the budget.
       const content =
@@ -685,7 +685,7 @@ export class MacrodataLocalDaemon {
   }
 
   reload() {
-    log("Reloading config (SIGHUP)");
+    log('Reloading config (SIGHUP)');
     log(`New state root: ${getStateRoot()}`);
 
     // Stop existing watchers
@@ -712,7 +712,7 @@ export class MacrodataLocalDaemon {
     this.watchRemindersDir();
     this.startFileWatcher();
 
-    log("Reload complete");
+    log('Reload complete');
   }
 
   shutdown(signal: string) {
@@ -744,7 +744,7 @@ export class MacrodataLocalDaemon {
     try {
       const pidFile = getPidFile();
       if (existsSync(pidFile)) {
-        const pid = readFileSync(pidFile, "utf-8").trim();
+        const pid = readFileSync(pidFile, 'utf-8').trim();
         if (pid === process.pid.toString()) {
           unlinkSync(pidFile);
         }
