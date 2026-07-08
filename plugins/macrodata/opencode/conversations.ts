@@ -26,6 +26,11 @@ const OPENCODE_DB_PATH =
 // Conversation index singleton
 let convIndex: LocalIndex | null = null;
 
+// Test seam: drop the cached index so a new MACRODATA_ROOT is picked up.
+export function resetConversationIndexForTests(): void {
+  convIndex = null;
+}
+
 async function getConversationIndex(): Promise<LocalIndex> {
   if (convIndex) return convIndex;
 

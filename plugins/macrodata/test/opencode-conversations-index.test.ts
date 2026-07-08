@@ -58,6 +58,17 @@ afterAll(() => {
   rmSync(stateRoot, { recursive: true, force: true });
 });
 
+describe("resetConversationIndexForTests", () => {
+  test("drops the cached index so a later query reopens it", async () => {
+    seed(db, { session: "ses_reset", u: "rmu", a: "rma", t: 1_700_000_050_000, text: "reset seam probe" });
+    await oc.rebuildConversationIndex();
+    oc.resetConversationIndexForTests();
+    // After reset the next call must reopen the on-disk index and still see data.
+    const stats = await oc.getConversationIndexStats();
+    expect(stats.exchangeCount).toBeGreaterThan(0);
+  }, 90000);
+});
+
 describe("rebuildConversationIndex", () => {
   test("indexes exchanges from the opencode db and is searchable", async () => {
     seed(db, { session: "ses_a", u: "mu1", a: "ma1", t: 1_700_000_000_000, text: "how to deploy a rust binary" });
