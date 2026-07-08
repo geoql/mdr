@@ -48,5 +48,5 @@ jobs:
           use_oidc: true
           files: ./coverage/lcov.info
           flags: unittests
-          name: geoql-macrodata
+          name: geoql-mdr
           fail_ci_if_error: true

@@ -16,7 +16,7 @@ Add to ~/.config/opencode/opencode.json:
 For Claude Code:
 \`\`\`
 /plugin marketplace add geoql/mdr
-/plugin install macrodata@macrodata
+/plugin install refiner@mdr
 \`\`\`
 
 ## What it gives you

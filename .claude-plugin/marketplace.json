@@ -1,5 +1,5 @@
 {
-	"name": "macrodata",
+	"name": "mdr",
 	"owner": {
 		"name": "Vinayak Kulkarni",
 		"url": "https://vinayakkulkarni.dev"
@@ -9,7 +9,7 @@
 	},
 	"plugins": [
 		{
-			"name": "macrodata",
+			"name": "refiner",
 			"source": "./plugins/macrodata",
 			"description": "Stateful agent tools for Claude Code. Local-only memory, scheduling, and autonomy.",
 			"version": "0.3.0"

@@ -66,7 +66,7 @@
               class="font-mono text-[13.5px] text-ink space-y-1"
             >
               <div><span class="text-ink-dim select-none mr-2">$</span>/plugin marketplace add geoql/mdr</div>
-              <div><span class="text-ink-dim select-none mr-2">$</span>/plugin install macrodata@macrodata</div>
+              <div><span class="text-ink-dim select-none mr-2">$</span>/plugin install refiner@mdr</div>
             </div>
             <a
               href="https://github.com/geoql/mdr"
