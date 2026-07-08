@@ -8,7 +8,7 @@
  * these tests will be skipped.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import {
   createTestContext,
   setupMinimalState,
@@ -46,6 +46,7 @@ describe.skipIf(!embeddingsAvailable)("indexer", () => {
   describe("indexJournalEntry", () => {
     test(
       "indexes a single journal entry",
+      { timeout: 30000 },
       async () => {
         const entry = {
           timestamp: new Date().toISOString(),
@@ -57,8 +58,7 @@ describe.skipIf(!embeddingsAvailable)("indexer", () => {
 
         const stats = await indexer!.getIndexStats();
         expect(stats.itemCount).toBe(1);
-      },
-      { timeout: 30000 }
+      }
     );
 
     test("indexed entries are searchable", async () => {

@@ -8,7 +8,7 @@
  * and sharp. If sharp is not built, these tests will be skipped.
  */
 
-import { describe, test, expect, beforeEach, afterEach, afterAll } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach, afterAll } from "vitest";
 import { spawn } from "child_process";
 import { existsSync, readFileSync, rmSync } from "fs";
 import { join, dirname } from "path";
@@ -37,7 +37,7 @@ const spawnedProcs: ReturnType<typeof spawn>[] = [];
 const startedDaemons: { pid: number; ctx: TestContext }[] = [];
 
 // The daemon ships compiled to dist/bin; `pnpm build` must run before tests.
-const DAEMON_SCRIPT_JS = join(dirname(import.meta.dir), "dist", "bin", "macrodata-daemon.js");
+const DAEMON_SCRIPT_JS = join(dirname(import.meta.dirname), "dist", "bin", "macrodata-daemon.js");
 
 async function startDaemon(ctx: TestContext): Promise<number | null> {
   return new Promise((resolve) => {

@@ -4,7 +4,7 @@
  * Tests schedule file management in isolated temp directories
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "fs";
 import { join } from "path";
 import {

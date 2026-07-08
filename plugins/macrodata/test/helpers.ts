@@ -4,7 +4,7 @@
  * Provides isolated test environments with temp directories
  */
 
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync } from "fs";
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 
@@ -158,7 +158,6 @@ export function addJournalEntry(
   const line = JSON.stringify(entry) + "\n";
 
   if (existsSync(journalPath)) {
-    const { appendFileSync } = require("fs");
     appendFileSync(journalPath, line);
   } else {
     writeFileSync(journalPath, line);

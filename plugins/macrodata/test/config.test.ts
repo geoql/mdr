@@ -4,7 +4,7 @@
  * Tests that MACRODATA_ROOT env var properly controls all paths
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { createTestContext, type TestContext } from "./helpers";
 import { getStateRoot, getStateDir, getEntitiesDir, getJournalDir, getIndexDir, getRemindersDir } from "../src/config";
 

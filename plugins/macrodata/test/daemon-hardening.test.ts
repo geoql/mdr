@@ -7,7 +7,7 @@
  * failures.
  */
 
-import { describe, test, expect, beforeEach, afterEach, afterAll } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach, afterAll } from "vitest";
 import { spawn } from "child_process";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
@@ -21,7 +21,7 @@ try {
   console.warn("[Test] Daemon hardening tests skipped - transformers not built");
 }
 
-const DAEMON_SCRIPT_JS = join(dirname(import.meta.dir), "dist", "bin", "macrodata-daemon.js");
+const DAEMON_SCRIPT_JS = join(dirname(import.meta.dirname), "dist", "bin", "macrodata-daemon.js");
 
 const startedDaemons: { pid: number }[] = [];
 

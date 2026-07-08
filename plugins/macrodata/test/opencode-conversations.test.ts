@@ -7,7 +7,7 @@
  * re-index and silently disabled indexing.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { DatabaseSync } from "node:sqlite";
 import { queryExchanges } from "../opencode/conversations";
 

@@ -4,9 +4,9 @@
  * Tests the shell script that integrates with Claude Code
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import { execSync } from "child_process";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from "fs";
 import { join, dirname } from "path";
 import {
   createTestContext,
@@ -17,7 +17,7 @@ import {
 } from "./helpers";
 
 // Get the hook script path
-const HOOK_SCRIPT = join(dirname(import.meta.dir), "bin", "macrodata-hook.sh");
+const HOOK_SCRIPT = join(dirname(import.meta.dirname), "bin", "macrodata-hook.sh");
 
 function runHook(ctx: TestContext, command: "session-start" | "prompt-submit"): string {
   try {
@@ -139,7 +139,7 @@ describe("hook script", () => {
       // Remove identity file
       const identityFile = join(ctx.stateDir, "identity.md");
       if (existsSync(identityFile)) {
-        require("fs").unlinkSync(identityFile);
+        unlinkSync(identityFile);
       }
 
       const output = runHook(ctx, "session-start");

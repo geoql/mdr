@@ -6,7 +6,7 @@
  * fallback paths are covered by the existing indexer tests.
  */
 
-import { describe, test, expect, beforeEach, afterEach, afterAll } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach, afterAll } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -160,7 +160,7 @@ describe("remote embedding requests", () => {
     expect(vector).toEqual([0.1, 0.2, 0.3]);
     expect(recordedRequests).toHaveLength(1);
     const req = recordedRequests[0];
-    expect(req.url).toEndWith("/v1/embeddings");
+    expect(req.url).toMatch(/\/v1\/embeddings$/);
     expect(req.authorization).toBe("Bearer sk-test");
     expect(req.body.model).toBe("test-model");
     expect(req.body.input).toEqual(["hello"]);
