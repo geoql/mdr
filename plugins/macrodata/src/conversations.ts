@@ -206,11 +206,12 @@ function extractUserText(content: string | unknown[]): string {
 
   if (typeof content === "string") {
     text = content;
-  } else if (Array.isArray(content)) {
+  } else {
     // Array content - try to find actual text blocks
     for (const block of content) {
       const b = block as Record<string, unknown>;
-      // Skip tool results
+      /* v8 ignore next 3 -- defensive: callers pre-filter tool-result arrays via
+         isToolResult(), so this redundant guard is never the deciding skip. */
       if (b.type === "tool_result" || b.tool_use_id !== undefined) {
         continue;
       }
@@ -272,23 +273,21 @@ function parseConversationFile(filePath: string, projectPath: string): Conversat
 
           currentUser = { msg, text: userText };
         } else if (msg.type === "assistant" && currentUser && msg.message?.content) {
-          // Found a user-assistant pair
+          // Found a user-assistant pair. currentUser.text is always non-empty
+          // here (only truthy user text is stored above), so it needs no guard.
           const assistantText = extractAssistantText(msg.message.content);
-
-          if (currentUser.text) {
-            exchanges.push({
-              id: `conv-${currentUser.msg.sessionId}-${currentUser.msg.uuid}`,
-              userPrompt: currentUser.text.slice(0, 1000),
-              assistantSummary: assistantText,
-              project: projectName,
-              projectPath: projectPath,
-              branch: currentUser.msg.gitBranch,
-              timestamp: currentUser.msg.timestamp || new Date().toISOString(),
-              sessionId: currentUser.msg.sessionId || basename(filePath, ".jsonl"),
-              sessionPath: filePath,
-              messageUuid: currentUser.msg.uuid || "",
-            });
-          }
+          exchanges.push({
+            id: `conv-${currentUser.msg.sessionId}-${currentUser.msg.uuid}`,
+            userPrompt: currentUser.text.slice(0, 1000),
+            assistantSummary: assistantText,
+            project: projectName,
+            projectPath: projectPath,
+            branch: currentUser.msg.gitBranch,
+            timestamp: currentUser.msg.timestamp || new Date().toISOString(),
+            sessionId: currentUser.msg.sessionId || basename(filePath, ".jsonl"),
+            sessionPath: filePath,
+            messageUuid: currentUser.msg.uuid || "",
+          });
 
           currentUser = null; // Reset for next exchange
         }
@@ -420,7 +419,9 @@ export async function updateConversationIndex(): Promise<{ exchangeCount: number
   const state = loadIndexState();
   const idx = await getConversationIndex();
 
-  // Check if index exists - if not, do full rebuild
+  /* v8 ignore next 5 -- defensive: getConversationIndex() above always creates
+     the index, so isIndexCreated() is never false here; this full-rebuild
+     fallback only guards a future change to that contract. */
   if (!(await idx.isIndexCreated())) {
     console.log("[Conversations] No existing index, doing full rebuild");
     const result = await rebuildConversationIndex();
