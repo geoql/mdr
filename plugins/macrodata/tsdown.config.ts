@@ -6,6 +6,7 @@ export default defineConfig({
     "bin/macrodata-daemon": "bin/macrodata-daemon.ts",
     "bin/index-conversations": "bin/index-conversations.ts",
     "src/index": "src/index.ts",
+    "src/daemon": "src/daemon.ts",
   },
   format: "esm",
   platform: "node",
