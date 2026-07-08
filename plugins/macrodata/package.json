@@ -54,18 +54,18 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
-    "@modelcontextprotocol/sdk": "^1.1.0",
-    "@opencode-ai/plugin": "^1.0.162",
-    "@opencode-ai/sdk": "^1.1.49",
-    "chokidar": "^4.0.3",
-    "croner": "^9.0.0",
-    "vectra": "^0.9.0",
-    "zod": "^3.24.1"
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@opencode-ai/plugin": "^1.17.15",
+    "@opencode-ai/sdk": "^1.17.15",
+    "chokidar": "^5.0.0",
+    "croner": "^10.0.1",
+    "vectra": "^0.15.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.1.0",
+    "@types/node": "^26.1.1",
     "oxfmt": "catalog:",
-    "oxlint": "^1.0.0",
+    "oxlint": "^1.73.0",
     "oxlint-tsgolint": "latest",
     "tsdown": "latest"
   },
