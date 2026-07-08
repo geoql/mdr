@@ -152,7 +152,7 @@ get_usage() {
 - **flags.md** is how things reach the user across sessions — one line + pointer. Surface, don't hoard.
 - **journal** (`log_journal`) is durable and retrievable via `search_memory`. Writing it down is remembering, not forgetting — put detail here.
 - **entities/** hold persistent per-project/topic notes (searchable). Eviction is expected: resolved/aging items leave state for the journal/entity, leaving a pointer.
-- Search before claiming ignorance. Full guide: `plugins/macrodata/USAGE.md`.
+- Search before claiming ignorance. Full guide: `packages/macrodata/USAGE.md`.
 USAGE
 }
 

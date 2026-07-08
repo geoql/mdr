@@ -2,16 +2,16 @@
  * Sync the published package version into manifests that release-please's
  * per-package `extra-files` cannot reach.
  *
- * release-please bumps `plugins/macrodata/package.json`, and via `extra-files`
- * it also bumps `plugins/macrodata/.claude-plugin/plugin.json` and
- * `plugins/macrodata/jsr.json`. The root Claude Code marketplace manifest
+ * release-please bumps `packages/macrodata/package.json`, and via `extra-files`
+ * it also bumps `packages/macrodata/.claude-plugin/plugin.json` and
+ * `packages/macrodata/jsr.json`. The root Claude Code marketplace manifest
  * (`.claude-plugin/marketplace.json`) lives outside the package directory, so
  * it is synced here from the canonical package version.
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const pkg = JSON.parse(
-  readFileSync('plugins/macrodata/package.json', 'utf-8'),
+  readFileSync('packages/macrodata/package.json', 'utf-8'),
 );
 const { version } = pkg;
 

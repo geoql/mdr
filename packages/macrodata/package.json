@@ -29,7 +29,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/geoql/mdr.git",
-    "directory": "plugins/macrodata"
+    "directory": "packages/macrodata"
   },
   "files": [
     "dist",
@@ -45,17 +45,17 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsdown",
+    "build": "vp pack",
     "prepublishOnly": "pnpm build",
     "start": "node dist/src/index.js",
     "daemon": "node dist/bin/macrodata-daemon.js",
     "pretest": "pnpm build",
     "test": "vitest run",
-    "check": "oxlint --type-aware --type-check",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "format": "oxfmt --write .",
-    "format:check": "oxfmt --check ."
+    "check": "vp lint --type-aware --type-check",
+    "lint": "vp lint",
+    "lint:fix": "vp lint --fix",
+    "format": "vp fmt",
+    "format:check": "vp fmt --check"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -72,7 +72,7 @@
     "oxfmt": "catalog:",
     "oxlint": "^1.73.0",
     "oxlint-tsgolint": "latest",
-    "tsdown": "latest"
+    "vite-plus": "catalog:"
   },
   "engines": {
     "node": ">=24.11.0"

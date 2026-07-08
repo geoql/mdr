@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```
 macrodata/
-└── plugins/
-    └── local/                  # Local file-based memory plugin
+└── packages/
+    └── macrodata/              # Local file-based memory plugin
         ├── .claude-plugin/     # Plugin metadata
         ├── bin/                # Daemon and hook scripts
         ├── skills/             # Plugin skills (e.g., onboarding)
@@ -31,7 +31,7 @@ pnpm --filter @geoql/mdr run start   # Run MCP server
 
 Macrodata provides persistent memory for AI coding agents. File-based, fully offline.
 
-**Source** (`plugins/macrodata/`):
+**Source** (`packages/macrodata/`):
 - `src/index.ts` - MCP server with 11 tools (log_journal, search_memory, etc.)
 - `src/indexer.ts` - Vectra-based vector index for semantic search
 - `src/embeddings.ts` - Transformers.js embedding generation (BGE model)

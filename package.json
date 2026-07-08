@@ -32,14 +32,14 @@
 		}
 	},
 	"scripts": {
-		"build": "pnpm -r --filter './plugins/*' run build && pnpm --filter @geoql/mdr-marketing run build",
+		"build": "pnpm -r --filter './packages/*' run build && pnpm --filter @geoql/mdr-marketing run build",
 		"build:marketing": "pnpm --filter @geoql/mdr-marketing run build",
 		"dev:marketing": "pnpm --filter @geoql/mdr-marketing dev",
-		"lint": "pnpm -r --filter './plugins/*' run lint",
-		"lint:fix": "pnpm -r --filter './plugins/*' run lint:fix",
-		"format": "pnpm -r --filter './plugins/*' run format",
-		"format:check": "pnpm -r --filter './plugins/*' run format:check",
-		"typecheck": "pnpm -r --filter './plugins/*' run check",
+		"lint": "pnpm -r --filter './packages/*' run lint",
+		"lint:fix": "pnpm -r --filter './packages/*' run lint:fix",
+		"format": "pnpm -r --filter './packages/*' run format",
+		"format:check": "pnpm -r --filter './packages/*' run format:check",
+		"typecheck": "pnpm -r --filter './packages/*' run check",
 		"test": "vitest run",
 		"coverage": "vitest run --coverage --testTimeout=90000",
 		"prepare": "is-ci || husky"

@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 
-const packages = readdirSync('plugins')
-  .map((name) => `plugins/${name}`)
+const packages = readdirSync('packages')
+  .map((name) => `packages/${name}`)
   .filter((dir) => readdirSync(dir).includes('jsr.json'));
 
 for (const dir of packages) {

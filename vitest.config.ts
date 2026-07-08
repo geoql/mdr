@@ -2,15 +2,15 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    projects: ['plugins/*'],
+    projects: ['packages/*'],
     coverage: {
       provider: 'v8',
       include: [
-        'plugins/*/src/**/*.ts',
-        'plugins/*/opencode/**/*.ts',
-        'plugins/*/bin/**/*.ts',
+        'packages/*/src/**/*.ts',
+        'packages/*/opencode/**/*.ts',
+        'packages/*/bin/**/*.ts',
       ],
-      exclude: ['plugins/*/dist/**', '**/*.d.ts'],
+      exclude: ['packages/*/dist/**', '**/*.d.ts'],
       reporter: ['text', 'lcov', 'json-summary'],
       reportsDirectory: './coverage',
       thresholds: {

@@ -57,7 +57,7 @@ jobs:
           rm -rf .release && mkdir -p .release
           # The npm set is derived from disk (every plugin package with
           # private !== true) so it can never drift from the package list.
-          for dir in $(node -e "const f=require('node:fs');for(const p of f.readdirSync('plugins')){const j='plugins/'+p+'/package.json';if(f.existsSync(j)&&JSON.parse(f.readFileSync(j,'utf8')).private!==true)console.log('plugins/'+p)}"); do
+          for dir in $(node -e "const f=require('node:fs');for(const p of f.readdirSync('packages')){const j='packages/'+p+'/package.json';if(f.existsSync(j)&&JSON.parse(f.readFileSync(j,'utf8')).private!==true)console.log('packages/'+p)}"); do
             (cd "$dir" && pnpm pack --pack-destination "$GITHUB_WORKSPACE/.release")
           done
 
@@ -95,7 +95,7 @@ jobs:
         run: |
           failed=""
           # The JSR set is every plugin that ships a jsr.json.
-          for dir in $(node -e "const f=require('node:fs');for(const p of f.readdirSync('plugins')){if(f.existsSync('plugins/'+p+'/jsr.json'))console.log('plugins/'+p)}"); do
+          for dir in $(node -e "const f=require('node:fs');for(const p of f.readdirSync('packages')){if(f.existsSync('packages/'+p+'/jsr.json'))console.log('packages/'+p)}"); do
             name=$(node -p "require('./$dir/package.json').name")
             version=$(node -p "require('./$dir/package.json').version")
             if curl -fsS "https://jsr.io/$name/$version/package.json" >/dev/null 2>&1; then

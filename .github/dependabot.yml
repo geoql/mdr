@@ -13,7 +13,7 @@ updates:
       prefix-development: chore
       include: scope
 
-  # npm ecosystem covers the pnpm workspace (plugins/* via pnpm-workspace.yaml).
+  # npm ecosystem covers the pnpm workspace (packages/* via pnpm-workspace.yaml).
   # Dependabot's `package-ecosystem: pnpm` is NOT supported yet — the `npm`
   # ecosystem auto-detects pnpm-lock.yaml and atomically updates BOTH
   # package.json AND pnpm-lock.yaml in the same PR.

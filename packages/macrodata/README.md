@@ -65,7 +65,7 @@ Every session starts with context injection — identity, current projects, dail
 ## Architecture
 
 ```
-plugins/macrodata/
+packages/macrodata/
 ├── .claude-plugin/plugin.json   # Claude Code plugin manifest (hooks + MCP server)
 ├── opencode/                    # OpenCode plugin variant
 │   ├── index.ts                 # Plugin entry: context injection + tools + daemon supervision
@@ -137,7 +137,7 @@ Macrodata runs inside the agent's existing permission model. It uses only the to
 pnpm install
 pnpm run lint        # oxlint
 pnpm run typecheck   # oxlint --type-aware --type-check
-pnpm run build       # tsdown
+pnpm run build       # vite-plus (vp pack)
 pnpm run coverage    # vitest run --coverage (100% gate)
 ```
 

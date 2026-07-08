@@ -148,7 +148,7 @@ macrodata_log_journal(topic="distill-summary", content="Processed N sessions. Ex
   "distilled_actions": [
     {
       "summary": "Added /distill skill to macrodata plugin",
-      "files": ["plugins/macrodata/skills/distill/SKILL.md"],
+      "files": ["packages/macrodata/skills/distill/SKILL.md"],
       "outcome": "Skill extracts facts from conversations via sub-agents"
     }
   ],

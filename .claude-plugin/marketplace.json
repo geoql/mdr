@@ -10,7 +10,7 @@
 	"plugins": [
 		{
 			"name": "refiner",
-			"source": "./plugins/macrodata",
+			"source": "./packages/macrodata",
 			"description": "Stateful agent tools for Claude Code. Local-only memory, scheduling, and autonomy.",
 			"version": "0.0.0"
 		}
