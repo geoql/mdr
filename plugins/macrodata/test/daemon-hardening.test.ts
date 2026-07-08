@@ -15,19 +15,19 @@ import { createTestContext, type TestContext } from "./helpers";
 
 let daemonAvailable = false;
 try {
-  await import("@xenova/transformers");
+  await import("@huggingface/transformers");
   daemonAvailable = true;
 } catch {
-  console.warn("[Test] Daemon hardening tests skipped - sharp not built");
+  console.warn("[Test] Daemon hardening tests skipped - transformers not built");
 }
 
-const DAEMON_SCRIPT = join(dirname(import.meta.dir), "bin", "macrodata-daemon.ts");
+const DAEMON_SCRIPT_JS = join(dirname(import.meta.dir), "dist", "bin", "macrodata-daemon.js");
 
 const startedDaemons: { pid: number }[] = [];
 
 async function startDaemon(ctx: TestContext, env: Record<string, string> = {}): Promise<number | null> {
   return new Promise((resolve) => {
-    const proc = spawn("bun", ["run", DAEMON_SCRIPT], {
+    const proc = spawn(process.execPath, [DAEMON_SCRIPT_JS], {
       env: {
         ...process.env,
         MACRODATA_ROOT: ctx.root,

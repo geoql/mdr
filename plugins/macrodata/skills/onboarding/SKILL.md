@@ -21,30 +21,22 @@ Use `AskUserQuestion` for any choice with multiple options (location, permission
 
 ### Phase 0: Prerequisites
 
-Check that Bun is installed (required for the MCP server):
+Check that Node.js (version 24 or newer) is installed (required for the MCP server):
 
 ```bash
-command -v bun
+command -v node && node --version
 ```
 
-If not found, offer to install it:
+If not found or older than 24, ask the user to install Node 24+.
 
-**Ask:** "Macrodata needs Bun to run. Would you like me to install it?"
+**Ask:** "Macrodata needs Node.js 24 or newer to run. Please install it (for example via nvm, fnm, or nodejs.org) and let me know when it's ready."
 
-If yes, run:
+Once available, verify it worked:
 ```bash
-curl -fsSL https://bun.sh/install | bash
+command -v node && node --version
 ```
 
-After installation, verify it worked:
-```bash
-# Source the updated PATH
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-command -v bun && bun --version
-```
-
-If they decline, explain that macrodata won't work without Bun and ask if they'd like to install it manually later.
+If Node is unavailable, explain that macrodata won't work without Node 24+ and ask if they'd like to install it later.
 
 ### Phase 1: User Info
 

@@ -1,7 +1,7 @@
 /**
  * Tests for the remote (OpenAI-compatible) embedding provider.
  *
- * A mock Bun HTTP server plays the embeddings API so the tests verify the
+ * A mock Node HTTP server plays the embeddings API so the tests verify the
  * real request/response wire format without network access. Local-model
  * fallback paths are covered by the existing indexer tests.
  */
@@ -10,6 +10,8 @@ import { describe, test, expect, beforeEach, afterEach, afterAll } from "bun:tes
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
+import { createServer, type Server, type IncomingMessage, type ServerResponse } from "node:http";
+import type { AddressInfo } from "node:net";
 
 import {
   embed,
@@ -44,20 +46,40 @@ function defaultResponder(input: string[]): Response {
   });
 }
 
-const server = Bun.serve({
-  port: 0,
-  fetch: async (req) => {
-    const body = (await req.json()) as RecordedRequest["body"];
-    recordedRequests.push({
-      url: req.url,
-      authorization: req.headers.get("authorization"),
-      body,
-    });
-    return respondWith(body.input);
-  },
-});
+function readBody(req: IncomingMessage): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    req.on("data", (chunk: Buffer) => chunks.push(chunk));
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+    req.on("error", reject);
+  });
+}
 
-const ENDPOINT = `http://localhost:${server.port}/v1`;
+async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  const raw = await readBody(req);
+  const body = JSON.parse(raw) as RecordedRequest["body"];
+  recordedRequests.push({
+    url: `http://localhost:${port}${req.url ?? ""}`,
+    authorization: req.headers.authorization ?? null,
+    body,
+  });
+
+  const response = respondWith(body.input);
+  res.statusCode = response.status;
+  response.headers.forEach((value, key) => res.setHeader(key, value));
+  res.end(Buffer.from(await response.arrayBuffer()));
+}
+
+const server: Server = createServer((req, res) => {
+  handleRequest(req, res).catch(() => {
+    res.statusCode = 500;
+    res.end();
+  });
+});
+server.listen(0);
+const port = (server.address() as AddressInfo).port;
+
+const ENDPOINT = `http://localhost:${port}/v1`;
 
 let configDir: string;
 
@@ -81,7 +103,7 @@ afterEach(() => {
 });
 
 afterAll(() => {
-  server.stop(true);
+  server.close();
 });
 
 describe("getRemoteEmbeddingConfig", () => {

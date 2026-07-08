@@ -9,7 +9,12 @@
 
 # Get the directory where this script lives
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-DAEMON="$SCRIPT_DIR/macrodata-daemon.ts"
+# Resolve compiled daemon: alongside when run from dist/bin, else ../dist/bin.
+if [ -f "$SCRIPT_DIR/macrodata-daemon.js" ]; then
+    DAEMON="$SCRIPT_DIR/macrodata-daemon.js"
+else
+    DAEMON="$SCRIPT_DIR/../dist/bin/macrodata-daemon.js"
+fi
 
 # State directory (configurable via MACRODATA_ROOT, config file, or defaults to ~/.config/macrodata)
 DEFAULT_ROOT="$HOME/.config/macrodata"
@@ -60,12 +65,12 @@ start_daemon() {
         return 0
     fi
 
-    local BUN="bun"
+    local NODE="node"
     # Ensure state directory exists
     mkdir -p "$STATE_ROOT"
     # Start daemon in background, redirect output to log
     # Note: daemon writes its own PID file, we don't write it here
-    MACRODATA_ROOT="$STATE_ROOT" nohup "$BUN" run "$DAEMON" >> "$LOGFILE" 2>&1 &
+    MACRODATA_ROOT="$STATE_ROOT" nohup "$NODE" "$DAEMON" >> "$LOGFILE" 2>&1 &
 
     # Wait briefly for daemon to write PID file (up to 2 seconds)
     local attempts=0

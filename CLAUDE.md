@@ -21,9 +21,10 @@ macrodata/
 ## Build and Development Commands
 
 ```bash
-# From plugins/macrodata/
-bun install
-bun run start       # Run MCP server
+# From the repo root
+pnpm install
+pnpm build          # Compile the plugin to dist/
+pnpm --filter @macrodata/opencode run start   # Run MCP server
 ```
 
 ## Architecture

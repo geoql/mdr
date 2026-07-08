@@ -28,18 +28,20 @@ try {
   console.warn("[Test] Daemon tests skipped - sharp not built");
 }
 
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 // Track all spawned daemon processes for cleanup, including ones whose PID
 // file never appeared — otherwise a startup slower than the poll window leaks
 // a detached daemon that outlives the test run.
 const spawnedProcs: ReturnType<typeof spawn>[] = [];
 const startedDaemons: { pid: number; ctx: TestContext }[] = [];
 
-// Get paths
-const DAEMON_SCRIPT = join(dirname(import.meta.dir), "bin", "macrodata-daemon.ts");
+// The daemon ships compiled to dist/bin; `pnpm build` must run before tests.
+const DAEMON_SCRIPT_JS = join(dirname(import.meta.dir), "dist", "bin", "macrodata-daemon.js");
 
 async function startDaemon(ctx: TestContext): Promise<number | null> {
   return new Promise((resolve) => {
-    const proc = spawn("bun", ["run", DAEMON_SCRIPT], {
+    const proc = spawn(process.execPath, [DAEMON_SCRIPT_JS], {
       env: {
         ...process.env,
         MACRODATA_ROOT: ctx.root,
@@ -128,7 +130,7 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
         // Wait for it to stop
         let attempts = 0;
         while (isDaemonRunning(pid) && attempts < 10) {
-          await Bun.sleep(100);
+          await sleep(100);
           attempts++;
         }
         if (isDaemonRunning(pid)) {
@@ -158,7 +160,7 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
       expect(pid).not.toBeNull();
 
       // Give it a moment to write logs
-      await Bun.sleep(500);
+      await sleep(500);
 
       const logFile = join(ctx.root, ".daemon.log");
       expect(existsSync(logFile)).toBe(true);
@@ -179,7 +181,7 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
       expect(pid).not.toBeNull();
 
       // Daemon should recreate them
-      await Bun.sleep(500);
+      await sleep(500);
       expect(existsSync(entitiesDir)).toBe(true);
       expect(existsSync(journalDir)).toBe(true);
     });
@@ -213,7 +215,7 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
       // Wait for process to die (longer timeout for cleanup)
       let attempts = 0;
       while (isDaemonRunning(pid!) && attempts < 50) {
-        await Bun.sleep(100);
+        await sleep(100);
         attempts++;
       }
 
@@ -237,7 +239,7 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
       expect(pid).not.toBeNull();
 
       // Check logs for schedule loading
-      await Bun.sleep(500);
+      await sleep(500);
       const logFile = join(ctx.root, ".daemon.log");
       const log = readFileSync(logFile, "utf-8");
       expect(log).toContain("Started cron job: test-schedule");
@@ -248,7 +250,7 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
       expect(pid).not.toBeNull();
 
       // Give daemon time to start
-      await Bun.sleep(500);
+      await sleep(500);
 
       // Add a new reminder while daemon is running
       addReminder(ctx, "new-schedule", {
@@ -259,7 +261,7 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
       });
 
       // Give file watcher time to detect
-      await Bun.sleep(1000);
+      await sleep(1000);
 
       const logFile = join(ctx.root, ".daemon.log");
       const log = readFileSync(logFile, "utf-8");
@@ -277,14 +279,14 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
       const pid = await startDaemon(ctx);
       expect(pid).not.toBeNull();
 
-      await Bun.sleep(500);
+      await sleep(500);
 
       // Remove the reminder
       const reminderFile = join(ctx.root, "reminders", "remove-me.json");
       rmSync(reminderFile);
 
       // Give file watcher time to detect
-      await Bun.sleep(1000);
+      await sleep(1000);
 
       const logFile = join(ctx.root, ".daemon.log");
       const log = readFileSync(logFile, "utf-8");
@@ -298,12 +300,12 @@ describe.skipIf(!daemonAvailable)("daemon", () => {
       const pid = await startDaemon(ctx);
       expect(pid).not.toBeNull();
 
-      await Bun.sleep(500);
+      await sleep(500);
 
       // Send SIGHUP
       process.kill(pid!, "SIGHUP");
 
-      await Bun.sleep(500);
+      await sleep(500);
 
       const logFile = join(ctx.root, ".daemon.log");
       const log = readFileSync(logFile, "utf-8");

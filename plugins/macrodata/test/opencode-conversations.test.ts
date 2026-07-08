@@ -8,26 +8,26 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { Database } from "bun:sqlite";
+import { DatabaseSync } from "node:sqlite";
 import { queryExchanges } from "../opencode/conversations";
 
-function createOpenCodeDb(): Database {
-  const db = new Database(":memory:");
-  db.run(`CREATE TABLE project (id TEXT PRIMARY KEY, worktree TEXT)`);
-  db.run(`CREATE TABLE session (
+function createOpenCodeDb(): DatabaseSync {
+  const db = new DatabaseSync(":memory:");
+  db.exec(`CREATE TABLE project (id TEXT PRIMARY KEY, worktree TEXT)`);
+  db.exec(`CREATE TABLE session (
     id TEXT PRIMARY KEY,
     project_id TEXT,
     parent_id TEXT,
     directory TEXT,
     time_created INTEGER
   )`);
-  db.run(`CREATE TABLE message (
+  db.exec(`CREATE TABLE message (
     id TEXT PRIMARY KEY,
     session_id TEXT,
     time_created INTEGER,
     data TEXT
   )`);
-  db.run(`CREATE TABLE part (
+  db.exec(`CREATE TABLE part (
     id TEXT PRIMARY KEY,
     message_id TEXT,
     session_id TEXT,
@@ -38,44 +38,44 @@ function createOpenCodeDb(): Database {
 }
 
 function seedExchange(
-  db: Database,
+  db: DatabaseSync,
   opts: { sessionId: string; userMsgId: string; assistantMsgId: string; timeMs: number; userText: string }
 ) {
-  db.run(`INSERT OR IGNORE INTO project (id, worktree) VALUES ('prj_1', '/tmp/proj')`);
-  db.run(`INSERT OR IGNORE INTO session (id, project_id, parent_id, directory, time_created) VALUES (?, 'prj_1', NULL, '/tmp/proj', ?)`, [
+  db.exec(`INSERT OR IGNORE INTO project (id, worktree) VALUES ('prj_1', '/tmp/proj')`);
+  db.prepare(`INSERT OR IGNORE INTO session (id, project_id, parent_id, directory, time_created) VALUES (?, 'prj_1', NULL, '/tmp/proj', ?)`).run(
     opts.sessionId,
-    opts.timeMs,
-  ]);
-  db.run(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`, [
+    opts.timeMs
+  );
+  db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`).run(
     opts.userMsgId,
     opts.sessionId,
     opts.timeMs,
-    JSON.stringify({ role: "user" }),
-  ]);
-  db.run(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`, [
+    JSON.stringify({ role: "user" })
+  );
+  db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES (?, ?, ?, ?)`).run(
     opts.assistantMsgId,
     opts.sessionId,
     opts.timeMs + 1000,
-    JSON.stringify({ role: "assistant" }),
-  ]);
-  db.run(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`, [
+    JSON.stringify({ role: "assistant" })
+  );
+  db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`).run(
     `${opts.userMsgId}-p`,
     opts.userMsgId,
     opts.sessionId,
     opts.timeMs,
-    JSON.stringify({ type: "text", text: opts.userText }),
-  ]);
-  db.run(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`, [
+    JSON.stringify({ type: "text", text: opts.userText })
+  );
+  db.prepare(`INSERT INTO part (id, message_id, session_id, time_created, data) VALUES (?, ?, ?, ?, ?)`).run(
     `${opts.assistantMsgId}-p`,
     opts.assistantMsgId,
     opts.sessionId,
     opts.timeMs + 1000,
-    JSON.stringify({ type: "text", text: "assistant reply" }),
-  ]);
+    JSON.stringify({ type: "text", text: "assistant reply" })
+  );
 }
 
 describe("queryExchanges", () => {
-  let db: Database;
+  let db: DatabaseSync;
 
   beforeEach(() => {
     db = createOpenCodeDb();
@@ -108,8 +108,8 @@ describe("queryExchanges", () => {
   });
 
   test("throws on schema mismatch instead of returning an empty no-op result (#25)", () => {
-    const broken = new Database(":memory:");
-    broken.run(`CREATE TABLE message (id TEXT PRIMARY KEY)`);
+    const broken = new DatabaseSync(":memory:");
+    broken.exec(`CREATE TABLE message (id TEXT PRIMARY KEY)`);
 
     expect(() => queryExchanges(broken, 1000)).toThrow();
 
@@ -118,10 +118,10 @@ describe("queryExchanges", () => {
 
   test("excludes subtask sessions", () => {
     seedExchange(db, { sessionId: "ses_parent", userMsgId: "msg_u1", assistantMsgId: "msg_a1", timeMs: 1000, userText: "parent" });
-    db.run(`INSERT INTO session (id, project_id, parent_id, directory, time_created) VALUES ('ses_child', 'prj_1', 'ses_parent', '/tmp/proj', 2000)`);
-    db.run(`INSERT INTO message (id, session_id, time_created, data) VALUES ('msg_cu', 'ses_child', 2000, ?)`, [
-      JSON.stringify({ role: "user" }),
-    ]);
+    db.exec(`INSERT INTO session (id, project_id, parent_id, directory, time_created) VALUES ('ses_child', 'prj_1', 'ses_parent', '/tmp/proj', 2000)`);
+    db.prepare(`INSERT INTO message (id, session_id, time_created, data) VALUES ('msg_cu', 'ses_child', 2000, ?)`).run(
+      JSON.stringify({ role: "user" })
+    );
 
     const rows = queryExchanges(db);
 

@@ -14,7 +14,7 @@
 import { existsSync, mkdirSync } from "fs";
 import { join, basename } from "path";
 import { homedir } from "os";
-import { Database } from "bun:sqlite";
+import { DatabaseSync } from "node:sqlite";
 import { LocalIndex } from "vectra";
 import { embedBatch, embedQuery } from "../src/embeddings.js";
 import { getStateRoot } from "./context.js";
@@ -67,14 +67,14 @@ export interface ConversationSearchResult {
 /**
  * Open the OpenCode SQLite database (read-only)
  */
-function openDb(): Database | null {
+function openDb(): DatabaseSync | null {
   if (!existsSync(OPENCODE_DB_PATH)) {
     logger.log(`OpenCode database not found at ${OPENCODE_DB_PATH}`);
     return null;
   }
 
   try {
-    return new Database(OPENCODE_DB_PATH, { readonly: true });
+    return new DatabaseSync(OPENCODE_DB_PATH, { readOnly: true });
   } catch (err) {
     logger.error(`Failed to open OpenCode database: ${err}`);
     return null;
@@ -101,7 +101,7 @@ interface ExchangeRow {
  * 4. Joins to project for worktree path
  * 5. Excludes subtask sessions (parent_id IS NULL)
  */
-export function queryExchanges(db: Database, sinceMs?: number): ExchangeRow[] {
+export function queryExchanges(db: DatabaseSync, sinceMs?: number): ExchangeRow[] {
   // Interpolated inside the user_messages CTE body, where only `m` and `s`
   // are in scope (`um` is the outer query's alias and must not be used here).
   const whereClause = sinceMs ? "AND m.time_created > ?" : "";
@@ -167,7 +167,7 @@ export function queryExchanges(db: Database, sinceMs?: number): ExchangeRow[] {
   `;
 
   try {
-    return db.prepare(sql).all(...params) as ExchangeRow[];
+    return db.prepare(sql).all(...params) as unknown as ExchangeRow[];
   } catch (err) {
     // Propagate instead of returning [] so callers can't mistake a schema
     // mismatch for "no new exchanges" (a silent no-op that previously

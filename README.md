@@ -58,7 +58,7 @@ The daemon is a simple cron runner that spawns Claude Code when reminders fire. 
 ## Requirements
 
 - This will likely only work on macOS and Linux systems. It may work with WSL on Windows, but this is untested.
-- Requires [Bun](https://bun.com/).
+- Requires [Node.js](https://nodejs.org/) 24 or newer.
 
 ## Installation
 

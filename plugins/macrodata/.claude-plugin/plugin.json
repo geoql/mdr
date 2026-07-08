@@ -39,7 +39,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"command": "bun run ${CLAUDE_PLUGIN_ROOT}/bin/index-conversations.ts"
+						"command": "node ${CLAUDE_PLUGIN_ROOT}/dist/bin/index-conversations.js"
 					},
 					{
 						"type": "prompt",
@@ -52,10 +52,9 @@
 	},
 	"mcpServers": {
 		"macrodata": {
-			"command": "bun",
+			"command": "node",
 			"args": [
-				"run",
-				"${CLAUDE_PLUGIN_ROOT}/src/index.ts"
+				"${CLAUDE_PLUGIN_ROOT}/dist/src/index.js"
 			]
 		}
 	}

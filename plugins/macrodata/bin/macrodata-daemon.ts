@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * Macrodata Local Daemon
  *
@@ -6,7 +6,7 @@
  * Claude Code or OpenCode via CLI when reminders fire.
  *
  * Usage:
- *   MACRODATA_ROOT=~/.config/macrodata bun run macrodata-daemon.ts
+ *   MACRODATA_ROOT=~/.config/macrodata node macrodata-daemon.js
  *
  * Environment:
  *   MACRODATA_AGENT=opencode|claude  (default: auto-detect)

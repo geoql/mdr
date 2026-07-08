@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 /**
  * Version script for changesets.
  * Runs changeset version, then syncs version to plugin manifests.
@@ -10,7 +10,7 @@ import { join } from "node:path";
 const root = join(import.meta.dirname, "..");
 
 // Run changeset version first
-execSync("bunx changeset version", { cwd: root, stdio: "inherit" });
+execSync("pnpm exec changeset version", { cwd: root, stdio: "inherit" });
 
 // Read the new version from the package
 const pkgPath = join(root, "plugins/macrodata/package.json");

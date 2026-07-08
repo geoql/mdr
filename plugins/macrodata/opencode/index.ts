@@ -58,7 +58,7 @@ function ensureDaemonRunning(): void {
   const pidFile = join(configDir, ".daemon.pid");
   const stateRoot = getStateRoot();
   const heartbeatFile = join(stateRoot, ".daemon.heartbeat");
-  const daemonScript = join(import.meta.dirname, "..", "bin", "macrodata-daemon.ts");
+  const daemonScript = join(import.meta.dirname, "..", "bin", "macrodata-daemon.js");
 
   if (existsSync(pidFile)) {
     try {
@@ -88,7 +88,7 @@ function ensureDaemonRunning(): void {
     const out = openSync(logFile, "a");
     const err = openSync(logFile, "a");
     
-    const child = spawn("bun", ["run", daemonScript], {
+    const child = spawn(process.execPath, [daemonScript], {
       detached: true,
       stdio: ["ignore", out, err],
       env: { ...process.env, MACRODATA_ROOT: stateRoot },
