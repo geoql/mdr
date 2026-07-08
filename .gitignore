@@ -4,3 +4,6 @@ dist/
 .dev.vars
 *.log
 .omo
+
+# coverage output
+coverage/
