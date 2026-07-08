@@ -120,6 +120,8 @@ function installSkills(): void {
   // import.meta.dirname is the opencode/ folder
   const pluginSkillsDir = join(import.meta.dirname, "skills");
 
+  /* v8 ignore next 3 -- the skills/ directory always ships next to the built
+     plugin, so this missing-dir bail-out is defensive only. */
   if (!existsSync(pluginSkillsDir)) {
     return;
   }
@@ -170,6 +172,8 @@ export const MacrodataPlugin: Plugin = async (ctx: PluginInput) => {
         }
 
         const memoryContext = await formatContextForPrompt({ client: ctx.client });
+        /* v8 ignore next 3 -- outside compaction formatContextForPrompt always
+           returns a string (onboarding or full context), never null. */
         if (memoryContext) {
           output.system.push(memoryContext);
         }
