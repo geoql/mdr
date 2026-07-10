@@ -233,8 +233,8 @@ importers:
         specifier: ^1.29.0
         version: 1.29.0(zod@4.4.3)
       '@opencode-ai/plugin':
-        specifier: ^1.17.15
-        version: 1.17.15
+        specifier: ^1.17.18
+        version: 1.17.18
       '@opencode-ai/sdk':
         specifier: ^1.17.15
         version: 1.17.15
@@ -1343,8 +1343,8 @@ packages:
       zod:
         optional: true
 
-  '@opencode-ai/plugin@1.17.15':
-    resolution: {integrity: sha512-Y/3vs1K6TBcR8yBdNqbYGUX2z9ny7rxTyxZszI0sK2mPX9rMLlrmtya4I3QKXv6qRv12R4oN3psGr60AZS5fVg==}
+  '@opencode-ai/plugin@1.17.18':
+    resolution: {integrity: sha512-tqVBzhTHYUzO0laAmcQeBtT56tXYM5VGUk9V60O+cMx4kkSfac4qEfPVguCGUMJnfcU+u+EPvpME6xmHWoQE8w==}
     peerDependencies:
       '@opentui/core': '>=0.4.3'
       '@opentui/keymap': '>=0.4.3'
@@ -1359,6 +1359,9 @@ packages:
 
   '@opencode-ai/sdk@1.17.15':
     resolution: {integrity: sha512-gWRQOEggHTELJ9+BtelxnuAczk9qutCXVZenPgRPaT8oVxePf52jfWbqfhyFjnrN8Vlp8tCCTdkEpFW5pZAuEA==}
+
+  '@opencode-ai/sdk@1.17.18':
+    resolution: {integrity: sha512-c/C9PhY8PrbcxDY+JIYtOZsrmMD0KzoVvxq+RGUrZ6LQp57SuVBbT4lfwA2G8Se5RNC1N5JtYjiuaXeECnF2SQ==}
 
   '@oxc-minify/binding-android-arm-eabi@0.133.0':
     resolution: {integrity: sha512-D8M1+nqwLaACHZsld/t6f+cE4N97XOu5iQ88f1ZaYH4ptFzFrXo5N7wUKACTI4xmNUD+6W0Y4Apk5U2r8HLdBQ==}
@@ -4716,8 +4719,8 @@ packages:
   exsolve@1.1.0:
     resolution: {integrity: sha512-D+42+T12DdIlJM3uepa55qGiL3sYdLBOxIl2ifQCzCHz4c7eiolaHsi3BIqEr7JxBzxv2pYZQX9kw16ziMcEmw==}
 
-  fast-check@4.8.0:
-    resolution: {integrity: sha512-GOJ158CUMnN6cSahsv4+ExARvIDuzzinFjkp0E9WtiBa5zcVeLozVkWaE4IzFcc+Y48Wp1EDlUZsXRyAztQcSg==}
+  fast-check@4.9.0:
+    resolution: {integrity: sha512-7ms6T7SybUev/PQITciI0yLM2pOSFy5zpG8Ty7tQofcVaQUvrMXp6CBwqF6fThLCLOrfBtuHAtwq6Yu4XPCllg==}
     engines: {node: '>=12.17.0'}
 
   fast-deep-equal@3.1.3:
@@ -8810,14 +8813,18 @@ snapshots:
       - vite
       - vue
 
-  '@opencode-ai/plugin@1.17.15':
+  '@opencode-ai/plugin@1.17.18':
     dependencies:
       '@ai-sdk/provider': 3.0.8
-      '@opencode-ai/sdk': 1.17.15
+      '@opencode-ai/sdk': 1.17.18
       effect: 4.0.0-beta.83
       zod: 4.1.8
 
   '@opencode-ai/sdk@1.17.15':
+    dependencies:
+      cross-spawn: 7.0.6
+
+  '@opencode-ai/sdk@1.17.18':
     dependencies:
       cross-spawn: 7.0.6
 
@@ -11072,7 +11079,7 @@ snapshots:
   effect@4.0.0-beta.83:
     dependencies:
       '@standard-schema/spec': 1.1.0
-      fast-check: 4.8.0
+      fast-check: 4.9.0
       find-my-way-ts: 0.1.6
       ini: 7.0.0
       kubernetes-types: 1.30.0
@@ -11470,7 +11477,7 @@ snapshots:
 
   exsolve@1.1.0: {}
 
-  fast-check@4.8.0:
+  fast-check@4.9.0:
     dependencies:
       pure-rand: 8.4.1
 
