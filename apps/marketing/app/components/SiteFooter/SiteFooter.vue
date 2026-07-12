@@ -35,9 +35,7 @@
         />
         local-first · offline · MIT
       </span>
-      <span
-        >© {{ year }} geoql · fork of ascorbic/macrodata</span
-      >
+      <span>© {{ year }} geoql · fork of ascorbic/macrodata</span>
     </div>
   </footer>
 </template>

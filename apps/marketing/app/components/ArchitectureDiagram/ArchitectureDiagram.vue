@@ -52,11 +52,7 @@
           />
 
           <div class="relative space-y-4">
-            <div
-              v-for="row in 3"
-              :key="row"
-              class="grid grid-cols-4 gap-3"
-            >
+            <div v-for="row in 3" :key="row" class="grid grid-cols-4 gap-3">
               <template
                 v-for="node in architectureNodes.filter(
                   (n) => rowOf(n.key) === row - 1,
@@ -81,9 +77,7 @@
                   >
                     {{ nodeHint(node) }}
                   </div>
-                  <div
-                    class="font-mono text-[13.5px] text-ink leading-[1.3]"
-                  >
+                  <div class="font-mono text-[13.5px] text-ink leading-[1.3]">
                     {{ node.label }}
                   </div>
                 </div>
@@ -100,9 +94,7 @@
           </div>
         </div>
 
-        <div
-          class="rounded-lg border border-border bg-bg p-6 lg:p-7 space-y-5"
-        >
+        <div class="rounded-lg border border-border bg-bg p-6 lg:p-7 space-y-5">
           <div>
             <h3
               class="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-muted m-0 mb-2.5"
@@ -150,15 +142,17 @@
                 <span class="text-ink-muted shrink-0 w-[18ch]"
                   >MACRODATA_CHILD_TIMEOUT_MS</span
                 >
-                <span class="text-ink-dim">hard cap on scheduled agent runs</span>
+                <span class="text-ink-dim"
+                  >hard cap on scheduled agent runs</span
+                >
               </li>
             </ul>
           </div>
 
           <p class="text-ink-muted text-[13px] leading-[1.6] m-0">
-            All state stays on your disk. Nothing phones home. Switch to a remote
-            embedding endpoint any time — the local model is never loaded when
-            one is configured.
+            All state stays on your disk. Nothing phones home. Switch to a
+            remote embedding endpoint any time — the local model is never loaded
+            when one is configured.
           </p>
         </div>
       </div>

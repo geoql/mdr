@@ -58,11 +58,9 @@
           class="font-display font-400 text-ink leading-[0.98] tracking-tighter my-5 text-[clamp(46px,7vw,86px)]"
         >
           <span class="block">{{ headlineA }}</span>
-          <span
-            class="block italic text-accent"
-            style="margin-left: -0.04em"
-            >{{ headlineBItalic }}</span
-          >
+          <span class="block italic text-accent" style="margin-left: -0.04em">{{
+            headlineBItalic
+          }}</span>
           <span class="block">{{ headlineC }}</span>
         </h1>
 
@@ -80,13 +78,10 @@
           role="group"
           aria-label="Install snippet"
         >
-          <span
-            class="text-ink-dim font-mono text-[13.5px] mr-2 select-none"
+          <span class="text-ink-dim font-mono text-[13.5px] mr-2 select-none"
             >$</span
           >
-          <code
-            class="font-mono text-[14px] text-ink flex-1 min-w-0 truncate"
-          >
+          <code class="font-mono text-[14px] text-ink flex-1 min-w-0 truncate">
             {{ installSnippet }}
           </code>
           <CopyButton
@@ -111,10 +106,7 @@
             class="inline-flex items-center gap-2 px-4 h-11 rounded-md border border-border bg-surface text-ink text-[14.5px] tracking-[-0.01em] hover:text-ink hover:border-ink-muted transition-colors duration-120"
           >
             {{ ctaSecondary.label }}
-            <Icon
-              name="lucide:arrow-right"
-              class="size-3.5"
-            />
+            <Icon name="lucide:arrow-right" class="size-3.5" />
           </a>
         </div>
       </div>
@@ -122,9 +114,7 @@
       <div
         class="relative aspect-5/4 rounded-lg border border-border bg-surface overflow-hidden"
       >
-        <div
-          class="absolute inset-0 dot-grid opacity-50 pointer-events-none"
-        />
+        <div class="absolute inset-0 dot-grid opacity-50 pointer-events-none" />
         <div class="relative h-full p-5 flex flex-col gap-3">
           <div
             class="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.16em] text-ink-dim"

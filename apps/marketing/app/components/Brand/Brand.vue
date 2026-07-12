@@ -1,9 +1,9 @@
 <script setup lang="ts">
   const { version } = useMdrVersion();
-  withDefaults(
-    defineProps<{ showWordmark?: boolean; showBadge?: boolean }>(),
-    { showWordmark: true, showBadge: true },
-  );
+  withDefaults(defineProps<{ showWordmark?: boolean; showBadge?: boolean }>(), {
+    showWordmark: true,
+    showBadge: true,
+  });
 </script>
 
 <template>

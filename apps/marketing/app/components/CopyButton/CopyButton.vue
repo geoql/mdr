@@ -45,8 +45,7 @@
       copied
         ? 'text-ok'
         : 'text-ink bg-surface-2 hover:bg-[color-mix(in_oklch,var(--ink)_8%,var(--surface-2))]',
-      copied &&
-        'border-[color-mix(in_oklch,var(--ok)_40%,var(--border))]',
+      copied && 'border-[color-mix(in_oklch,var(--ok)_40%,var(--border))]',
     ]"
     @click="copy"
   >

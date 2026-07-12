@@ -7,8 +7,7 @@ export function usePageSeo(options: {
   robots?: string;
 }) {
   const config = useRuntimeConfig();
-  const baseUrl =
-    config.public.baseUrl || 'https://mdr.geoql.in';
+  const baseUrl = config.public.baseUrl || 'https://mdr.geoql.in';
 
   const canonicalUrl = `${baseUrl}${options.path}`;
   const ogDesc = options.ogDescription ?? options.description;

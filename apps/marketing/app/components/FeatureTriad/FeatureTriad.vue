@@ -27,10 +27,7 @@
 </script>
 
 <template>
-  <section
-    id="layers"
-    class="border-t border-border-soft py-24 lg:py-32"
-  >
+  <section id="layers" class="border-t border-border-soft py-24 lg:py-32">
     <div class="mx-auto max-w-330 px-5 lg:px-8">
       <div class="max-w-[58ch] mb-14">
         <span
@@ -58,10 +55,7 @@
           class="bg-surface p-7 lg:p-8 flex flex-col gap-4 transition-colors duration-120 hover:bg-surface-2"
         >
           <div class="flex items-center justify-between">
-            <Icon
-              :name="iconFor(f.icon)"
-              class="size-5 text-accent"
-            />
+            <Icon :name="iconFor(f.icon)" class="size-5 text-accent" />
             <span
               class="font-data text-[11.5px] text-ink-dim tracking-[0.14em] uppercase"
               >{{ f.num }}</span
@@ -72,9 +66,7 @@
           >
             {{ f.title }}
           </h3>
-          <p
-            class="text-ink-muted text-[14.5px] leading-[1.6] m-0"
-          >
+          <p class="text-ink-muted text-[14.5px] leading-[1.6] m-0">
             {{ f.body }}
           </p>
           <div

@@ -31,9 +31,7 @@
         </div>
 
         <div class="space-y-5">
-          <div
-            class="rounded-lg border border-border bg-bg p-5"
-          >
+          <div class="rounded-lg border border-border bg-bg p-5">
             <div
               class="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-muted mb-3"
             >
@@ -47,26 +45,28 @@
                 >{ "plugin": ["@geoql/mdr@latest"] }</code
               >
               <CopyButton
-                :text='"{ \"plugin\": [\"@geoql/mdr@latest\"] }"'
+                :text="'{ &quot;plugin&quot;: [&quot;@geoql/mdr@latest&quot;] }'"
                 label="Copy"
                 success-label="Copied"
               />
             </div>
           </div>
 
-          <div
-            class="rounded-lg border border-border bg-bg p-5"
-          >
+          <div class="rounded-lg border border-border bg-bg p-5">
             <div
               class="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-muted mb-3"
             >
               Claude Code
             </div>
-            <div
-              class="font-mono text-[13.5px] text-ink space-y-1"
-            >
-              <div><span class="text-ink-dim select-none mr-2">$</span>/plugin marketplace add geoql/mdr</div>
-              <div><span class="text-ink-dim select-none mr-2">$</span>/plugin install refiner@mdr</div>
+            <div class="font-mono text-[13.5px] text-ink space-y-1">
+              <div>
+                <span class="text-ink-dim select-none mr-2">$</span>/plugin
+                marketplace add geoql/mdr
+              </div>
+              <div>
+                <span class="text-ink-dim select-none mr-2">$</span>/plugin
+                install refiner@mdr
+              </div>
             </div>
             <a
               href="https://github.com/geoql/mdr"
@@ -76,16 +76,11 @@
             >
               <Icon name="lucide:book-open" class="size-3.5" />
               Full installation guide
-              <Icon
-                name="lucide:arrow-up-right"
-                class="size-3.5"
-              />
+              <Icon name="lucide:arrow-up-right" class="size-3.5" />
             </a>
           </div>
 
-          <div
-            class="flex items-center gap-2 pt-1 text-ink-muted text-[13px]"
-          >
+          <div class="flex items-center gap-2 pt-1 text-ink-muted text-[13px]">
             <span>or install via</span>
             <a
               href="https://www.npmjs.com/package/@geoql/mdr"

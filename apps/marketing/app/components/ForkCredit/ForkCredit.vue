@@ -13,10 +13,7 @@
 </script>
 
 <template>
-  <section
-    id="fork"
-    class="border-t border-border-soft py-20 lg:py-24"
-  >
+  <section id="fork" class="border-t border-border-soft py-20 lg:py-24">
     <div class="mx-auto max-w-330 px-5 lg:px-8">
       <div
         class="rounded-lg border border-border bg-surface p-8 lg:p-10 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center"
@@ -77,7 +74,10 @@
           <div class="relative h-full grid place-items-center">
             <span
               class="font-display italic text-accent leading-none text-[clamp(80px,12vw,140px)]"
-              style="text-shadow: 0 0 32px color-mix(in oklch, var(--accent) 35%, transparent);"
+              style="
+                text-shadow: 0 0 32px
+                  color-mix(in oklch, var(--accent) 35%, transparent);
+              "
               >M</span
             >
           </div>

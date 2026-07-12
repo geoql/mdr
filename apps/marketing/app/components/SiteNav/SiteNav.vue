@@ -5,9 +5,7 @@
 </script>
 
 <template>
-  <header
-    class="nav-blur sticky top-0 z-50 border-b border-border-soft"
-  >
+  <header class="nav-blur sticky top-0 z-50 border-b border-border-soft">
     <div class="mx-auto flex h-15 max-w-330 items-center gap-6 px-5 lg:px-8">
       <NuxtLink to="/">
         <Brand />
@@ -29,11 +27,7 @@
           :aria-label="mobileOpen ? 'Close menu' : 'Open menu'"
           @click="mobileOpen = !mobileOpen"
         >
-          <Icon
-            v-if="!mobileOpen"
-            name="lucide:menu"
-            class="size-5"
-          />
+          <Icon v-if="!mobileOpen" name="lucide:menu" class="size-5" />
           <Icon v-else name="lucide:x" class="size-5" />
         </button>
       </div>
