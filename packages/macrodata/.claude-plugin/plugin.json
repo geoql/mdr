@@ -1,6 +1,6 @@
 {
   "name": "refiner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Stateful agent tools for Claude Code. Learns who you are, remembers what you're working on, schedules tasks, maintains itself.",
   "author": {
     "name": "Vinayak Kulkarni",
@@ -8,7 +8,11 @@
   },
   "repository": "https://github.com/geoql/mdr",
   "license": "MIT",
-  "keywords": ["memory", "context", "local"],
+  "keywords": [
+    "memory",
+    "context",
+    "local"
+  ],
   "hooks": {
     "SessionStart": [
       {
@@ -49,7 +53,9 @@
   "mcpServers": {
     "macrodata": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/src/index.js"]
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/dist/src/index.js"
+      ]
     }
   }
 }
