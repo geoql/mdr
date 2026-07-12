@@ -58,6 +58,15 @@ Forked from upstream at commit
 
 <!-- fork marker — everything below is the upstream ascorbic/macrodata changelog -->
 
+## [1.0.1](https://github.com/geoql/mdr/compare/v1.0.0...v1.0.1) (2026-07-12)
+
+
+### Bug Fixes
+
+* **deps:** bump @opencode-ai/plugin from 1.17.15 to 1.17.18 ([#5](https://github.com/geoql/mdr/issues/5)) ([ab9a434](https://github.com/geoql/mdr/commit/ab9a434c574cca85610e66e64e7d8d0e66f2a2c7))
+* **deps:** bump @opencode-ai/sdk from 1.17.15 to 1.17.18 ([#7](https://github.com/geoql/mdr/issues/7)) ([8fb6634](https://github.com/geoql/mdr/commit/8fb6634383cc57bb740792079c97aabe63e0f448))
+* **opencode:** make memory context prompt-cache friendly ([edd0fb3](https://github.com/geoql/mdr/commit/edd0fb3ffe9eb058097d7684097cce1e4b7e4756))
+
 ## 1.0.0 (2026-07-08)
 
 ### Documentation
