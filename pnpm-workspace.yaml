@@ -52,7 +52,6 @@ catalogs:
   app:marketing:
     '@iconify-json/lucide': ^1.2.116
     '@nuxtjs/robots': ^6.1.2
-    '@nuxtjs/sitemap': ^8.2.2
 
 # pnpm v9+ in workspace mode SILENTLY IGNORES package.json's `pnpm.overrides`.
 # Overrides MUST live here in pnpm-workspace.yaml.

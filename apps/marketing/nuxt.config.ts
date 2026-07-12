@@ -6,15 +6,13 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
 
   modules: [
+    '@nuxtjs/robots',
     'shadcn-nuxt',
     '@vueuse/nuxt',
     '@nuxt/icon',
     '@nuxt/eslint',
     '@nuxtjs/color-mode',
     'motion-v/nuxt',
-    // robots before sitemap so the sitemap URL is auto-injected into robots.txt
-    '@nuxtjs/robots',
-    '@nuxtjs/sitemap',
     [
       '@nuxtjs/plausible',
       {
@@ -27,10 +25,6 @@ export default defineNuxtConfig({
 
   site: {
     url: 'https://mdr.geoql.in',
-  },
-
-  sitemap: {
-    urls: [],
   },
 
   // Explicit AI-crawler allowlist (GEO). Marketing content is meant to be
@@ -146,7 +140,8 @@ export default defineNuxtConfig({
       nodeCompat: true,
       wrangler: {
         name: 'mdr-marketing',
-        compatibility_date: '2026-05-26',
+        compatibility_date: '2026-06-16',
+        compatibility_flags: ['nodejs_compat'],
       },
     },
     experimental: {

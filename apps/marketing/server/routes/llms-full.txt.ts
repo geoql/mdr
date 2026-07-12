@@ -1,6 +1,5 @@
-export default defineEventHandler((event) => {
-  setHeader(event, 'content-type', 'text/plain; charset=utf-8');
-  return `# MDR — full project context
+export default defineEventHandler(() => {
+  const body = `# MDR — full project context
 
 ## What it is
 
@@ -92,4 +91,7 @@ MIT — © Matt Kane (original author, https://github.com/ascorbic) and Vinayak 
 - GitHub: https://github.com/geoql/mdr
 - Upstream: https://github.com/ascorbic/macrodata
 `;
+  return new Response(body, {
+    headers: { 'content-type': 'text/plain; charset=utf-8' },
+  });
 });

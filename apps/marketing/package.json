@@ -19,7 +19,6 @@
     "@nuxt/icon": "catalog:",
     "@nuxtjs/color-mode": "catalog:",
     "@nuxtjs/robots": "catalog:app:marketing",
-    "@nuxtjs/sitemap": "catalog:app:marketing",
     "@vueuse/core": "catalog:",
     "@vueuse/nuxt": "catalog:",
     "class-variance-authority": "catalog:",
