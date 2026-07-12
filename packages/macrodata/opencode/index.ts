@@ -2,7 +2,8 @@
  * OpenCode Macrodata Plugin
  *
  * Provides persistent local memory for OpenCode agents:
- * - Context injection via system prompt transform
+ * - Session-stable context injection via system prompt transform
+ * - Daemon deltas and state changes injected as user message parts
  * - Compaction hook to preserve memory context
  * - Custom `macrodata` tool for memory operations
  */
@@ -15,6 +16,9 @@ import { spawn } from 'child_process';
 import { memoryTools } from './tools.js';
 import {
   formatContextForPrompt,
+  getSessionContext,
+  getContextUpdate,
+  buildContextPart,
   consumePendingContext,
   initializeStateRoot,
   getStateRoot,
@@ -167,22 +171,43 @@ export const MacrodataPlugin: Plugin = async (ctx: PluginInput) => {
   installSkills();
 
   return {
-    // Inject memory context into system prompt
-    'experimental.chat.system.transform': async (_input, output) => {
+    // Inject memory context into the system prompt, frozen per session so the
+    // provider's prompt cache stays valid across turns
+    'experimental.chat.system.transform': async (input, output) => {
       try {
-        const pendingContext = consumePendingContext();
-        if (pendingContext) {
-          output.system.push(pendingContext);
-        }
-
-        const memoryContext = await formatContextForPrompt({ client: ctx.client });
-        /* v8 ignore next 3 -- outside compaction formatContextForPrompt always
+        const memoryContext = await getSessionContext(input.sessionID, { client: ctx.client });
+        /* v8 ignore next 3 -- outside compaction getSessionContext always
            returns a string (onboarding or full context), never null. */
         if (memoryContext) {
           output.system.push(memoryContext);
         }
       } catch (err) {
         logger.error(`System context injection error: ${String(err)}`);
+      }
+    },
+
+    // Deliver daemon deltas and state changes as a part of the incoming user
+    // message — appended to the transcript tail, so the cached prefix is
+    // untouched
+    'chat.message': async (input, output) => {
+      try {
+        const updates: string[] = [];
+
+        const pendingContext = consumePendingContext();
+        if (pendingContext) {
+          updates.push(pendingContext);
+        }
+
+        const contextUpdate = await getContextUpdate(input.sessionID);
+        if (contextUpdate) {
+          updates.push(contextUpdate);
+        }
+
+        if (updates.length > 0) {
+          output.parts.push(buildContextPart(updates.join('\n\n'), output.message));
+        }
+      } catch (err) {
+        logger.error(`Context update injection error: ${String(err)}`);
       }
     },
 

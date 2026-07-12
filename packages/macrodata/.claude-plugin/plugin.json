@@ -8,11 +8,7 @@
   },
   "repository": "https://github.com/geoql/mdr",
   "license": "MIT",
-  "keywords": [
-    "memory",
-    "context",
-    "local"
-  ],
+  "keywords": ["memory", "context", "local"],
   "hooks": {
     "SessionStart": [
       {
@@ -53,9 +49,7 @@
   "mcpServers": {
     "macrodata": {
       "command": "node",
-      "args": [
-        "${CLAUDE_PLUGIN_ROOT}/dist/src/index.js"
-      ]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/src/index.js"]
     }
   }
 }

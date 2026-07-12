@@ -6,13 +6,6 @@
     ".": "./opencode/index.ts"
   },
   "publish": {
-    "include": [
-      "opencode",
-      "src",
-      "bin",
-      "README.md",
-      "USAGE.md",
-      "LICENSE"
-    ]
+    "include": ["opencode", "src", "bin", "README.md", "USAGE.md", "LICENSE"]
   }
 }

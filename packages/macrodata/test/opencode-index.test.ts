@@ -44,6 +44,7 @@ function makeCtx(overrides: Record<string, unknown> = {}) {
 type PluginHooks = {
   tool: unknown;
   'experimental.chat.system.transform': (input: never, output: never) => Promise<void>;
+  'chat.message': (input: never, output: never) => Promise<void>;
   'experimental.session.compacting': (input: never, output: never) => Promise<void>;
 };
 
@@ -75,6 +76,7 @@ describe('plugin factory', () => {
     expect(spawnMock).toHaveBeenCalledTimes(1);
     expect(hooks.tool).toBeDefined();
     expect(typeof hooks['experimental.chat.system.transform']).toBe('function');
+    expect(typeof hooks['chat.message']).toBe('function');
     expect(typeof hooks['experimental.session.compacting']).toBe('function');
   });
 
@@ -143,13 +145,11 @@ describe('plugin factory', () => {
 });
 
 describe('system.transform hook', () => {
-  test('pushes pending context and memory context', async () => {
+  test('pushes the frozen memory context', async () => {
     // A first-run root (no identity) yields onboarding context.
-    writeFileSync(join(stateRoot, '.pending-context'), 'pending line');
     const hooks = await loadPlugin();
     const output = { system: [] as string[] };
     await hooks['experimental.chat.system.transform']({} as never, output as never);
-    expect(output.system).toContain('pending line');
     expect(output.system.some((s) => s.includes('First Run'))).toBe(true);
   });
 
@@ -164,6 +164,71 @@ describe('system.transform hook', () => {
     };
     await expect(
       hooks['experimental.chat.system.transform']({} as never, badOutput as never),
+    ).resolves.toBeUndefined();
+  });
+});
+
+describe('chat.message hook', () => {
+  function makeMessageOutput(id = 'msg_1', sessionID = 'ses_1') {
+    return { parts: [] as unknown[], message: { id, sessionID } };
+  }
+
+  test('delivers pending daemon context as a synthetic user message part', async () => {
+    writeFileSync(join(stateRoot, '.pending-context'), 'pending line');
+    const hooks = await loadPlugin();
+    const output = makeMessageOutput();
+    await hooks['chat.message']({ sessionID: 'ses_1' } as never, output as never);
+
+    expect(output.parts).toHaveLength(1);
+    const part = output.parts[0] as { text: string; id: string; synthetic: boolean };
+    expect(part.text).toContain('<system-reminder>');
+    expect(part.text).toContain('pending line');
+    expect(part.id).toBe('msg_1-macrodata');
+    expect(part.synthetic).toBe(true);
+  });
+
+  test('delivers changed context sections as a synthetic part', async () => {
+    mkdirSync(join(stateRoot, 'state'), { recursive: true });
+    writeFileSync(join(stateRoot, 'state', 'identity.md'), '# Identity');
+    writeFileSync(join(stateRoot, 'state', 'today.md'), 'first');
+    const hooks = await loadPlugin();
+
+    // Freeze the session snapshot via the system-prompt hook, then change state.
+    await hooks['experimental.chat.system.transform'](
+      { sessionID: 'ses_delta' } as never,
+      { system: [] as string[] } as never,
+    );
+    writeFileSync(join(stateRoot, 'state', 'today.md'), 'second');
+
+    const output = makeMessageOutput('msg_2', 'ses_delta');
+    await hooks['chat.message']({ sessionID: 'ses_delta' } as never, output as never);
+
+    expect(output.parts).toHaveLength(1);
+    const part = output.parts[0] as { text: string };
+    expect(part.text).toContain('<macrodata-update>');
+    expect(part.text).toContain('second');
+  });
+
+  test('pushes no part when nothing is pending and nothing changed', async () => {
+    const hooks = await loadPlugin();
+    const output = makeMessageOutput('msg_3', 'ses_none');
+    await hooks['chat.message']({ sessionID: 'ses_none' } as never, output as never);
+    expect(output.parts).toHaveLength(0);
+  });
+
+  test('swallows errors from update injection', async () => {
+    writeFileSync(join(stateRoot, '.pending-context'), 'pending line');
+    const hooks = await loadPlugin();
+    const badOutput = {
+      message: { id: 'msg_4', sessionID: 'ses_4' },
+      parts: {
+        push() {
+          throw new Error('push failed');
+        },
+      },
+    };
+    await expect(
+      hooks['chat.message']({ sessionID: 'ses_4' } as never, badOutput as never),
     ).resolves.toBeUndefined();
   });
 });
