@@ -22,7 +22,7 @@ catalog:
   '@nuxt/icon': ^2.3.1
   '@nuxtjs/color-mode': ^4.0.1
   '@nuxtjs/plausible': ^3.0.2
-  '@tailwindcss/vite': ^4.3.2
+  '@tailwindcss/vite': ^4.3.3
   '@types/node': ^26.1.1
   '@vueuse/core': ^14.3.0
   '@vueuse/nuxt': ^14.3.0
