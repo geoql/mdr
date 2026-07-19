@@ -1,6 +1,6 @@
 {
   "name": "refiner",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Stateful agent tools for Claude Code. Learns who you are, remembers what you're working on, schedules tasks, maintains itself.",
   "author": {
     "name": "Vinayak Kulkarni",
