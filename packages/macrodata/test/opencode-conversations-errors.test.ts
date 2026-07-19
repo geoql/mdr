@@ -17,6 +17,7 @@ const hoisted = vi.hoisted(() => ({
   upsertThrows: true,
 }));
 vi.mock('vectra', () => ({
+  ProtobufCodec: class {},
   LocalIndex: class {
     async isIndexCreated() {
       return true;
