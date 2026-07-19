@@ -114,9 +114,14 @@ describe('search tools', () => {
   }, 60000);
 
   test('search_conversations formats results from a seeded index', async () => {
-    const { LocalIndex } = await import('vectra');
+    const { LocalIndex, ProtobufCodec } = await import('vectra');
     const { embed } = await import('../src/embeddings');
-    const idx = new LocalIndex(join(root, '.index', 'oc-conversations'));
+    const idx = new LocalIndex(
+      join(root, '.index', 'oc-conversations'),
+      undefined,
+      undefined,
+      new ProtobufCodec(),
+    );
     await idx.createIndex();
     await idx.upsertItem({
       id: 'oc-seed',

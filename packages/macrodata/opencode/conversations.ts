@@ -11,11 +11,11 @@
  *   - project: id, worktree
  */
 
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, rmSync } from 'fs';
 import { join, basename } from 'path';
 import { homedir } from 'os';
 import { DatabaseSync } from 'node:sqlite';
-import { LocalIndex } from 'vectra';
+import { LocalIndex, ProtobufCodec } from 'vectra';
 import { embedBatch, embedQuery } from '../src/embeddings.js';
 import { getStateRoot } from './context.js';
 import { logger } from './logger.js';
@@ -23,6 +23,54 @@ import { logger } from './logger.js';
 const OPENCODE_DB_PATH =
   process.env.MACRODATA_OPENCODE_DB_PATH ||
   join(homedir(), '.local', 'share', 'opencode', 'opencode.db');
+
+/**
+ * Retention cap for the conversation index (#27).
+ *
+ * Vectra persists the whole index as ONE file rewritten via a single
+ * serialized string, and V8 caps strings at 0x1fffffe8 (~536 MB). At ~20 KB
+ * per item the old unbounded JSON index died at ~27k items. 22,000 items is
+ * ~220 MB with the protobuf codec (~440 MB even as JSON) — comfortably under
+ * the ceiling while keeping months of history.
+ */
+export const MAX_CONVERSATION_ITEMS = 22000;
+
+/**
+ * Keep only the newest `cap` exchanges. Rows arrive oldest-first (the query
+ * orders by user_time ASC), so slicing from the end keeps the newest.
+ */
+export function capExchanges(
+  exchanges: ConversationExchange[],
+  cap: number = MAX_CONVERSATION_ITEMS,
+): ConversationExchange[] {
+  if (exchanges.length <= cap) return exchanges;
+  return exchanges.slice(exchanges.length - cap);
+}
+
+/**
+ * FIFO-evict the oldest items inside an open update transaction so the
+ * persisted index never exceeds `cap` items. Items are insertion-ordered
+ * (chronological for this index), so the head of `existingItems` is oldest.
+ * Must be called between beginUpdate() and endUpdate(): deletions mutate the
+ * pending update and persist in the same single rewrite as the inserts.
+ * Returns the number of evicted items.
+ */
+export async function enforceRetentionCap(
+  idx: LocalIndex,
+  existingItems: { id: string }[],
+  newCount: number,
+  cap: number = MAX_CONVERSATION_ITEMS,
+): Promise<number> {
+  const overflow = existingItems.length + newCount - cap;
+  if (overflow <= 0) return 0;
+
+  const toEvict = existingItems.slice(0, overflow);
+  for (const item of toEvict) {
+    await idx.deleteItem(item.id);
+  }
+  logger.log(`Evicted ${toEvict.length} oldest exchanges to enforce the ${cap}-item cap`);
+  return toEvict.length;
+}
 
 // Conversation index singleton
 let convIndex: LocalIndex | null = null;
@@ -43,7 +91,18 @@ async function getConversationIndex(): Promise<LocalIndex> {
     mkdirSync(indexDir, { recursive: true });
   }
 
-  convIndex = new LocalIndex(indexPath);
+  // Protobuf codec: packed float32 vectors are ~50% smaller than JSON text,
+  // and the binary file (index.pb) sidesteps the JSON codec that could no
+  // longer read or write the index past V8's max string length (#27).
+  convIndex = new LocalIndex(indexPath, undefined, undefined, new ProtobufCodec());
+
+  // Drop the orphaned pre-protobuf index.json: past ~536 MB it is unreadable
+  // by the JSON codec (#27), and after the codec switch it is dead weight.
+  const legacyJsonPath = join(indexPath, 'index.json');
+  if (existsSync(legacyJsonPath)) {
+    logger.log('Removing orphaned legacy index.json (superseded by index.pb)...');
+    rmSync(legacyJsonPath, { force: true });
+  }
 
   if (!(await convIndex.isIndexCreated())) {
     logger.log('Creating new conversation index...');
@@ -238,7 +297,7 @@ async function doRebuildConversationIndex(): Promise<{ exchangeCount: number }> 
 
   try {
     const rows = queryExchanges(db);
-    const exchanges = rowsToExchanges(rows);
+    const exchanges = capExchanges(rowsToExchanges(rows));
 
     logger.log(`Found ${exchanges.length} exchanges`);
     if (exchanges.length === 0) return { exchangeCount: 0 };
@@ -418,8 +477,9 @@ export async function updateConversationIndex(): Promise<{ newCount: number; tot
     const rows = queryExchanges(db, sinceMs);
     const allExchanges = rowsToExchanges(rows);
 
-    // Filter to truly new exchanges
-    const newExchanges = allExchanges.filter((ex) => !existingIds.has(ex.id));
+    // Filter to truly new exchanges; cap BEFORE embedding so a huge backlog
+    // (e.g. first index after #27) never embeds more than the index can hold.
+    const newExchanges = capExchanges(allExchanges.filter((ex) => !existingIds.has(ex.id)));
 
     logger.log(`Found ${newExchanges.length} new exchanges (${existingIds.size} already indexed)`);
 
@@ -431,7 +491,10 @@ export async function updateConversationIndex(): Promise<{ newCount: number; tot
     logger.log(`Generating embeddings for ${texts.length} new exchanges...`);
     const vectors = await embedBatch(texts);
 
-    // Single update transaction: one index.json write for the whole batch
+    // Single update transaction: one index file write for the whole batch.
+    // Eviction runs inside the same transaction so inserts + evictions land
+    // in one rewrite and the file never exceeds the cap on disk (#27).
+    let evicted = 0;
     await idx.beginUpdate();
     try {
       for (let i = 0; i < newExchanges.length; i++) {
@@ -450,6 +513,7 @@ export async function updateConversationIndex(): Promise<{ newCount: number; tot
           },
         });
       }
+      evicted = await enforceRetentionCap(idx, existingItems, newExchanges.length);
       await idx.endUpdate();
     } catch (err) {
       idx.cancelUpdate();
@@ -457,7 +521,7 @@ export async function updateConversationIndex(): Promise<{ newCount: number; tot
     }
 
     const duration = Date.now() - startTime;
-    const totalCount = existingIds.size + newExchanges.length;
+    const totalCount = existingIds.size + newExchanges.length - evicted;
     logger.log(`Added ${newExchanges.length} exchanges in ${duration}ms (total: ${totalCount})`);
 
     return { newCount: newExchanges.length, totalCount };
