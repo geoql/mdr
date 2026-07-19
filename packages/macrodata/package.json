@@ -1,6 +1,6 @@
 {
   "name": "@geoql/mdr",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Persistent layered memory for coding agents (OpenCode, Claude Code) — journal, entities, state files, semantic search, daemon, scheduled reminders. A hard fork of ascorbic/macrodata by Matt Kane.",
   "keywords": [
     "agent",
