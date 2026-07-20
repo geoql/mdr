@@ -58,6 +58,13 @@ Forked from upstream at commit
 
 <!-- fork marker — everything below is the upstream ascorbic/macrodata changelog -->
 
+## [1.0.3](https://github.com/geoql/mdr/compare/v1.0.2...v1.0.3) (2026-07-20)
+
+
+### Bug Fixes
+
+* **daemon:** stop test background-task leak from polluting production log ([#34](https://github.com/geoql/mdr/issues/34)) ([3cd649a](https://github.com/geoql/mdr/commit/3cd649a175dc7c9fd0a7e5c4ce7d9434f8fc88ff)), closes [#31](https://github.com/geoql/mdr/issues/31)
+
 ## [1.0.2](https://github.com/geoql/mdr/compare/v1.0.1...v1.0.2) (2026-07-19)
 
 
