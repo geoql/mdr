@@ -262,6 +262,16 @@ export async function updateAllConversationIndexes(
 ) {
   const { updateClaudeCodeConversations, updateOpenCodeConversations } = await loaders();
 
+  // A dir vanishing mid-run (teardown race, ENOENT) is benign: the next pass
+  // recreates the index. Only non-ENOENT failures are real errors (#31).
+  const logIndexFailure = (label: string, err: unknown) => {
+    if (err instanceof Error && (err as NodeJS.ErrnoException).code === 'ENOENT') {
+      log(`${label} conversation index skipped (path vanished mid-run): ${err.message}`);
+    } else {
+      logError(`${label} conversation index failed: ${String(err)}`);
+    }
+  };
+
   // Update Claude Code conversations
   try {
     const claude = await updateClaudeCodeConversations();
@@ -271,7 +281,7 @@ export async function updateAllConversationIndexes(
       );
     }
   } catch (err) {
-    logError(`Claude Code conversation index failed: ${String(err)}`);
+    logIndexFailure('Claude Code', err);
   }
 
   // Update OpenCode conversations
@@ -281,7 +291,7 @@ export async function updateAllConversationIndexes(
       log(`OpenCode conversations: +${opencode.newCount} (${opencode.totalCount} total)`);
     }
   } catch (err) {
-    logError(`OpenCode conversation index failed: ${String(err)}`);
+    logIndexFailure('OpenCode', err);
   }
 }
 
@@ -338,6 +348,8 @@ export interface DaemonOptions {
   backgroundIndexing?: () => Promise<void>;
   // Overridable indexer loader for the reindex queue (injectable failures).
   indexerLoader?: () => Promise<{ indexEntityFile: (path: string) => Promise<void> }>;
+  // Upper bound on how long shutdown waits for in-flight indexing (#31).
+  shutdownIndexingWaitMs?: number;
 }
 
 export async function defaultBackgroundIndexing(
@@ -346,7 +358,10 @@ export async function defaultBackgroundIndexing(
     updateAll?: typeof updateAllConversationIndexes;
   } = {},
 ): Promise<void> {
+  /* v8 ignore next -- the no-injection side runs the REAL model load and
+     history scan; exercising it in unit tests is the leak fixed by #31. */
   const load = deps.loadIndexer ?? loadIndexer;
+  /* v8 ignore next -- same: real-scan fallback must stay untested (#31). */
   const updateAll = deps.updateAll ?? updateAllConversationIndexes;
   const indexer = await load();
   await indexer.preloadModel();
@@ -362,10 +377,13 @@ export class MacrodataLocalDaemon {
   private shouldRun = true;
   private backgroundIndexing: () => Promise<void>;
   private indexerLoader: () => Promise<{ indexEntityFile: (path: string) => Promise<void> }>;
+  private indexingPromise: Promise<void> | null = null;
+  private shutdownIndexingWaitMs: number;
 
   constructor(options: DaemonOptions = {}) {
     this.backgroundIndexing = options.backgroundIndexing ?? defaultBackgroundIndexing;
     this.indexerLoader = options.indexerLoader ?? loadIndexer;
+    this.shutdownIndexingWaitMs = options.shutdownIndexingWaitMs ?? 5000;
   }
 
   async start() {
@@ -404,8 +422,14 @@ export class MacrodataLocalDaemon {
       logError(`Uncaught exception (daemon continues): ${String(err?.stack || err)}`);
     });
 
-    // Preload embedding model and update conversation indexes in background
-    this.backgroundIndexing().catch((err) => logError(`Failed to preload/index: ${err}`));
+    // Preload embedding model and update conversation indexes in background.
+    // The promise is retained so shutdown() can await it: a fire-and-forget
+    // task outliving shutdown races with cleanup and dirties the log (#31).
+    this.indexingPromise = this.backgroundIndexing()
+      .catch((err) => logError(`Failed to preload/index: ${err}`))
+      .finally(() => {
+        this.indexingPromise = null;
+      });
 
     // Load and start schedules
     this.loadAndStartSchedules();
@@ -753,6 +777,18 @@ export class MacrodataLocalDaemon {
       // Ignore cleanup errors
     }
 
+    // Exit only after in-flight background indexing settles (bounded), so a
+    // still-running indexer can never outlive shutdown and race teardown (#31).
+    const indexing = this.indexingPromise;
+    if (indexing) {
+      log(`Shutdown waiting for background indexing (max ${this.shutdownIndexingWaitMs}ms)`);
+      const timeout = new Promise<void>((resolve) => {
+        setTimeout(resolve, this.shutdownIndexingWaitMs).unref();
+      });
+      void Promise.race([indexing, timeout]).then(() => process.exit(0));
+      return;
+    }
+
     process.exit(0);
   }
 
@@ -775,8 +811,8 @@ export class MacrodataLocalDaemon {
 /**
  * Entrypoint used by bin/macrodata-daemon.ts.
  */
-export function runDaemon(): MacrodataLocalDaemon {
-  const daemon = new MacrodataLocalDaemon();
+export function runDaemon(options: DaemonOptions = {}): MacrodataLocalDaemon {
+  const daemon = new MacrodataLocalDaemon(options);
   daemon.start().catch((err) => {
     log(`Fatal error: ${err}`);
     process.exit(1);

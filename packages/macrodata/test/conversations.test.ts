@@ -8,7 +8,7 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, utimesSync } from 'fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, utimesSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
@@ -178,6 +178,13 @@ describe('rebuildConversationIndex', () => {
 });
 
 describe('updateConversationIndex', () => {
+  test('early-skips without creating an index when no Claude history exists', async () => {
+    rmSync(projectsDir, { recursive: true, force: true });
+    const result = await conversations.updateConversationIndex();
+    expect(result).toEqual({ exchangeCount: 0, filesUpdated: 0, skipped: 0 });
+    expect(existsSync(join(stateRoot, '.index', 'conversations'))).toBe(false);
+  });
+
   test('indexes new files on a first incremental run', async () => {
     writeProjectFile(
       '-proj',
