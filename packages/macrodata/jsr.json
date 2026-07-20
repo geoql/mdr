@@ -1,6 +1,6 @@
 {
   "name": "@geoql/mdr",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "MIT",
   "exports": {
     ".": "./opencode/index.ts"
