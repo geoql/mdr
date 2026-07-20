@@ -112,7 +112,13 @@ async function getConversationIndex(): Promise<LocalIndex> {
 
   if (!(await convIndex.isIndexCreated())) {
     console.log('[Conversations] Creating new conversation index...');
-    await convIndex.createIndex();
+    try {
+      await convIndex.createIndex();
+    } catch (err) {
+      convIndex = null;
+      convIndexPath = null;
+      throw err;
+    }
   }
 
   return convIndex;
@@ -424,6 +430,14 @@ export async function updateConversationIndex(): Promise<{
 }> {
   console.log('[Conversations] Starting incremental update...');
   const startTime = Date.now();
+
+  // Mirror the OpenCode indexer: bail before touching the vector index when
+  // there is no Claude history, so machines without Claude Code never create
+  // an empty .index/conversations (#31).
+  if (!existsSync(PROJECTS_DIR)) {
+    console.log('[Conversations] No Claude projects directory, skipping');
+    return { exchangeCount: 0, filesUpdated: 0, skipped: 0 };
+  }
 
   const state = loadIndexState();
   const idx = await getConversationIndex();

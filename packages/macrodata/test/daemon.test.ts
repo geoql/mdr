@@ -460,6 +460,36 @@ describe('updateAllConversationIndexes', () => {
     expect(contents).not.toContain('Claude Code conversations: +');
     expect(contents).not.toContain('OpenCode conversations: +');
   });
+
+  test('logs ENOENT rejections as benign skips, not errors', async () => {
+    const enoent = () =>
+      Object.assign(new Error("ENOENT: no such file or directory, lstat '/tmp/gone'"), {
+        code: 'ENOENT',
+      });
+    await updateAllConversationIndexes(async () => ({
+      updateClaudeCodeConversations: async () => {
+        throw enoent();
+      },
+      updateOpenCodeConversations: async () => {
+        throw enoent();
+      },
+    }));
+    const contents = readLog();
+    expect(contents).not.toContain('ERROR: Claude Code conversation index failed');
+    expect(contents).not.toContain('ERROR: OpenCode conversation index failed');
+    expect(contents).toContain('Claude Code conversation index skipped (path vanished mid-run)');
+    expect(contents).toContain('OpenCode conversation index skipped (path vanished mid-run)');
+  });
+
+  test('non-Error rejections still log as errors', async () => {
+    await updateAllConversationIndexes(async () => ({
+      updateClaudeCodeConversations: async () => {
+        throw 'bare cc failure';
+      },
+      updateOpenCodeConversations: async () => ({ newCount: 0, totalCount: 0 }),
+    }));
+    expect(readLog()).toContain('ERROR: Claude Code conversation index failed: bare cc failure');
+  });
 });
 
 const noopIndexing = async () => {};
@@ -562,6 +592,37 @@ describe('MacrodataLocalDaemon', () => {
     expect(contents).toContain('Uncaught exception (daemon continues): Error: stray throw');
     expect(contents).toContain('Uncaught exception (daemon continues): bare string failure');
     d.shutdown('SIGTERM');
+  });
+
+  test('shutdown defers exit until in-flight background indexing settles', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    const d = new MacrodataLocalDaemon({ backgroundIndexing: () => gate });
+    await d.start();
+
+    d.shutdown('SIGTERM');
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(readLog()).toContain('waiting for background indexing');
+
+    release();
+    await flush();
+    expect(exitSpy).toHaveBeenCalledWith(0);
+  });
+
+  test('shutdown stops waiting after the bounded indexing wait elapses', async () => {
+    const d = new MacrodataLocalDaemon({
+      backgroundIndexing: () => new Promise<void>(() => {}),
+      shutdownIndexingWaitMs: 25,
+    });
+    await d.start();
+
+    d.shutdown('SIGTERM');
+    expect(exitSpy).not.toHaveBeenCalled();
+
+    await new Promise((r) => setTimeout(r, 100));
+    expect(exitSpy).toHaveBeenCalledWith(0);
   });
 
   test('start logs when background indexing rejects', async () => {
@@ -1108,12 +1169,17 @@ describe('MacrodataLocalDaemon watchers', () => {
 });
 
 describe('runDaemon', () => {
-  test('constructs and starts a daemon instance', async () => {
+  test('constructs and starts a daemon instance, forwarding injected options', async () => {
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation((): never => undefined as never);
-    const d = runDaemon();
+    // Injecting a noop indexer here is load-bearing: without it, runDaemon()
+    // starts REAL background indexing under the test temp root, which races
+    // with cleanup() and pollutes the production daemon log (#31).
+    const indexingRan = vi.fn(async () => {});
+    const d = runDaemon({ backgroundIndexing: indexingRan });
     await flush();
     expect(d).toBeInstanceOf(MacrodataLocalDaemon);
     expect(existsSync(getPidFile())).toBe(true);
+    expect(indexingRan).toHaveBeenCalled();
     d.shutdown('SIGTERM');
     detachSignalHandlers();
     exitSpy.mockRestore();
