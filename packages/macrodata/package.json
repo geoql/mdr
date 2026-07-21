@@ -61,7 +61,7 @@
     "@huggingface/transformers": "^4.2.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@opencode-ai/plugin": "^1.18.3",
-    "@opencode-ai/sdk": "^1.18.3",
+    "@opencode-ai/sdk": "^1.18.4",
     "chokidar": "^5.0.0",
     "croner": "^10.0.1",
     "vectra": "^0.15.0",
