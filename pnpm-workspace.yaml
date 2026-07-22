@@ -45,7 +45,7 @@ catalog:
   vite-plus: ^0.2.5
   vue: ^3.5.40
   vue-tsc: ^3.3.7
-  wrangler: ^4.112.0
+  wrangler: ^4.113.0
 
 catalogs:
   # Marketing app-only deps — referenced via `catalog:app:marketing`.
