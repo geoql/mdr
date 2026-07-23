@@ -34,7 +34,7 @@ catalog:
   '@lucide/vue': ^1.25.0
   motion-v: ^2.3.0
   nuxt: ^4.5.0
-  oxfmt: ^0.59.0
+  oxfmt: ^0.60.0
   oxlint: ^1.75.0
   reka-ui: ^2.10.1
   shadcn-nuxt: ^2.8.0
