@@ -228,8 +228,8 @@ importers:
         specifier: ^1.29.0
         version: 1.29.0(supports-color@10.2.2)(zod@4.4.3)
       '@opencode-ai/plugin':
-        specifier: ^1.18.4
-        version: 1.18.4
+        specifier: ^1.18.7
+        version: 1.18.7
       '@opencode-ai/sdk':
         specifier: ^1.18.5
         version: 1.18.5
@@ -1487,8 +1487,8 @@ packages:
       zod:
         optional: true
 
-  '@opencode-ai/plugin@1.18.4':
-    resolution: {integrity: sha512-Mkq128aLJo4E8Sb2bX8zrRlQ+I2WPaJ/n1kzaor8nTi/K/zNP4t8LGKwyMbuRoD/lhw4veSbzDOASSSypv3mcQ==}
+  '@opencode-ai/plugin@1.18.7':
+    resolution: {integrity: sha512-kXm5hqur5JiF/xJPaQYkuNn7vSl4ya09YgL/pIvIrggWCLFsfo1gXqNbONRcGW7m5Ih2k6kgMXFyjB9or1+dEg==}
     peerDependencies:
       '@opentui/core': '>=0.4.5'
       '@opentui/keymap': '>=0.4.5'
@@ -1501,11 +1501,11 @@ packages:
       '@opentui/solid':
         optional: true
 
-  '@opencode-ai/sdk@1.18.4':
-    resolution: {integrity: sha512-p/3P0KtWknoLvpsk8QrUzCKd4Q1A5Z3RmACEvwuQBGxnUy4AGo379lUYMgt7fczFn53079oroLuo6BosQri+HA==}
-
   '@opencode-ai/sdk@1.18.5':
     resolution: {integrity: sha512-7KgMvP5/1oxbhHj6kYBtPSTEdFKYpUeEYOzBTKdzSaRpapUpFFdn6Hkus3rr0rljO0kukWZIgRd3DrVBwTULGA==}
+
+  '@opencode-ai/sdk@1.18.7':
+    resolution: {integrity: sha512-5txVELvCxzC3O/MYnRKdTvBN3TqQjE3PaEks3kDRA/moWzMSUhdm15xCth/Mz/NPYyGTn2u4IdScdV9vLTfLRg==}
 
   '@oxc-parser/binding-android-arm-eabi@0.132.0':
     resolution: {integrity: sha512-KrLaPWa5c9Y7LkW+rKkaUE3y7DBDrQtaf7rlsSDfv6KAHUjgzAIRA761Lrrp6//Yd/Rlie/yEOt9YENCoJnOcw==}
@@ -8921,18 +8921,18 @@ snapshots:
       - vite
       - vue
 
-  '@opencode-ai/plugin@1.18.4':
+  '@opencode-ai/plugin@1.18.7':
     dependencies:
       '@ai-sdk/provider': 3.0.8
-      '@opencode-ai/sdk': 1.18.4
+      '@opencode-ai/sdk': 1.18.7
       effect: 4.0.0-beta.83
       zod: 4.1.8
 
-  '@opencode-ai/sdk@1.18.4':
+  '@opencode-ai/sdk@1.18.5':
     dependencies:
       cross-spawn: 7.0.6
 
-  '@opencode-ai/sdk@1.18.5':
+  '@opencode-ai/sdk@1.18.7':
     dependencies:
       cross-spawn: 7.0.6
 
