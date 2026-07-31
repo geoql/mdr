@@ -14,7 +14,7 @@
 import { existsSync, mkdirSync, rmSync } from 'fs';
 import { join, basename } from 'path';
 import { homedir } from 'os';
-import { DatabaseSync } from 'node:sqlite';
+import type { DatabaseSync } from 'node:sqlite';
 import { LocalIndex, ProtobufCodec } from 'vectra';
 import { embedBatch, embedQuery } from '../src/embeddings.js';
 import { getStateRoot } from './context.js';
@@ -130,15 +130,28 @@ export interface ConversationSearchResult {
 }
 
 /**
- * Open the OpenCode SQLite database (read-only)
+ * Open the OpenCode SQLite database (read-only).
+ *
+ * `node:sqlite` is imported dynamically, NOT statically, and this is load-bearing.
+ * OpenCode loads plugins in a runtime that has no `node:sqlite` built-in, so a
+ * static top-level import fails at module-resolution time and takes the whole
+ * plugin down with "Could not resolve: node:sqlite" — before any code runs.
+ *
+ * Only the two indexing paths (rebuild/update) ever call this; the read path
+ * (`searchConversations`) is served entirely from the Vectra index. Deferring the
+ * import to the call site keeps the plugin loadable everywhere, and confines the
+ * failure to the indexing paths, which already degrade gracefully on `null`.
+ *
+ * See: https://github.com/geoql/mdr/issues/68
  */
-function openDb(): DatabaseSync | null {
+async function openDb(): Promise<DatabaseSync | null> {
   if (!existsSync(OPENCODE_DB_PATH)) {
     logger.log(`OpenCode database not found at ${OPENCODE_DB_PATH}`);
     return null;
   }
 
   try {
+    const { DatabaseSync } = await import('node:sqlite');
     return new DatabaseSync(OPENCODE_DB_PATH, { readOnly: true });
   } catch (err) {
     logger.error(`Failed to open OpenCode database: ${String(err)}`);
@@ -292,7 +305,7 @@ async function doRebuildConversationIndex(): Promise<{ exchangeCount: number }> 
   logger.log('Rebuilding OpenCode conversation index...');
   const startTime = Date.now();
 
-  const db = openDb();
+  const db = await openDb();
   if (!db) return { exchangeCount: 0 };
 
   try {
@@ -454,7 +467,7 @@ export async function updateConversationIndex(): Promise<{ newCount: number; tot
   logger.log('Updating OpenCode conversation index...');
   const startTime = Date.now();
 
-  const db = openDb();
+  const db = await openDb();
   if (!db) return { newCount: 0, totalCount: 0 };
 
   try {
