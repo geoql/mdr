@@ -231,8 +231,8 @@ importers:
         specifier: ^1.18.10
         version: 1.18.10
       '@opencode-ai/sdk':
-        specifier: ^1.18.9
-        version: 1.18.9
+        specifier: ^1.18.10
+        version: 1.18.10
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
@@ -1512,9 +1512,6 @@ packages:
 
   '@opencode-ai/sdk@1.18.10':
     resolution: {integrity: sha512-K+glWbBp5pfGepZ/6EHvuXY3IpVG2qgsEqF4z9mOiUQUrs6KWN72Vdp15Qsl2TCDbemgHWXKQKgbX3b8PSK2hg==}
-
-  '@opencode-ai/sdk@1.18.9':
-    resolution: {integrity: sha512-oDJSmsmiGW+3lNLmZYj3EpUkpiT3ITZBKffH3mrmu2KMJXlkxQ/Nvv7jqPffSM7o8lCdBZS/aCE+2GkA3/92gQ==}
 
   '@oxc-parser/binding-android-arm-eabi@0.132.0':
     resolution: {integrity: sha512-KrLaPWa5c9Y7LkW+rKkaUE3y7DBDrQtaf7rlsSDfv6KAHUjgzAIRA761Lrrp6//Yd/Rlie/yEOt9YENCoJnOcw==}
@@ -9310,10 +9307,6 @@ snapshots:
       zod: 4.1.8
 
   '@opencode-ai/sdk@1.18.10':
-    dependencies:
-      cross-spawn: 7.0.6
-
-  '@opencode-ai/sdk@1.18.9':
     dependencies:
       cross-spawn: 7.0.6
 
