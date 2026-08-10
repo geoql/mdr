@@ -228,8 +228,8 @@ importers:
         specifier: ^1.30.0
         version: 1.30.0(supports-color@10.2.2)(zod@4.4.3)
       '@opencode-ai/plugin':
-        specifier: ^1.18.11
-        version: 1.18.11
+        specifier: ^1.18.14
+        version: 1.18.14
       '@opencode-ai/sdk':
         specifier: ^1.18.14
         version: 1.18.14
@@ -1526,8 +1526,8 @@ packages:
       zod:
         optional: true
 
-  '@opencode-ai/plugin@1.18.11':
-    resolution: {integrity: sha512-mgn7+YO2J5tM2sWtV8pPBz6Lz6vWZswBOjUWssLvGaxKPuHR60sZ3Py4/tjI9RNl74aB4lhI0NUlanuWZS8NfA==}
+  '@opencode-ai/plugin@1.18.14':
+    resolution: {integrity: sha512-M7gmzsQTE6z81fMZb8AaNd3u/FdQ8h7hhtQ59rWHnZMFMWusHXZM2S2BL1Z3E8kGWeveVluOVfTKtxJhCurXtw==}
     peerDependencies:
       '@opentui/core': '>=0.4.5'
       '@opentui/keymap': '>=0.4.5'
@@ -1539,9 +1539,6 @@ packages:
         optional: true
       '@opentui/solid':
         optional: true
-
-  '@opencode-ai/sdk@1.18.11':
-    resolution: {integrity: sha512-yDImmNv4PhxdMgtiHVNWQWEVwQlAm7Dr0y4XU7CT4dOIbzgO+VP+9I02lAP7Zva1FhGeyI7oKMI2tzB9RUsWaQ==}
 
   '@opencode-ai/sdk@1.18.14':
     resolution: {integrity: sha512-Yd8vPDT5DW++Hs2904Q/Vvk/m1U79aKFSRusgAfBQ+AGhfoT40LdeL5eiJtVy0xBUIZF/8DEZjkWaeof9Y59PA==}
@@ -9560,16 +9557,12 @@ snapshots:
       - vite
       - vue
 
-  '@opencode-ai/plugin@1.18.11':
+  '@opencode-ai/plugin@1.18.14':
     dependencies:
       '@ai-sdk/provider': 3.0.8
-      '@opencode-ai/sdk': 1.18.11
+      '@opencode-ai/sdk': 1.18.14
       effect: 4.0.0-beta.83
       zod: 4.1.8
-
-  '@opencode-ai/sdk@1.18.11':
-    dependencies:
-      cross-spawn: 7.0.6
 
   '@opencode-ai/sdk@1.18.14':
     dependencies:
