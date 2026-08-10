@@ -17,7 +17,7 @@ allowBuilds:
 # Default catalog — deps shared across every app (tooling + common Nuxt/Vue
 # runtime). Referenced via `catalog:` in each app's package.json.
 catalog:
-  '@nuxt/eslint': ^1.16.0
+  '@nuxt/eslint': ^1.17.0
   '@nuxt/eslint-config': ^1.17.0
   '@nuxt/icon': ^2.4.1
   '@nuxtjs/color-mode': ^4.0.1
