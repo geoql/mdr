@@ -228,8 +228,8 @@ importers:
         specifier: ^1.30.0
         version: 1.30.0(supports-color@10.2.2)(zod@4.4.3)
       '@opencode-ai/plugin':
-        specifier: ^1.18.14
-        version: 1.18.14
+        specifier: ^1.18.15
+        version: 1.18.15
       '@opencode-ai/sdk':
         specifier: ^1.18.14
         version: 1.18.14
@@ -1504,8 +1504,8 @@ packages:
       zod:
         optional: true
 
-  '@opencode-ai/plugin@1.18.14':
-    resolution: {integrity: sha512-M7gmzsQTE6z81fMZb8AaNd3u/FdQ8h7hhtQ59rWHnZMFMWusHXZM2S2BL1Z3E8kGWeveVluOVfTKtxJhCurXtw==}
+  '@opencode-ai/plugin@1.18.15':
+    resolution: {integrity: sha512-AY10RtFbzLkf951dbLkSGJdBeddeS6ojbjvqCpWnINedqlj2cK/GF91xWjWnlHpqQZ4GABLPCuoSJx8mGmKvCw==}
     peerDependencies:
       '@opentui/core': '>=0.4.5'
       '@opentui/keymap': '>=0.4.5'
@@ -1520,6 +1520,9 @@ packages:
 
   '@opencode-ai/sdk@1.18.14':
     resolution: {integrity: sha512-Yd8vPDT5DW++Hs2904Q/Vvk/m1U79aKFSRusgAfBQ+AGhfoT40LdeL5eiJtVy0xBUIZF/8DEZjkWaeof9Y59PA==}
+
+  '@opencode-ai/sdk@1.18.15':
+    resolution: {integrity: sha512-8sfo9nGiVwesAZW9Wqkvynyn7w4wYaHx1O9qOHpYL65+Bs2XUpHP3kBbZe58gjQydFgk6I74kUF7sqCiPu2arQ==}
 
   '@oxc-parser/binding-android-arm-eabi@0.132.0':
     resolution: {integrity: sha512-KrLaPWa5c9Y7LkW+rKkaUE3y7DBDrQtaf7rlsSDfv6KAHUjgzAIRA761Lrrp6//Yd/Rlie/yEOt9YENCoJnOcw==}
@@ -9511,14 +9514,18 @@ snapshots:
       - vite
       - vue
 
-  '@opencode-ai/plugin@1.18.14':
+  '@opencode-ai/plugin@1.18.15':
     dependencies:
       '@ai-sdk/provider': 3.0.8
-      '@opencode-ai/sdk': 1.18.14
+      '@opencode-ai/sdk': 1.18.15
       effect: 4.0.0-beta.83
       zod: 4.1.8
 
   '@opencode-ai/sdk@1.18.14':
+    dependencies:
+      cross-spawn: 7.0.6
+
+  '@opencode-ai/sdk@1.18.15':
     dependencies:
       cross-spawn: 7.0.6
 
