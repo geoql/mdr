@@ -68,7 +68,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.2.0",
     "oxfmt": "catalog:",
     "oxlint": "^1.77.0",
     "oxlint-tsgolint": "latest",
