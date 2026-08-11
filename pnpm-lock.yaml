@@ -231,8 +231,8 @@ importers:
         specifier: ^1.18.15
         version: 1.18.15
       '@opencode-ai/sdk':
-        specifier: ^1.18.14
-        version: 1.18.14
+        specifier: ^1.18.15
+        version: 1.18.15
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
@@ -1517,9 +1517,6 @@ packages:
         optional: true
       '@opentui/solid':
         optional: true
-
-  '@opencode-ai/sdk@1.18.14':
-    resolution: {integrity: sha512-Yd8vPDT5DW++Hs2904Q/Vvk/m1U79aKFSRusgAfBQ+AGhfoT40LdeL5eiJtVy0xBUIZF/8DEZjkWaeof9Y59PA==}
 
   '@opencode-ai/sdk@1.18.15':
     resolution: {integrity: sha512-8sfo9nGiVwesAZW9Wqkvynyn7w4wYaHx1O9qOHpYL65+Bs2XUpHP3kBbZe58gjQydFgk6I74kUF7sqCiPu2arQ==}
@@ -9517,10 +9514,6 @@ snapshots:
       '@opencode-ai/sdk': 1.18.15
       effect: 4.0.0-beta.83
       zod: 4.1.8
-
-  '@opencode-ai/sdk@1.18.14':
-    dependencies:
-      cross-spawn: 7.0.6
 
   '@opencode-ai/sdk@1.18.15':
     dependencies:
