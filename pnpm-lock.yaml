@@ -68,8 +68,8 @@ catalogs:
       specifier: ^1.77.0
       version: 1.77.0
     reka-ui:
-      specifier: ^2.10.1
-      version: 2.10.1
+      specifier: ^2.10.3
+      version: 2.10.3
     shadcn-nuxt:
       specifier: ^2.8.2
       version: 2.8.2
@@ -159,7 +159,7 @@ importers:
         version: 4.5.2(a08ce30a1d05774dd547b84077faea20)
       reka-ui:
         specifier: 'catalog:'
-        version: 2.10.1(vue@3.5.41(typescript@7.0.2))
+        version: 2.10.3(vue@3.5.41(typescript@7.0.2))
       tailwind-merge:
         specifier: 'catalog:'
         version: 3.6.0
@@ -6613,8 +6613,8 @@ packages:
     resolution: {integrity: sha512-NgRBy2Nx/bE+9F27nVHnqcN5HjyLmecqsqx2PJHu3/IEtADD4WuxuXIVExD5PoSDFVrl78dOonfcOe5O+5nbzQ==}
     hasBin: true
 
-  reka-ui@2.10.1:
-    resolution: {integrity: sha512-drcOQ4rQtDYAcGCsyQBqQg8QQ+H3B+zDaMJU0h8KPEPMa7g9BHu3zcOi4OB39XJSWizceFoNO0Z9tctSGLOXqg==}
+  reka-ui@2.10.3:
+    resolution: {integrity: sha512-nJGZbwcha8AcP2wbnjodfzsciTKBqp1mIzepC9Pi2xDI/YK3++ej3vpJOSPyxqrkq1Oorj4K+BdJkbVCV6x6ag==}
     peerDependencies:
       vue: '>= 3.4.0'
 
@@ -14289,15 +14289,15 @@ snapshots:
     dependencies:
       jsesc: 3.1.0
 
-  reka-ui@2.10.1(vue@3.5.41(typescript@7.0.2)):
+  reka-ui@2.10.3(vue@3.5.41(typescript@7.0.2)):
     dependencies:
       '@floating-ui/dom': 1.8.0
       '@floating-ui/vue': 1.1.11(vue@3.5.41(typescript@7.0.2))
       '@internationalized/date': 3.12.2
       '@internationalized/number': 3.6.7
       '@tanstack/vue-virtual': 3.13.32(vue@3.5.41(typescript@7.0.2))
-      '@vueuse/core': 14.3.0(vue@3.5.41(typescript@7.0.2))
-      '@vueuse/shared': 14.3.0(vue@3.5.41(typescript@7.0.2))
+      '@vueuse/core': 14.4.0(vue@3.5.41(typescript@7.0.2))
+      '@vueuse/shared': 14.4.0(vue@3.5.41(typescript@7.0.2))
       aria-hidden: 1.2.6
       defu: 6.1.7
       ohash: 2.0.11
