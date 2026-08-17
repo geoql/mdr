@@ -45,7 +45,7 @@
     "prepare": "is-ci || husky"
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.2.1",
+    "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@vitest/coverage-v8": "^4.1.10",
     "husky": "^9.1.7",
