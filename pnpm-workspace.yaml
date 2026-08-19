@@ -32,7 +32,7 @@ catalog:
   eslint-plugin-better-tailwindcss: ^4.7.0
   eslint-plugin-oxlint: ^1.78.0
   '@lucide/vue': ^1.25.0
-  motion-v: ^2.3.0
+  motion-v: ^2.4.0
   nuxt: ^4.5.2
   oxfmt: ^0.63.0
   oxlint: ^1.78.0
