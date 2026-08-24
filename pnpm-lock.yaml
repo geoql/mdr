@@ -228,8 +228,8 @@ importers:
         specifier: ^1.30.0
         version: 1.30.0(supports-color@10.2.2)(zod@4.4.3)
       '@opencode-ai/plugin':
-        specifier: ^1.18.18
-        version: 1.18.18
+        specifier: ^1.18.19
+        version: 1.18.19
       '@opencode-ai/sdk':
         specifier: ^1.18.18
         version: 1.18.18
@@ -1494,8 +1494,8 @@ packages:
       zod:
         optional: true
 
-  '@opencode-ai/plugin@1.18.18':
-    resolution: {integrity: sha512-vqQeqJtn9c+J+tIQDzYk88xip/NVNN1hym1ATmckxo6zINHAoXoul4Sw/jgnvL00rLsfAvhja28qax4h3g/5Jg==}
+  '@opencode-ai/plugin@1.18.19':
+    resolution: {integrity: sha512-Z7MZALTNDg6WBNZVVGFhh2FwKd2dBDKmRqOFtXkJ1RDB2+PtqcrBz+3ZjpvgZDe2h9eW8N+1rxkIJEU5FnPU3g==}
     peerDependencies:
       '@opentui/core': '>=0.4.5'
       '@opentui/keymap': '>=0.4.5'
@@ -1510,6 +1510,9 @@ packages:
 
   '@opencode-ai/sdk@1.18.18':
     resolution: {integrity: sha512-zJlwXskIR47V1dkPJqeKBgq7nejG1uU8lJaGIGqbX3MWRCT8vKn0fEotbxuPCKnTdmWsDyNGNg9q1qIliDSMDA==}
+
+  '@opencode-ai/sdk@1.18.19':
+    resolution: {integrity: sha512-AnszRg7cJ3PA6/06mkqdTJDKn9NJuV26AJMWbKEgRsznbJvrhf3PT8UhQQOhyKQYCygx9ZOxyKMIPVOQdMSS1A==}
 
   '@oxc-parser/binding-android-arm-eabi@0.132.0':
     resolution: {integrity: sha512-KrLaPWa5c9Y7LkW+rKkaUE3y7DBDrQtaf7rlsSDfv6KAHUjgzAIRA761Lrrp6//Yd/Rlie/yEOt9YENCoJnOcw==}
@@ -7316,8 +7319,8 @@ packages:
     resolution: {integrity: sha512-vzi9uRZ926x4XV73S/4qQaTwPXM2JBj6/6lI/byHH1jOpCzb0zDbfytgA9LcN/hzb2l7WQSQnxITOVx5un/wGw==}
     hasBin: true
 
-  uuid@14.0.1:
-    resolution: {integrity: sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==}
+  uuid@14.0.2:
+    resolution: {integrity: sha512-xZe/16rV4aa+HGSOCiY2YeLT1OybRLrrkL/Rqaq7p7GMVXjFh+6wN4oMYgjFmnSnhY8t6Xpdl2l9qmnHYuMHwQ==}
     hasBin: true
 
   valibot@1.4.2:
@@ -9468,14 +9471,18 @@ snapshots:
       - vite
       - vue
 
-  '@opencode-ai/plugin@1.18.18':
+  '@opencode-ai/plugin@1.18.19':
     dependencies:
       '@ai-sdk/provider': 3.0.8
-      '@opencode-ai/sdk': 1.18.18
+      '@opencode-ai/sdk': 1.18.19
       effect: 4.0.0-beta.83
       zod: 4.1.8
 
   '@opencode-ai/sdk@1.18.18':
+    dependencies:
+      cross-spawn: 7.0.6
+
+  '@opencode-ai/sdk@1.18.19':
     dependencies:
       cross-spawn: 7.0.6
 
@@ -11859,7 +11866,7 @@ snapshots:
       msgpackr: 2.0.5
       multipasta: 0.2.8
       toml: 4.3.0
-      uuid: 14.0.1
+      uuid: 14.0.2
       yaml: 2.9.0
 
   electron-to-chromium@1.5.393: {}
@@ -15059,7 +15066,7 @@ snapshots:
 
   uuid@13.0.2: {}
 
-  uuid@14.0.1: {}
+  uuid@14.0.2: {}
 
   valibot@1.4.2(typescript@7.0.2):
     optionalDependencies:
