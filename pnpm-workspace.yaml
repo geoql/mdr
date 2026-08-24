@@ -50,7 +50,7 @@ catalog:
 catalogs:
   # Marketing app-only deps — referenced via `catalog:app:marketing`.
   app:marketing:
-    '@iconify-json/lucide': ^1.2.123
+    '@iconify-json/lucide': ^1.2.124
     '@nuxtjs/robots': ^6.2.0
 
 # pnpm v9+ in workspace mode SILENTLY IGNORES package.json's `pnpm.overrides`.
