@@ -70,7 +70,7 @@
   "devDependencies": {
     "@types/node": "^26.2.0",
     "oxfmt": "catalog:",
-    "oxlint": "^1.78.0",
+    "oxlint": "^1.79.0",
     "oxlint-tsgolint": "latest",
     "vite-plus": "catalog:"
   },
