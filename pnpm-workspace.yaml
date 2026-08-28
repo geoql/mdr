@@ -30,7 +30,7 @@ catalog:
   clsx: ^2.1.1
   eslint: ^10.9.0
   eslint-plugin-better-tailwindcss: ^4.7.0
-  eslint-plugin-oxlint: ^1.79.0
+  eslint-plugin-oxlint: ^1.80.0
   '@lucide/vue': ^1.25.0
   motion-v: ^2.4.0
   nuxt: ^4.5.2
