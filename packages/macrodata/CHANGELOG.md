@@ -58,6 +58,34 @@ Forked from upstream at commit
 
 <!-- fork marker — everything below is the upstream ascorbic/macrodata changelog -->
 
+## [1.0.5](https://github.com/geoql/mdr/compare/v1.0.4...v1.0.5) (2026-08-28)
+
+
+### Bug Fixes
+
+* **deps:** bump @opencode-ai/plugin from 1.18.10 to 1.18.11 ([#81](https://github.com/geoql/mdr/issues/81)) ([176997c](https://github.com/geoql/mdr/commit/176997cc83051b235a089cd29dff6c0836804b12))
+* **deps:** bump @opencode-ai/plugin from 1.18.11 to 1.18.14 ([#92](https://github.com/geoql/mdr/issues/92)) ([ac30dd2](https://github.com/geoql/mdr/commit/ac30dd2f358db08b27283c94da7b2c01ecfe924f))
+* **deps:** bump @opencode-ai/plugin from 1.18.14 to 1.18.15 ([#96](https://github.com/geoql/mdr/issues/96)) ([b356aa3](https://github.com/geoql/mdr/commit/b356aa35f41b002d2bb9d638422ff41ddf2aa86b))
+* **deps:** bump @opencode-ai/plugin from 1.18.15 to 1.18.16 ([#102](https://github.com/geoql/mdr/issues/102)) ([7c3180d](https://github.com/geoql/mdr/commit/7c3180de645e303d9802d2497ba0531ff6a1bf93))
+* **deps:** bump @opencode-ai/plugin from 1.18.16 to 1.18.18 ([#111](https://github.com/geoql/mdr/issues/111)) ([bb20557](https://github.com/geoql/mdr/commit/bb20557f505826ff69542b35f80c3c4cfcdec7a8))
+* **deps:** bump @opencode-ai/plugin from 1.18.18 to 1.18.19 ([#119](https://github.com/geoql/mdr/issues/119)) ([b6c73e1](https://github.com/geoql/mdr/commit/b6c73e152e633d9136abdf45cd7559086adb20bb))
+* **deps:** bump @opencode-ai/plugin from 1.18.19 to 1.18.21 ([#127](https://github.com/geoql/mdr/issues/127)) ([c1bb3cd](https://github.com/geoql/mdr/commit/c1bb3cd9cf9631572ccd0e2c99577d4c4d2feab5))
+* **deps:** bump @opencode-ai/plugin from 1.18.9 to 1.18.10 ([#71](https://github.com/geoql/mdr/issues/71)) ([6ed4160](https://github.com/geoql/mdr/commit/6ed4160c69562e57b67fc1e706a79e0d61cb7f22))
+* **deps:** bump @opencode-ai/sdk from 1.18.10 to 1.18.11 ([#80](https://github.com/geoql/mdr/issues/80)) ([146def8](https://github.com/geoql/mdr/commit/146def8e9f2ba694d2260abf685a5d21e5b83ef4))
+* **deps:** bump @opencode-ai/sdk from 1.18.11 to 1.18.14 ([#90](https://github.com/geoql/mdr/issues/90)) ([4e77b74](https://github.com/geoql/mdr/commit/4e77b74985779c6bd9abd7ee0aa618b3ca80ec7d))
+* **deps:** bump @opencode-ai/sdk from 1.18.14 to 1.18.15 ([#98](https://github.com/geoql/mdr/issues/98)) ([e4ddc03](https://github.com/geoql/mdr/commit/e4ddc03eeee71fe8d1278160fa1d88c37282e893))
+* **deps:** bump @opencode-ai/sdk from 1.18.15 to 1.18.16 ([#103](https://github.com/geoql/mdr/issues/103)) ([957ea05](https://github.com/geoql/mdr/commit/957ea0579c87e133db2bbf54f6ec6d9714540031))
+* **deps:** bump @opencode-ai/sdk from 1.18.16 to 1.18.18 ([#112](https://github.com/geoql/mdr/issues/112)) ([17fcdce](https://github.com/geoql/mdr/commit/17fcdce9babc0b10e681cbb2e37250f8f521c14e))
+* **deps:** bump @opencode-ai/sdk from 1.18.18 to 1.18.19 ([#122](https://github.com/geoql/mdr/issues/122)) ([cf46b3b](https://github.com/geoql/mdr/commit/cf46b3b750487c7c2f038c0073c7ca9ce4aa4327))
+* **deps:** bump @opencode-ai/sdk from 1.18.19 to 1.18.22 ([#140](https://github.com/geoql/mdr/issues/140)) ([2236414](https://github.com/geoql/mdr/commit/2236414959add8006dddf67147882d5f933d7f55))
+* **deps:** bump @opencode-ai/sdk from 1.18.9 to 1.18.10 ([#74](https://github.com/geoql/mdr/issues/74)) ([7528631](https://github.com/geoql/mdr/commit/75286314249d8c89095fef4667311ba60b95777b))
+* **deps:** bump @types/node from 26.1.2 to 26.2.0 ([#95](https://github.com/geoql/mdr/issues/95)) ([e32d916](https://github.com/geoql/mdr/commit/e32d9160eff3c537ee1d1d932055e0b1c517ee23))
+* **deps:** bump @types/node from 26.2.0 to 26.3.0 ([#136](https://github.com/geoql/mdr/issues/136)) ([25f1002](https://github.com/geoql/mdr/commit/25f1002d41f2767fdff4cd210d555693e409b9a2))
+* **deps:** bump oxlint from 1.76.0 to 1.77.0 ([#85](https://github.com/geoql/mdr/issues/85)) ([4bcd4e7](https://github.com/geoql/mdr/commit/4bcd4e774b23ea6f2ba69adcb04612b860483d28))
+* **deps:** bump oxlint from 1.77.0 to 1.78.0 ([#105](https://github.com/geoql/mdr/issues/105)) ([e7f1fa9](https://github.com/geoql/mdr/commit/e7f1fa901ee24895f1998c8f0bd5605745b05bc8))
+* **deps:** bump oxlint from 1.78.0 to 1.79.0 ([#125](https://github.com/geoql/mdr/issues/125)) ([dd9df78](https://github.com/geoql/mdr/commit/dd9df78f73f4d9fd8ce87071fd24d0fba1a226d2))
+* **deps:** bump oxlint from 1.79.0 to 1.80.0 ([#133](https://github.com/geoql/mdr/issues/133)) ([28db42e](https://github.com/geoql/mdr/commit/28db42eed327ee02d191922392e90bce560890f7))
+
 ## [1.0.4](https://github.com/geoql/mdr/compare/v1.0.3...v1.0.4) (2026-07-31)
 
 
