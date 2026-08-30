@@ -155,8 +155,23 @@ async function embedRemoteBatched(
 }
 
 // Singleton pipeline instance (expensive to create)
+import { ensureBunSafeOnnxRuntime, isBunRuntime } from './onnx-bun.js';
+
 let embeddingPipeline: FeatureExtractionPipeline | null = null;
 let pipelineLoading: Promise<FeatureExtractionPipeline> | null = null;
+
+/**
+ * Pick the pipeline device option.
+ *
+ * Under Bun, onnx-bun.ts injects onnxruntime-web (see that module for the
+ * NAPI-crash rationale). With an injected runtime, transformers has an empty
+ * device table, and its Node default ("cpu") throws "Unsupported device".
+ * "auto" maps to the injected runtime's own default backend (wasm).
+ * Node processes get no device option and keep the native default.
+ */
+export function resolveLocalEmbeddingDevice(): 'auto' | undefined {
+  return isBunRuntime() ? 'auto' : undefined;
+}
 
 /**
  * Get or create the local embedding pipeline
@@ -173,10 +188,13 @@ async function getEmbeddingPipeline(): Promise<FeatureExtractionPipeline> {
   }
 
   pipelineLoading = (async () => {
+    await ensureBunSafeOnnxRuntime();
     const { pipeline } = await import('@huggingface/transformers');
+    const device = resolveLocalEmbeddingDevice();
     return pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2', {
       // Use quantized model for faster loading
       dtype: 'q8',
+      ...(device ? { device } : {}),
     });
   })();
 
