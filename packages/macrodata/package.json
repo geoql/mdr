@@ -65,7 +65,7 @@
     "chokidar": "^5.0.0",
     "croner": "^10.0.1",
     "vectra": "^0.15.0",
-    "zod": "^4.4.3"
+    "zod": "^4.5.1"
   },
   "devDependencies": {
     "@types/node": "^26.3.0",
