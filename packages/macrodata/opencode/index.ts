@@ -17,7 +17,7 @@ import type { Plugin as V1Plugin, PluginInput } from '@opencode-ai/plugin';
 import { Plugin } from '@opencode/plugin';
 import type { Context } from '@opencode/plugin/promise/plugin';
 import { existsSync, mkdirSync, cpSync, readdirSync, readFileSync, openSync } from 'fs';
-import { join } from 'path';
+import { join, delimiter } from 'path';
 import { homedir } from 'os';
 import { spawn } from 'child_process';
 import { memoryTools } from './tools.js';
@@ -65,6 +65,29 @@ function signalDaemonReload(): void {
 const HEARTBEAT_STALE_MS = 15 * 60_000;
 
 /**
+ * Resolve the runtime that launches the daemon.
+ *
+ * The daemon imports `node:sqlite`, which Bun does not implement, and a
+ * bun-compiled host treats its argv[1] as a directory — so spawning
+ * `process.execPath` under a Bun host fails with ENOTDIR and the daemon never
+ * starts. Prefer the explicit override, then a `node` on PATH, then the host.
+ */
+export function resolveNodeBinary(): string {
+  if (process.env.MACRODATA_NODE_BIN) return process.env.MACRODATA_NODE_BIN;
+
+  if (process.versions.bun) {
+    for (const dir of (process.env.PATH ?? '').split(delimiter)) {
+      if (!dir) continue;
+      const candidate = join(dir, 'node');
+      if (existsSync(candidate)) return candidate;
+    }
+    logger.warn('No node runtime found on PATH; the macrodata daemon may not start');
+  }
+
+  return process.execPath;
+}
+
+/**
  * Ensure the macrodata daemon is running and healthy.
  * Starts it when the PID is dead, and restarts it when the PID is alive but
  * the heartbeat file is stale (wedged daemon, see #25).
@@ -104,7 +127,7 @@ function ensureDaemonRunning(): void {
     const out = openSync(logFile, 'a');
     const err = openSync(logFile, 'a');
 
-    const child = spawn(process.execPath, [daemonScript], {
+    const child = spawn(resolveNodeBinary(), [daemonScript], {
       detached: true,
       stdio: ['ignore', out, err],
       env: { ...process.env, MACRODATA_ROOT: stateRoot },
