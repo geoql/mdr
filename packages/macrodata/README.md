@@ -34,15 +34,25 @@ The **data directory (`~/.config/macrodata/`), the MCP server id (`macrodata`), 
 
 ### OpenCode
 
-Add the plugin to **`~/.config/opencode/opencode.json`**:
+One package serves both OpenCode generations. Add it to **`~/.config/opencode/opencode.json`** under the key your host reads:
 
-```json
+| Host       | Minimum version | Config key | Entry the host calls        |
+| ---------- | --------------- | ---------- | --------------------------- |
+| OpenCode 1 | `1.18.29`       | `plugin`   | `server()`                  |
+| OpenCode 2 | `2.0.15`        | `plugins`  | `setup()` (`Plugin.define`) |
+
+```jsonc
 {
-  "plugin": ["@geoql/mdr@latest"]
+  // OpenCode 1
+  "plugin": ["@geoql/mdr@latest"],
+  // OpenCode 2 (also merges the V1 `plugin` array, so either works there)
+  "plugins": ["@geoql/mdr@latest"],
 }
 ```
 
 Launch OpenCode and ask it to set up Macrodata.
+
+On OpenCode 2 the bundled skills register through the host (`ctx.skill.transform`) instead of being copied into `~/.config/opencode/skills/`. Conversation indexing reads both store generations — OpenCode 1 `session`/`message`/`part` and OpenCode 2 `session_v2`/`session_message` — from the store named by `OPENCODE_DB` (default `~/.local/share/opencode/opencode.db`).
 
 ### Claude Code
 
@@ -105,6 +115,8 @@ config.json          # optional (remote embedding provider, etc.)
 | `MACRODATA_ROOT`             | Override the memory root directory (default `~/.config/macrodata`).                                   |
 | `MACRODATA_CONFIG_PATH`      | Override the path to `config.json` (default `~/.config/macrodata/config.json`).                       |
 | `MACRODATA_CHILD_TIMEOUT_MS` | Hard timeout for scheduled agent children before the daemon kills the process group (default 10 min). |
+| `MACRODATA_NODE_BIN`         | Node binary that launches the daemon (default: `node` on `PATH` under a Bun host, else the host).     |
+| `MACRODATA_OPENCODE_DB_PATH` | Absolute path to the OpenCode store to index; overrides `OPENCODE_DB`.                                |
 
 ### Remote embedding provider (optional)
 

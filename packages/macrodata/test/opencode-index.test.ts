@@ -22,7 +22,7 @@ vi.mock('os', async (importOriginal) => {
 
 fakeHome = mkdtempSync(join(tmpdir(), 'macrodata-plugin-home-'));
 
-const { MacrodataPlugin } = await import('../opencode/index');
+const { MacrodataPlugin, resolveNodeBinary } = await import('../opencode/index');
 
 let stateRoot: string;
 let prevRoot: string | undefined;
@@ -183,7 +183,7 @@ describe('chat.message hook', () => {
     const part = output.parts[0] as { text: string; id: string; synthetic: boolean };
     expect(part.text).toContain('<system-reminder>');
     expect(part.text).toContain('pending line');
-    expect(part.id).toBe('msg_1-macrodata');
+    expect(part.id).toBe('prt_1');
     expect(part.synthetic).toBe(true);
   });
 
@@ -266,5 +266,84 @@ describe('session.compacting hook', () => {
     await expect(
       hooks['experimental.session.compacting']({} as never, badOutput as never),
     ).resolves.toBeUndefined();
+  });
+});
+
+describe('resolveNodeBinary', () => {
+  const prevBin = process.env.MACRODATA_NODE_BIN;
+  const prevPath = process.env.PATH;
+  let binDir: string;
+
+  function withBunHost(run: () => void): void {
+    Object.defineProperty(process.versions, 'bun', { value: '1.4.2', configurable: true });
+    try {
+      run();
+    } finally {
+      delete (process.versions as Record<string, unknown>).bun;
+    }
+  }
+
+  beforeEach(() => {
+    binDir = mkdtempSync(join(tmpdir(), 'macrodata-path-'));
+    delete process.env.MACRODATA_NODE_BIN;
+    process.env.PATH = binDir;
+  });
+
+  afterEach(() => {
+    rmSync(binDir, { recursive: true, force: true });
+    if (prevBin === undefined) delete process.env.MACRODATA_NODE_BIN;
+    else process.env.MACRODATA_NODE_BIN = prevBin;
+    process.env.PATH = prevPath;
+  });
+
+  test('prefers the MACRODATA_NODE_BIN override', () => {
+    process.env.MACRODATA_NODE_BIN = join(binDir, 'custom-node');
+    expect(resolveNodeBinary()).toBe(join(binDir, 'custom-node'));
+  });
+
+  test('uses the host executable when the host is not Bun', () => {
+    expect(resolveNodeBinary()).toBe(process.execPath);
+  });
+
+  test('finds a Node runtime on PATH under a Bun host', () => {
+    const node = join(binDir, 'node');
+    writeFileSync(node, '');
+    withBunHost(() => {
+      expect(resolveNodeBinary()).toBe(node);
+    });
+  });
+
+  test('skips empty PATH segments under a Bun host', () => {
+    const node = join(binDir, 'node');
+    writeFileSync(node, '');
+    process.env.PATH = `:${binDir}`;
+    withBunHost(() => {
+      expect(resolveNodeBinary()).toBe(node);
+    });
+  });
+
+  test('falls back to the host executable when PATH is unset under a Bun host', () => {
+    delete process.env.PATH;
+    withBunHost(() => {
+      expect(resolveNodeBinary()).toBe(process.execPath);
+    });
+  });
+
+  test('falls back to the host executable when Bun has no Node on PATH', () => {
+    withBunHost(() => {
+      expect(resolveNodeBinary()).toBe(process.execPath);
+    });
+  });
+
+  test('spawns the daemon with a Node runtime under a Bun host', async () => {
+    // A bun-compiled host treats argv[1] as a directory, so the daemon never
+    // starts; the spawn target must be a real Node binary instead.
+    const node = join(binDir, 'node');
+    writeFileSync(node, '');
+    await new Promise<void>((resolve) => withBunHost(() => resolve(loadPlugin().then(() => {}))));
+    expect(spawnMock).toHaveBeenCalledTimes(1);
+    const [command, args] = spawnMock.mock.calls[0] as [string, string[]];
+    expect(command).toBe(node);
+    expect(args[0]).toContain('macrodata-daemon.js');
   });
 });

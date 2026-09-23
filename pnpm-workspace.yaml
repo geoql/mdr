@@ -86,3 +86,9 @@ minimumReleaseAgeExclude:
   - vue-tsc
   - '@unhead/*'
   - unhead@3.2.1
+  - '@opencode/ai@2.0.15'
+  - '@opencode/client@2.0.15'
+  - '@opencode/plugin@2.0.15'
+  - '@opencode/protocol@2.0.15'
+  - '@opencode/schema@2.0.15'
+  - '@opencode/util@2.0.15'

@@ -485,7 +485,7 @@ describe('buildContextPart', () => {
     });
 
     expect(part).toEqual({
-      id: 'msg_123-macrodata',
+      id: 'prt_123',
       messageID: 'msg_123',
       sessionID: 'ses_456',
       type: 'text',

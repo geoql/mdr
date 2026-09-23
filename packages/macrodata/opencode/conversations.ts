@@ -2,17 +2,32 @@
  * OpenCode Conversation Indexer
  *
  * Indexes past OpenCode sessions for semantic search.
- * Reads from the OpenCode SQLite database at ~/.local/share/opencode/opencode.db
+ * Reads from the OpenCode SQLite store under ~/.local/share/opencode/ — by
+ * default `opencode.db`; `OPENCODE_DB` (as set by an `opencode2` launcher) or
+ * `MACRODATA_OPENCODE_DB_PATH` override it.
  *
- * Schema (relevant tables):
- *   - session: id, project_id, title, time_created, time_updated, parent_id
+ * Two store generations exist and the reader unions both (#152):
+ *
+ *   OpenCode 1 ("v1")
+ *   - session: id, project_id, parent_id, directory, time_created
  *   - message: id, session_id, time_created, data (JSON with role, agent, etc.)
  *   - part: id, message_id, session_id, data (JSON with type, text, etc.)
- *   - project: id, worktree
+ *
+ *   OpenCode 2 ("v2")
+ *   - session_v2: id, project_id, parent_id, directory, time_created
+ *   - session_message: id, session_id, type (user|assistant|…), seq, time_created,
+ *     data (user: JSON with text; assistant: JSON with content[] parts)
+ *
+ *   Shared: project: id, worktree
+ *
+ * OpenCode 2 migrates a V1 store in place and KEEPS the V1 tables, and an
+ * OpenCode 1 host on the same file keeps writing them afterwards — so the
+ * presence of either generation says nothing about which one is live. Reading
+ * both and deduping by message id is the only shape that never drops history.
  */
 
 import { existsSync, mkdirSync, rmSync } from 'fs';
-import { join, basename } from 'path';
+import { join, basename, isAbsolute } from 'path';
 import { homedir } from 'os';
 import type { DatabaseSync } from 'node:sqlite';
 import { LocalIndex, ProtobufCodec } from 'vectra';
@@ -20,9 +35,25 @@ import { embedBatch, embedQuery } from '../src/embeddings.js';
 import { getStateRoot } from './context.js';
 import { logger } from './logger.js';
 
-const OPENCODE_DB_PATH =
-  process.env.MACRODATA_OPENCODE_DB_PATH ||
-  join(homedir(), '.local', 'share', 'opencode', 'opencode.db');
+/**
+ * Resolve the OpenCode store path. `MACRODATA_OPENCODE_DB_PATH` wins; then
+ * OpenCode's own `OPENCODE_DB` (absolute, or relative to its data dir — the
+ * `opencode2` launcher sets `opencode2.db` to isolate the V2 store); then the
+ * default `opencode.db`.
+ */
+export function resolveOpenCodeDbPath(
+  env: Record<string, string | undefined>,
+  dataDir: string,
+): string {
+  if (env.MACRODATA_OPENCODE_DB_PATH) return env.MACRODATA_OPENCODE_DB_PATH;
+  const store = env.OPENCODE_DB || 'opencode.db';
+  return isAbsolute(store) ? store : join(dataDir, store);
+}
+
+const OPENCODE_DB_PATH = resolveOpenCodeDbPath(
+  process.env,
+  join(homedir(), '.local', 'share', 'opencode'),
+);
 
 /**
  * Retention cap for the conversation index (#27).
@@ -169,17 +200,146 @@ interface ExchangeRow {
   directory: string | null;
 }
 
+export interface StoreGenerations {
+  /** OpenCode 1 tables (`session`, `message`, `part`) are present. */
+  v1: boolean;
+  /** OpenCode 2 tables (`session_v2`, `session_message`) are present. */
+  v2: boolean;
+}
+
 /**
- * Query exchanges from the SQLite database.
+ * Detect which store generations the database carries. Both can be true on a
+ * store OpenCode 2 migrated in place; neither means this is not an OpenCode
+ * store at all.
+ */
+export function detectStoreGenerations(db: DatabaseSync): StoreGenerations {
+  const rows = db
+    .prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`)
+    .all() as unknown as { name: string }[];
+  const tables = new Set(rows.map((r) => r.name));
+  return {
+    v1: tables.has('session') && tables.has('message') && tables.has('part'),
+    v2: tables.has('session_v2') && tables.has('session_message'),
+  };
+}
+
+/**
+ * Query exchanges from the SQLite database, across every store generation it
+ * carries.
  *
- * This runs a single query that:
- * 1. Finds user messages (role = 'user') that aren't compaction summaries
+ * Each generation query:
+ * 1. Finds user messages
  * 2. Finds the next assistant message in the same session
  * 3. Aggregates text parts for both user and assistant messages
  * 4. Joins to project for worktree path
  * 5. Excludes subtask sessions (parent_id IS NULL)
+ *
+ * Rows are deduped by message id (OpenCode 2's in-place migration keeps ids),
+ * V1 winning so already-indexed text never changes, then ordered by user time.
+ *
+ * Fails closed: a store with neither generation throws instead of returning
+ * [], so a schema change can never be mistaken for "no new exchanges" (#25).
  */
 export function queryExchanges(db: DatabaseSync, sinceMs?: number): ExchangeRow[] {
+  const generations = detectStoreGenerations(db);
+  if (!generations.v1 && !generations.v2) {
+    const message =
+      'OpenCode store has neither the OpenCode 2 tables (session_v2 + session_message) ' +
+      'nor the OpenCode 1 tables (session + message + part); refusing to index';
+    logger.error(message);
+    throw new Error(message);
+  }
+
+  const seen = new Set<string>();
+  const rows: ExchangeRow[] = [];
+  const collect = (batch: ExchangeRow[]) => {
+    for (const row of batch) {
+      const key = `${row.session_id}:${row.user_msg_id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      rows.push(row);
+    }
+  };
+
+  if (generations.v1) collect(queryV1Exchanges(db, sinceMs));
+  if (generations.v2) collect(queryV2Exchanges(db, sinceMs));
+
+  return rows.sort((a, b) => a.user_time - b.user_time);
+}
+
+/**
+ * OpenCode 2 store: user text lives inline in `data.text`; assistant text is
+ * the `text` entries of `data.content[]`. Messages are ordered by `seq`.
+ */
+function queryV2Exchanges(db: DatabaseSync, sinceMs?: number): ExchangeRow[] {
+  const whereClause = sinceMs ? 'AND m.time_created > ?' : '';
+  const params = sinceMs ? [sinceMs] : [];
+
+  const sql = `
+    WITH user_messages AS (
+      SELECT
+        m.id AS user_msg_id,
+        m.session_id,
+        m.time_created AS user_time,
+        COALESCE(json_extract(m.data, '$.text'), '') AS user_text,
+        (
+          SELECT am.id FROM session_message am
+          WHERE am.session_id = m.session_id
+            AND am.seq > m.seq
+            AND am.type = 'assistant'
+          ORDER BY am.seq ASC
+          LIMIT 1
+        ) AS assistant_msg_id
+      FROM session_message m
+      JOIN session_v2 s ON s.id = m.session_id
+      WHERE m.type = 'user'
+        AND s.parent_id IS NULL
+        ${whereClause}
+    )
+    SELECT
+      um.user_msg_id,
+      um.session_id,
+      um.user_time,
+      um.user_text,
+      COALESCE(
+        (
+          SELECT GROUP_CONCAT(json_extract(c.value, '$.text'), '\n')
+          FROM session_message am, json_each(am.data, '$.content') c
+          WHERE am.id = um.assistant_msg_id
+            AND json_extract(c.value, '$.type') = 'text'
+        ),
+        ''
+      ) AS assistant_text,
+      p.worktree,
+      s.directory
+    FROM user_messages um
+    JOIN session_v2 s ON s.id = um.session_id
+    LEFT JOIN project p ON p.id = s.project_id
+    WHERE um.assistant_msg_id IS NOT NULL
+      AND um.user_text != ''
+    ORDER BY um.user_time ASC
+  `;
+
+  return runExchangeQuery(db, sql, params);
+}
+
+function runExchangeQuery(db: DatabaseSync, sql: string, params: number[]): ExchangeRow[] {
+  try {
+    return db.prepare(sql).all(...params) as unknown as ExchangeRow[];
+  } catch (err) {
+    // Propagate instead of returning [] so callers can't mistake a schema
+    // mismatch for "no new exchanges" (a silent no-op that previously
+    // disabled indexing for weeks, see #25).
+    logger.error(`Query failed: ${String(err)}`);
+    throw err;
+  }
+}
+
+/**
+ * OpenCode 1 store: message roles live in `data.role`; text lives in the
+ * `part` table joined by message id.
+ */
+function queryV1Exchanges(db: DatabaseSync, sinceMs?: number): ExchangeRow[] {
   // Interpolated inside the user_messages CTE body, where only `m` and `s`
   // are in scope (`um` is the outer query's alias and must not be used here).
   const whereClause = sinceMs ? 'AND m.time_created > ?' : '';
@@ -244,15 +404,7 @@ export function queryExchanges(db: DatabaseSync, sinceMs?: number): ExchangeRow[
     ORDER BY um.user_time ASC
   `;
 
-  try {
-    return db.prepare(sql).all(...params) as unknown as ExchangeRow[];
-  } catch (err) {
-    // Propagate instead of returning [] so callers can't mistake a schema
-    // mismatch for "no new exchanges" (a silent no-op that previously
-    // disabled indexing for weeks, see #25).
-    logger.error(`Query failed: ${String(err)}`);
-    throw err;
-  }
+  return runExchangeQuery(db, sql, params);
 }
 
 /**
