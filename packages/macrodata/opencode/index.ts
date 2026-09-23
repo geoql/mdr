@@ -6,9 +6,16 @@
  * - Daemon deltas and state changes injected as user message parts
  * - Compaction hook to preserve memory context
  * - Custom `macrodata` tool for memory operations
+ *
+ * One default export serves both hosts (#152): OpenCode 1 (>= 1.18.29) calls
+ * `server()`, OpenCode 2 calls `setup(ctx)`. The shared core (state root,
+ * daemon supervision, tools, context) is identical; only the registration
+ * surface differs.
  */
 
-import type { Plugin, PluginInput } from '@opencode-ai/plugin';
+import type { Plugin as V1Plugin, PluginInput } from '@opencode-ai/plugin';
+import { Plugin } from '@opencode/plugin';
+import type { Context } from '@opencode/plugin/promise/plugin';
 import { existsSync, mkdirSync, cpSync, readdirSync, readFileSync, openSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
@@ -24,6 +31,7 @@ import {
   getStateRoot,
 } from './context.js';
 import { logger } from './logger.js';
+import { bridgeTool, loadBundledSkills, providersFromModels } from './v2.js';
 
 /**
  * Check if a process with given PID is running
@@ -157,7 +165,10 @@ function installSkills(): void {
   }
 }
 
-export const MacrodataPlugin: Plugin = async (ctx: PluginInput) => {
+/**
+ * Runtime-agnostic startup shared by both hosts.
+ */
+function bootstrap(): void {
   // Initialize state directories
   initializeStateRoot();
 
@@ -166,8 +177,12 @@ export const MacrodataPlugin: Plugin = async (ctx: PluginInput) => {
 
   // Signal daemon to reload config (in case it was started with old config)
   signalDaemonReload();
+}
 
-  // Install skills to global config on plugin load
+export const MacrodataPlugin: V1Plugin = async (ctx: PluginInput) => {
+  bootstrap();
+
+  // Install skills to global config on plugin load (V1 has no skill API)
   installSkills();
 
   return {
@@ -229,5 +244,104 @@ export const MacrodataPlugin: Plugin = async (ctx: PluginInput) => {
   };
 };
 
-// Default export for OpenCode plugin system
-export default MacrodataPlugin;
+/**
+ * OpenCode 2 registration. Same hooks as V1 mapped onto the domain APIs:
+ * system.transform → session 'context', chat.message → session 'prompt',
+ * session.compacting → session 'compaction'; the tool map → tool transform;
+ * bundled skills → skill transform (no copy into the user's config dir).
+ */
+async function setup(ctx: Context): Promise<() => void> {
+  bootstrap();
+
+  const client = {
+    config: {
+      providers: async () => ({
+        data: { providers: providersFromModels((await ctx.model.list()).data) },
+      }),
+    },
+  };
+
+  // Inject memory context into the system prompt, frozen per session so the
+  // provider's prompt cache stays valid across turns
+  await ctx.session.hook('context', async (event) => {
+    try {
+      const memoryContext = await getSessionContext(event.sessionID, { client });
+      /* v8 ignore next 3 -- outside compaction getSessionContext always
+         returns a string (onboarding or full context), never null. */
+      if (memoryContext) {
+        event.system.push({ type: 'text', text: memoryContext });
+      }
+    } catch (err) {
+      logger.error(`System context injection error: ${String(err)}`);
+    }
+  });
+
+  // Deliver daemon deltas and state changes with the incoming prompt. The
+  // prompt hook runs once per submission, before durable admission, so the
+  // reminder lands in the transcript tail and the cached prefix is untouched.
+  await ctx.session.hook('prompt', async (event) => {
+    try {
+      const updates: string[] = [];
+
+      const pendingContext = consumePendingContext();
+      if (pendingContext) {
+        updates.push(pendingContext);
+      }
+
+      const contextUpdate = await getContextUpdate(event.sessionID);
+      if (contextUpdate) {
+        updates.push(contextUpdate);
+      }
+
+      if (updates.length > 0) {
+        event.prompt.text = `${event.prompt.text}\n\n<system-reminder>\n${updates.join('\n\n')}\n</system-reminder>`;
+      }
+    } catch (err) {
+      logger.error(`Context update injection error: ${String(err)}`);
+    }
+  });
+
+  // Inject memory context before compaction
+  await ctx.session.hook('compaction', async (event) => {
+    try {
+      const memoryContext = await formatContextForPrompt({ forCompaction: true });
+
+      if (memoryContext) {
+        event.system.push({ type: 'text', text: memoryContext });
+      }
+    } catch (err) {
+      logger.error(`Compaction hook error: ${String(err)}`);
+    }
+  });
+
+  // Provide memory tools under their V1 names. Bridged before the transform
+  // so the callback stays synchronous and replayable.
+  const tools = Object.entries(memoryTools).map(([name, definition]) =>
+    bridgeTool(name, definition, ctx.location),
+  );
+  await ctx.tool.transform((editor) => {
+    for (const definition of tools) editor.add(definition);
+  });
+
+  // Register bundled skills through the host instead of copying files
+  const skills = loadBundledSkills(join(import.meta.dirname, 'skills'));
+  await ctx.skill.transform((editor) => {
+    for (const skill of skills) editor.add(skill);
+  });
+
+  // Hook and transform registrations are disposed by the host. The daemon is
+  // a detached, shared process (both hosts and the CLI supervise it), so it
+  // is deliberately left running on unload.
+  return () => {
+    logger.log('OpenCode 2 plugin unloaded');
+  };
+}
+
+/**
+ * Default export for both OpenCode plugin systems: V2 reads `id` + `setup`,
+ * V1 (>= 1.18.29) calls `server()`.
+ */
+export default {
+  ...Plugin.define({ id: 'geoql.mdr', setup }),
+  server: MacrodataPlugin,
+};
