@@ -183,7 +183,7 @@ describe('chat.message hook', () => {
     const part = output.parts[0] as { text: string; id: string; synthetic: boolean };
     expect(part.text).toContain('<system-reminder>');
     expect(part.text).toContain('pending line');
-    expect(part.id).toBe('msg_1-macrodata');
+    expect(part.id).toBe('prt_1');
     expect(part.synthetic).toBe(true);
   });
 
@@ -310,6 +310,22 @@ describe('resolveNodeBinary', () => {
     writeFileSync(node, '');
     withBunHost(() => {
       expect(resolveNodeBinary()).toBe(node);
+    });
+  });
+
+  test('skips empty PATH segments under a Bun host', () => {
+    const node = join(binDir, 'node');
+    writeFileSync(node, '');
+    process.env.PATH = `:${binDir}`;
+    withBunHost(() => {
+      expect(resolveNodeBinary()).toBe(node);
+    });
+  });
+
+  test('falls back to the host executable when PATH is unset under a Bun host', () => {
+    delete process.env.PATH;
+    withBunHost(() => {
+      expect(resolveNodeBinary()).toBe(process.execPath);
     });
   });
 

@@ -415,6 +415,8 @@ export async function getContextUpdate(sessionID: string): Promise<string | null
 /**
  * Wrap volatile context in a synthetic text part attached to a user message.
  * At most one part is built per message, so the message-derived ID is unique.
+ * OpenCode >= 1.18.32 rejects part IDs that do not start with `prt`, so the
+ * message ID's `msg_` prefix is swapped rather than suffixed.
  * The text is framed as a system reminder so the model reads it as harness
  * context rather than something the user typed.
  */
@@ -423,7 +425,7 @@ export function buildContextPart(
   message: { id: string; sessionID: string },
 ): TextPart {
   return {
-    id: `${message.id}-macrodata`,
+    id: `prt_${message.id.replace(/^msg_/, '')}`,
     messageID: message.id,
     sessionID: message.sessionID,
     type: 'text',
