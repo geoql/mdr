@@ -58,6 +58,37 @@ Forked from upstream at commit
 
 <!-- fork marker — everything below is the upstream ascorbic/macrodata changelog -->
 
+## [1.1.0](https://github.com/geoql/mdr/compare/v1.0.5...v1.1.0) (2026-09-24)
+
+
+### Features
+
+* **opencode:** dual V1/V2 plugin entrypoint ([e68eddf](https://github.com/geoql/mdr/commit/e68eddf55cd5bdc6c8ecfc45864fe1a40f3b861b)), closes [#152](https://github.com/geoql/mdr/issues/152)
+* **opencode:** index the OpenCode 2 session_message store alongside V1 tables ([e437106](https://github.com/geoql/mdr/commit/e43710628f70fe62f0b426b0b5b0ff23bddeebec)), closes [#152](https://github.com/geoql/mdr/issues/152)
+* **opencode:** support the OpenCode 2 plugin API with a dual V1/V2 entrypoint ([#153](https://github.com/geoql/mdr/issues/153)) ([8b018c1](https://github.com/geoql/mdr/commit/8b018c12d0e360badf92debeb66f7cfcba4592e5))
+
+
+### Bug Fixes
+
+* **deps:** bump @huggingface/transformers from 4.2.0 to 4.3.0 ([#160](https://github.com/geoql/mdr/issues/160)) ([b1d4a32](https://github.com/geoql/mdr/commit/b1d4a32955a90273a2fbdc058982163edfc67a4d))
+* **deps:** bump @opencode-ai/plugin from 1.18.21 to 1.18.31 ([#146](https://github.com/geoql/mdr/issues/146)) ([9040037](https://github.com/geoql/mdr/commit/90400379df95656c0bcc28c98004630723e0d053))
+* **deps:** bump @opencode-ai/sdk from 1.18.22 to 1.18.31 ([#149](https://github.com/geoql/mdr/issues/149)) ([d7de038](https://github.com/geoql/mdr/commit/d7de038f58462dc7bbe2f5a98cdae00e39613e45))
+* **deps:** bump @types/node from 26.4.0 to 26.6.2 ([#161](https://github.com/geoql/mdr/issues/161)) ([e863459](https://github.com/geoql/mdr/commit/e8634591e9ca7747a46a508e995e79f64cb28e25))
+* **deps:** bump oxlint from 1.80.0 to 1.83.0 ([#156](https://github.com/geoql/mdr/issues/156)) ([d9ad3e4](https://github.com/geoql/mdr/commit/d9ad3e423c00aff3ca290ec7551e6004db81842e))
+* **deps:** bump zod from 4.4.3 to 4.6.5 ([#150](https://github.com/geoql/mdr/issues/150)) ([c08f2cb](https://github.com/geoql/mdr/commit/c08f2cbc78bfc17dbcf168a9fea1b303dbfb3357))
+* **opencode:** give the injected V1 context part a prt-prefixed id ([27dcf50](https://github.com/geoql/mdr/commit/27dcf50150ca7c95350eb7b8b7ce5aeeb46bdc5d)), closes [#152](https://github.com/geoql/mdr/issues/152)
+* **opencode:** spawn the daemon with a Node runtime under a Bun host ([4c6cc32](https://github.com/geoql/mdr/commit/4c6cc32db499001338aa341a2f376209e2fc1927)), closes [#152](https://github.com/geoql/mdr/issues/152)
+
+
+### Documentation
+
+* **opencode:** document the V1/V2 config shapes and store paths ([5b6cd63](https://github.com/geoql/mdr/commit/5b6cd63f78d3ecf3d470986e395b04ff88240198)), closes [#152](https://github.com/geoql/mdr/issues/152)
+
+
+### Miscellaneous
+
+* **opencode:** pin @opencode/plugin 2.0.15 for the OpenCode 2 plugin API ([62aba3a](https://github.com/geoql/mdr/commit/62aba3a142fbc1f46116e898fecfdb22958e7f8c))
+
 ## [1.0.5](https://github.com/geoql/mdr/compare/v1.0.4...v1.0.5) (2026-08-30)
 
 
