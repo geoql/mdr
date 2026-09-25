@@ -58,6 +58,14 @@ Forked from upstream at commit
 
 <!-- fork marker — everything below is the upstream ascorbic/macrodata changelog -->
 
+## [1.1.1](https://github.com/geoql/mdr/compare/v1.1.0...v1.1.1) (2026-09-25)
+
+
+### Bug Fixes
+
+* **deps:** bump @opencode-ai/sdk from 1.18.31 to 1.18.32 ([#168](https://github.com/geoql/mdr/issues/168)) ([aac6f31](https://github.com/geoql/mdr/commit/aac6f31d40aebb89bb91064b2c47947a3ff07b5d))
+* **deps:** bump oxlint from 1.83.0 to 1.85.0 ([#171](https://github.com/geoql/mdr/issues/171)) ([7918846](https://github.com/geoql/mdr/commit/7918846f1fbfbf6e0e75d2c12bfb065590a566cc))
+
 ## [1.1.0](https://github.com/geoql/mdr/compare/v1.0.5...v1.1.0) (2026-09-24)
 
 
