@@ -30,12 +30,12 @@ catalog:
   clsx: ^2.1.1
   eslint: ^10.9.1
   eslint-plugin-better-tailwindcss: ^4.7.0
-  eslint-plugin-oxlint: ^1.83.0
+  eslint-plugin-oxlint: ^1.85.0
   '@lucide/vue': ^1.25.0
   motion-v: ^2.4.0
   nuxt: ^4.5.2
   oxfmt: ^0.68.0
-  oxlint: ^1.83.0
+  oxlint: ^1.85.0
   reka-ui: ^2.10.4
   shadcn-nuxt: ^2.8.2
   tailwind-merge: ^3.6.0
