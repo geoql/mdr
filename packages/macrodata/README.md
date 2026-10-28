@@ -8,6 +8,8 @@
 [![codecov](https://codecov.io/gh/geoql/mdr/graph/badge.svg?token=GHLOD2ZG0N)](https://codecov.io/gh/geoql/mdr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
+**[Website](https://mdr.geoql.in/?utm_source=github&utm_medium=readme&utm_campaign=mdr)** · [npm](https://www.npmjs.com/package/@geoql/mdr) · [JSR](https://jsr.io/@geoql/mdr)
+
 Macrodata gives an AI coding agent layered, local-first memory: a searchable journal, entity files for people and projects, always-injected state files, semantic search across every past session, a background daemon for scheduled reminders, and overnight self-maintenance. All memory is plain markdown and JSON on disk — nothing phones home, and the whole system runs inside the agent's existing permission model with no new APIs or attack surface.
 
 ## Hard fork of ascorbic/macrodata
