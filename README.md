@@ -8,6 +8,8 @@
 [![codecov](https://codecov.io/gh/geoql/mdr/graph/badge.svg?token=GHLOD2ZG0N)](https://codecov.io/gh/geoql/mdr)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
+**[Website](https://mdr.geoql.in/?utm_source=github&utm_medium=readme&utm_campaign=mdr)** · [npm](https://www.npmjs.com/package/@geoql/mdr) · [JSR](https://jsr.io/@geoql/mdr)
+
 Macrodata gives an AI coding agent layered, local-first memory: a searchable journal, entity files for people and projects, always-injected state files, semantic search across every past session, a background daemon for scheduled reminders, and overnight self-maintenance. All memory is plain markdown and JSON on disk — nothing phones home, and the whole system runs inside the agent's existing permission model with no new APIs or attack surface.
 
 ## Hard fork of ascorbic/macrodata
@@ -150,3 +152,13 @@ The layered-memory architecture is inspired by [Letta](https://www.letta.com/), 
 ## License
 
 [MIT](./LICENSE) © [Matt Kane](https://github.com/ascorbic) (original author) and [Vinayak Kulkarni](https://vinayakkulkarni.dev) (fork).
+
+## More from the author
+
+- [the-doctor.report](https://the-doctor.report/?utm_source=github&utm_medium=readme&utm_campaign=mdr) — Vue/Nuxt code health auditor
+- [nxui](https://nxui.geoql.in/?utm_source=github&utm_medium=readme&utm_campaign=mdr) — Vue port of Paper Shaders + animated components (shadcn-vue registry)
+- [shadscan-vue](https://shadscan-vue.geoql.in/?utm_source=github&utm_medium=readme&utm_campaign=mdr) — shadcn-vue component/registry scanner
+- [tileserver-rs](https://tileserver.app/?utm_source=github&utm_medium=readme&utm_campaign=mdr) — Rust tile server
+- [v-maplibre](https://v-maplibre.geoql.in/?utm_source=github&utm_medium=readme&utm_campaign=mdr) — Vue 3 MapLibre GL components
+
+See every project at [vinayakkulkarni.dev/projects](https://vinayakkulkarni.dev/projects?utm_source=github&utm_medium=readme&utm_campaign=mdr) and [geoql.in](https://geoql.in/?utm_source=github&utm_medium=readme&utm_campaign=mdr).
